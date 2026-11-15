@@ -62,7 +62,7 @@ function makeDuneGeometry(){
  for(let iz=0;iz<=nz;iz++){const z=-1+2*iz/nz;for(let ix=0;ix<=nx;ix++){
   const x=-1+2*ix/nx,ridge=.18*Math.sin(z*2.9)+.09*Math.sin(z*6.1+.7),q=x-ridge;
   const windward=Math.pow(Math.max(0,1-q*q),1.18),lee=1-.16*Math.max(0,q);
-  const longWave=.91+.09*Math.sin(z*3.8+x*.65),height=windward*lee*longWave;
+  const longWave=.91+.09*Math.sin(z*3.8+x*.65),endFade=Math.pow(Math.max(0,1-z*z),.34),height=windward*lee*longWave*endFade;
   positions.push(x,height,z);
   const shade=.83+.14*height+.025*Math.sin(z*13+x*8);colors.push(shade,shade*.91,shade*.76);
  }}
@@ -83,8 +83,8 @@ function makeMountainGeometry(){
   const shade=.72-.12*(k/rings.length)+.06*Math.sin(j*2.4+k);col.push(shade,shade*1.015,shade*1.04);
  }
  const top=pos.length/3;pos.push(.025,.5,-.018);col.push(.9,.92,.94);
- for(let k=0;k<rings.length-1;k++)for(let j=0;j<seg;j++){const a=k*seg+j,b=k*seg+(j+1)%seg,e=(k+1)*seg+j,d=(k+1)*seg+(j+1)%seg;idx.push(a,b,e,b,d,e)}
- const last=(rings.length-1)*seg;for(let j=0;j<seg;j++)idx.push(last+j,last+(j+1)%seg,top);
+ for(let k=0;k<rings.length-1;k++)for(let j=0;j<seg;j++){const a=k*seg+j,b=k*seg+(j+1)%seg,e=(k+1)*seg+j,d=(k+1)*seg+(j+1)%seg;idx.push(a,e,b,b,e,d)}
+ const last=(rings.length-1)*seg;for(let j=0;j<seg;j++)idx.push(last+j,top,last+(j+1)%seg);
  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();return g;
 }
 function makePineCrownGeometry(){
@@ -381,6 +381,14 @@ if(prefs.track==='coast'){
  }
  pineTrunk.instanceMatrix.needsUpdate=true;pineTrunk.castShadow=true;scene.add(pineTrunk);
  for(const crown of pineCrowns){crown.instanceMatrix.needsUpdate=true;crown.castShadow=true;crown.receiveShadow=true;scene.add(crown)}
+ // Low alpine shrubs and undergrowth fill the gaps between the pines without touching the road.
+ const bushGeo=new THREE.IcosahedronGeometry(1,1),bushMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1}),bushCount=104;
+ const bushes=new THREE.InstancedMesh(bushGeo,bushMat,bushCount),bushDummy=new THREE.Object3D(),bushColors=['#294b32','#3d6540','#526e43','#6a7547'];
+ for(let i=0;i<bushCount;i++){
+  const s=pointAt(((i*37)%bushCount)/bushCount*length),side=i%2?1:-1,dist=31+(i%9)*4.1,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,base=terrainHeightAt(x,z),size=.75+(i%5)*.22;
+  bushDummy.position.set(x,base+size*.34,z);bushDummy.rotation.set(.12*Math.sin(i),i*1.91,.08*Math.cos(i));bushDummy.scale.set(size*1.35,size*.72,size);bushDummy.updateMatrix();bushes.setMatrixAt(i,bushDummy.matrix);bushes.setColorAt(i,new THREE.Color(bushColors[i%bushColors.length]));
+ }
+ bushes.instanceMatrix.needsUpdate=true;if(bushes.instanceColor)bushes.instanceColor.needsUpdate=true;bushes.castShadow=true;bushes.receiveShadow=true;scene.add(bushes);
 }else if(prefs.track==='desert'){
   // DESERT RING: dense date palms with thick trunks and broad feathered crowns.
   const bark=mat('#80502d',.98,0),barkLight=mat('#b18451',.96,0);
