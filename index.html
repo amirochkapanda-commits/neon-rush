@@ -168,7 +168,7 @@ function car(color,isPlayer=false){
  root.userData.body=body;return root;
 }
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.paint||$('paint').value);if(rimMat)rimMat.color.set(prefs.rim||$('rimPaint').value)}
-function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?210:150,prefs.track==='desert'?520:370);
+function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
  // Cinematic atmospheric sky gradient and distant sun: decorative scene layer only.
  const skyGeo=new THREE.SphereGeometry(690,32,20);
  const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{topColor:{value:new THREE.Color(prefs.track==='desert'?'#42617c':prefs.track==='forest'?'#344b62':'#397a9b')},horizonColor:{value:new THREE.Color(prefs.track==='desert'?'#e9bd83':prefs.track==='forest'?'#aab8bd':'#d6c7a5')}},vertexShader:'varying vec3 vWorld; void main(){vec4 p=modelMatrix*vec4(position,1.0);vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}',fragmentShader:'uniform vec3 topColor;uniform vec3 horizonColor;varying vec3 vWorld;void main(){float h=clamp(normalize(vWorld).y,0.0,1.0);float t=smoothstep(0.02,0.72,h);gl_FragColor=vec4(mix(horizonColor,topColor,t),1.0);}'});
@@ -177,11 +177,11 @@ function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dis
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.35:1.7));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
 scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':'#54483a',1.72));
 const sun=new THREE.DirectionalLight('#fff0d9',3.1);sun.position.set(-65,105,42);sun.castShadow=true;
-sun.shadow.mapSize.set(mobileQuality?1024:1536,mobileQuality?1024:1536);
+sun.shadow.mapSize.set(mobileQuality?1024:2048,mobileQuality?1024:2048);
 sun.shadow.camera.left=-115;sun.shadow.camera.right=115;sun.shadow.camera.top=115;sun.shadow.camera.bottom=-115;
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00018;sun.shadow.normalBias=.035;sun.shadow.radius=2;
 scene.add(sun);
@@ -209,7 +209,7 @@ if(prefs.track==='coast'){
   for(let i=0;i<p.count;i++){const x=p.getX(i),z=-p.getY(i);p.setZ(i,terrainHeightAt(x,z))}
   p.needsUpdate=true;terrainGeo.computeVertexNormals();
  }
- const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
+ const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:.16,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
  if(prefs.track==='forest'){
  // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
  const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,metalness:0,vertexColors:true,side:THREE.DoubleSide});
@@ -314,7 +314,7 @@ let v=[],idx=[],uv=[];const seg=900;
  for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,s.p.y+.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+1,n+2,n+1,n+3,n+2)}}
  let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
  const roadTex=makeRoadTexture();roadTex.repeat.set(1,1);
- let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,roughness:.98}));road.receiveShadow=true;scene.add(road);
+ let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,bumpMap:roadTex,bumpScale:.028,roughness:.96}));road.receiveShadow=true;scene.add(road);
  /* High-contrast road edge markings: continuous bright lines plus raised rumble strips */
 for(const side of [-1,1]){
  const edgePts=[];for(let i=0;i<=seg;i+=2){const s=pointAt(i/seg*length);edgePts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2-.22)*side,s.p.y+.085,s.p.z+s.side.z*(ROAD/2-.22)*side))}
