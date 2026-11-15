@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#101820"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="mobile-web-app-capable" content="yes"><title>AUTOSPORT — Racing Championship</title>
 <style>
-*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}button,.ctrl,.track-card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.ctrl{touch-action:none}html,body{margin:0;width:100%;height:100%;min-height:100%;overflow:hidden;background:#071019;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#stage{position:fixed;inset:0;width:100vw;height:100dvh;background:#071019}canvas{display:block;width:100%;height:100%}.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:max(8px,env(safe-area-inset-top)) 9px max(8px,env(safe-area-inset-bottom));background:#09121bd9;overflow:auto}.fullscreen-toggle{position:absolute;z-index:5;top:12px;right:14px;width:38px;height:38px;min-height:38px;padding:0;border:1px solid #ffffff55;border-radius:10px;background:#071019b8;color:#f5ca84;font-size:25px;line-height:1;display:grid;place-items:center;cursor:pointer}.card>.brand{padding-right:46px}.card{width:min(570px,100%);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);overflow:auto;padding:clamp(12px,3.5vw,22px);border:1px solid #ffffff35;border-radius:20px;background:linear-gradient(145deg,#263944f5,#101820fa);box-shadow:0 20px 80px #0009}.hidden{display:none!important}.brand{font-size:clamp(42px,12vw,68px);font-weight:1000;letter-spacing:-.08em;line-height:1}.brand span{color:#f0b45e}.tag{font-size:10px;letter-spacing:.22em;color:#c6d1d5;margin:8px 0 16px}.muted{font-size:12px;line-height:1.5;color:#c1cdd2}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.grid label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:#d4dfe2}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}.tab{padding:10px 5px;font-size:11px;color:#cbd7dc}.tab[aria-selected=true]{background:#eeb96b;color:#17120d;border-color:#eeb96b}.panel{display:none}.panel.active{display:block}.menu-stats{margin:10px 0}.design-colors{display:grid;grid-template-columns:1fr 1fr;gap:12px}.design-card{background:#101d28;border:1px solid #ffffff30;border-radius:13px;padding:10px;min-width:0}.design-photo{width:100%;height:105px;object-fit:cover;border-radius:9px;display:block;margin-bottom:8px}.design-name{font-size:12px;font-weight:950}.design-desc{font-size:10px;line-height:1.4;color:#bdcbd1;margin:4px 0 8px}.palette{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.swatch{width:25px;height:25px;border-radius:50%;padding:0;border:2px solid #ffffff80;min-height:25px}.swatch[aria-pressed=true]{outline:2px solid #f3bd69;outline-offset:2px}.design-colors input{width:100%;height:36px;background:#172832;border:1px solid #ffffff40;border-radius:8px;padding:2px}.design-colors label{display:flex;flex-direction:column;gap:7px;font-size:11px;color:#d4dfe2}.section-title{font-size:12px;font-weight:900;letter-spacing:.12em;color:#f2bd6a;margin:8px 0}.grid input,.grid select{width:100%;min-height:36px;background:#172832;color:white;border:1px solid #ffffff40;border-radius:8px;padding:5px}.wide{grid-column:1/-1}button{font:inherit;color:white;background:#1a2c38;border:1px solid #ffffff45;border-radius:11px;padding:12px;font-weight:900;touch-action:none}.primary{width:100%;background:linear-gradient(110deg,#a9652b,#f0bd69);color:#17120d;border:0;font-size:16px;margin-top:10px}.stats{display:flex;justify-content:space-around;gap:8px;margin:15px 0;text-align:center}.stats small{display:block;color:#b6c4ca;font-size:9px}.stats b{font-size:19px}.tiny{font-size:10px;color:#aebdc3}#hud{display:none;position:fixed;inset:0;pointer-events:none}.top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 34px 34px 48px;gap:4px;padding:max(5px,env(safe-area-inset-top)) 6px 5px;align-items:stretch}.box{background:#101a22d9;border:1px solid #ffffff30;border-radius:8px;padding:5px 4px;min-width:0;text-align:center}.box small{display:block;font-size:clamp(7px,1.8vw,9px);color:#c3cdd1}.box strong{font-size:clamp(12px,3.2vw,18px);font-variant-numeric:tabular-nums}#speed{color:#f3bd69;font-size:23px}.track-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.track-card{height:112px;padding:0;overflow:hidden;position:relative;background-size:cover;background-position:center;border:2px solid #ffffff38;border-radius:12px;text-align:left}.track-card[aria-pressed=true]{border-color:#ffc36b;box-shadow:0 0 0 2px #ffc36b55}.track-card:after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#071019eF)}.track-card span{position:absolute;z-index:1;left:8px;bottom:8px;font-size:11px;font-weight:900}.upgrade-row{display:flex;gap:8px;margin:8px 0}.upgrade-row button{flex:1;font-size:10px;padding:9px 5px}.upgrade-card{display:grid;grid-template-columns:104px 1fr;gap:11px;padding:10px;margin:10px 0;border:1px solid #ffffff30;border-radius:13px;background:#101d28}.upgrade-photo{width:104px;height:112px;border-radius:9px;object-fit:cover;background:#263944}.upgrade-info{min-width:0}.upgrade-name{font-weight:950;font-size:13px}.upgrade-desc{font-size:10px;line-height:1.35;color:#bdcbd1;margin:4px 0 9px}.statline{margin:7px 0}.stathead{display:flex;justify-content:space-between;font-size:9px;color:#dce5e9;margin-bottom:4px}.meter{height:9px;background:#ffffff1c;border-radius:9px;overflow:hidden;position:relative}.meter-current{height:100%;background:#f3f4f2;border-radius:9px;position:relative;z-index:1}.meter-next{position:absolute;top:0;height:100%;background:#40c879;opacity:.95;border-radius:0 9px 9px 0}.upgrade-buy{width:100%;padding:8px;font-size:10px;margin-top:6px}.league-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:20px;background:#f0bd6930;color:#ffd28e;font-size:10px;font-weight:900;margin-bottom:7px;cursor:pointer;border:1px solid #f0bd6950}.league-chip:active{filter:brightness(1.2)}
+*{box-sizing:border-box;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}button,.ctrl,.track-card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation}.ctrl{touch-action:none}html,body{margin:0;width:100%;height:100%;min-height:100%;overflow:hidden;background:#071019;color:#fff;font-family:system-ui,-apple-system,Segoe UI,sans-serif;touch-action:none}#stage{position:fixed;inset:0;width:100vw;height:100dvh;background:#071019}canvas{display:block;width:100%;height:100%}.screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:max(8px,env(safe-area-inset-top)) 9px max(8px,env(safe-area-inset-bottom));background:#09121bd9;overflow:auto}.card>.brand{padding-right:46px}.card{width:min(570px,100%);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);overflow:auto;padding:clamp(12px,3.5vw,22px);border:1px solid #ffffff35;border-radius:20px;background:linear-gradient(145deg,#263944f5,#101820fa);box-shadow:0 20px 80px #0009}.hidden{display:none!important}.brand{font-size:clamp(42px,12vw,68px);font-weight:1000;letter-spacing:-.08em;line-height:1}.brand span{color:#f0b45e}.tag{font-size:10px;letter-spacing:.22em;color:#c6d1d5;margin:8px 0 16px}.muted{font-size:12px;line-height:1.5;color:#c1cdd2}.grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:14px 0}.grid label{display:flex;flex-direction:column;gap:5px;font-size:10px;color:#d4dfe2}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:14px 0}.tab{padding:10px 5px;font-size:11px;color:#cbd7dc}.tab[aria-selected=true]{background:#eeb96b;color:#17120d;border-color:#eeb96b}.panel{display:none}.panel.active{display:block}.menu-stats{margin:10px 0}.design-colors{display:grid;grid-template-columns:1fr 1fr;gap:12px}.design-card{background:#101d28;border:1px solid #ffffff30;border-radius:13px;padding:10px;min-width:0}.design-photo{width:100%;height:105px;object-fit:cover;border-radius:9px;display:block;margin-bottom:8px}.design-name{font-size:12px;font-weight:950}.design-desc{font-size:10px;line-height:1.4;color:#bdcbd1;margin:4px 0 8px}.palette{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.swatch{width:25px;height:25px;border-radius:50%;padding:0;border:2px solid #ffffff80;min-height:25px}.swatch[aria-pressed=true]{outline:2px solid #f3bd69;outline-offset:2px}.design-colors input{width:100%;height:36px;background:#172832;border:1px solid #ffffff40;border-radius:8px;padding:2px}.design-colors label{display:flex;flex-direction:column;gap:7px;font-size:11px;color:#d4dfe2}.section-title{font-size:12px;font-weight:900;letter-spacing:.12em;color:#f2bd6a;margin:8px 0}.grid input,.grid select{width:100%;min-height:36px;background:#172832;color:white;border:1px solid #ffffff40;border-radius:8px;padding:5px}.wide{grid-column:1/-1}button{font:inherit;color:white;background:#1a2c38;border:1px solid #ffffff45;border-radius:11px;padding:12px;font-weight:900;touch-action:none}.primary{width:100%;background:linear-gradient(110deg,#a9652b,#f0bd69);color:#17120d;border:0;font-size:16px;margin-top:10px}.stats{display:flex;justify-content:space-around;gap:8px;margin:15px 0;text-align:center}.stats small{display:block;color:#b6c4ca;font-size:9px}.stats b{font-size:19px}.tiny{font-size:10px;color:#aebdc3}#hud{display:none;position:fixed;inset:0;pointer-events:none}.top{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) 34px 34px 48px;gap:4px;padding:max(5px,env(safe-area-inset-top)) 6px 5px;align-items:stretch}.box{background:#101a22d9;border:1px solid #ffffff30;border-radius:8px;padding:5px 4px;min-width:0;text-align:center}.box small{display:block;font-size:clamp(7px,1.8vw,9px);color:#c3cdd1}.box strong{font-size:clamp(12px,3.2vw,18px);font-variant-numeric:tabular-nums}#speed{color:#f3bd69;font-size:23px}.track-picker{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.track-card{height:112px;padding:0;overflow:hidden;position:relative;background-size:cover;background-position:center;border:2px solid #ffffff38;border-radius:12px;text-align:left}.track-card[aria-pressed=true]{border-color:#ffc36b;box-shadow:0 0 0 2px #ffc36b55}.track-card:after{content:'';position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#071019eF)}.track-card span{position:absolute;z-index:1;left:8px;bottom:8px;font-size:11px;font-weight:900}.upgrade-row{display:flex;gap:8px;margin:8px 0}.upgrade-row button{flex:1;font-size:10px;padding:9px 5px}.upgrade-card{display:grid;grid-template-columns:104px 1fr;gap:11px;padding:10px;margin:10px 0;border:1px solid #ffffff30;border-radius:13px;background:#101d28}.upgrade-photo{width:104px;height:112px;border-radius:9px;object-fit:cover;background:#263944}.upgrade-info{min-width:0}.upgrade-name{font-weight:950;font-size:13px}.upgrade-desc{font-size:10px;line-height:1.35;color:#bdcbd1;margin:4px 0 9px}.statline{margin:7px 0}.stathead{display:flex;justify-content:space-between;font-size:9px;color:#dce5e9;margin-bottom:4px}.meter{height:9px;background:#ffffff1c;border-radius:9px;overflow:hidden;position:relative}.meter-current{height:100%;background:#f3f4f2;border-radius:9px;position:relative;z-index:1}.meter-next{position:absolute;top:0;height:100%;background:#40c879;opacity:.95;border-radius:0 9px 9px 0}.upgrade-buy{width:100%;padding:8px;font-size:10px;margin-top:6px}.league-chip{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:20px;background:#f0bd6930;color:#ffd28e;font-size:10px;font-weight:900;margin-bottom:7px;cursor:pointer;border:1px solid #f0bd6950}.league-chip:active{filter:brightness(1.2)}
 .league-modal{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;padding:16px;background:#03080dcc;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}.league-modal-card{width:min(510px,100%);max-height:min(680px,calc(100dvh - 32px));overflow:auto;padding:20px;border:1px solid #d9b77b66;border-radius:20px;background:linear-gradient(145deg,#20313d,#0a121b);box-shadow:0 24px 90px #000c}.league-modal-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:17px}.league-modal-head .section-title{font-size:15px}.league-modal-head .muted{max-width:360px}.league-list{display:grid;gap:9px}.league-option{display:flex;align-items:center;justify-content:space-between;gap:12px;width:100%;min-height:62px;padding:12px 14px;text-align:left;border:1px solid #ffffff25;border-radius:13px;background:linear-gradient(110deg,#ffffff0c,#ffffff04)}.league-option:disabled{opacity:.42;filter:grayscale(.7)}.league-option.current{border-color:#f4c77e;background:#f0bd691b}.league-option-name{font-size:13px;font-weight:950;letter-spacing:.05em}.league-option-sub{display:block;margin-top:4px;font-size:10px;color:#b8c6cc;font-weight:500}.league-option-status{flex-shrink:0;font-size:10px;font-weight:900;color:#f5ca84}.league-option:disabled .league-option-status{color:#8e9aa0}
 @media(max-width:420px){.league-modal-card{padding:15px}.league-option{min-height:58px;padding:10px 11px}}.mission{padding:10px 12px;border:1px solid #ffffff26;border-radius:10px;background:#101d28;font-size:11px;color:#dce5e9}#pause,#restart,#exit{pointer-events:auto;padding:5px 2px;min-width:0;width:100%;height:36px;align-self:center;font-size:17px}#exit{font-size:9px;background:#713e36}.controls{position:absolute;bottom:max(9px,env(safe-area-inset-bottom));left:0;right:0;display:flex;justify-content:space-between;padding:0 8px;pointer-events:none;align-items:end}.pad{display:flex;gap:8px;pointer-events:auto}.ctrl{width:clamp(55px,14vw,76px);height:clamp(58px,15vw,76px);font-size:24px;background:#142632eF;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}.gas{background:#99632d}.brake{background:#773d37}.steer{background:#253e50}.hint{position:absolute;top:75px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.12em;color:#ffe0a6;text-shadow:0 2px 5px #000;white-space:nowrap}.result{text-align:center}.big{font-size:48px;font-weight:1000;color:#f2bd6a}
  /* Premium motorsport visual skin — presentation only. */
@@ -196,9 +196,47 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #menu .palette{gap:4px;margin-top:3px}
  #menu .swatch{width:16px;height:16px;min-height:16px}
 
+  /* More comfortable landscape spacing and readable menu sizing on phones. */
+  #menu{padding:max(12px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));}
+  #menu>.card{width:min(1100px,100%);height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);padding:11px 18px;overflow-y:auto;border-radius:18px;}
+  #menu .brand{font-size:clamp(29px,6.2vh,40px);line-height:.92;}
+  #menu .tag{font-size:8px;margin:4px 0 8px;letter-spacing:.24em;}
+  #menu .tabs{margin-bottom:8px;gap:6px;padding:3px;}
+  #menu .tab{padding:7px 10px;font-size:9px;}
+  #menu .panel.active{overflow-y:auto;overscroll-behavior:contain;}
+  #panel-race.active{column-gap:14px;row-gap:6px;grid-template-columns:minmax(0,1.15fr) minmax(205px,.85fr);}
+  #panel-race>.section-title{font-size:10px;margin:1px 0 4px;}
+  #panel-race>.track-picker{gap:7px;}
+  #menu .track-card{height:clamp(64px,17vh,84px);border-radius:10px;}
+  #menu .track-card span{font-size:9px;left:7px;bottom:7px;}
+  #panel-race>.league-chip{padding:6px 9px;font-size:9px;}
+  #panel-race>.mission{padding:7px 10px;font-size:9px;line-height:1.3;}
+  #panel-race>.menu-stats{padding:6px 4px;}
+  #menu .stats{margin:4px 0;gap:5px;}
+  #menu .stats small{font-size:7px;}
+  #menu .stats b{font-size:15px;}
+  #panel-race>#start{min-height:36px;padding:7px 10px;font-size:11px;}
+  #panel-race>#status{font-size:8px;min-height:10px;}
+  #panel-tuning.active{gap:7px;}
+  #panel-tuning>.upgrade-card{padding:7px;gap:7px;}
+  #menu .upgrade-name{font-size:9px;}
+  #menu .upgrade-desc{font-size:8px;line-height:1.2;}
+  #menu .stathead{font-size:7px;}
+  #menu .upgrade-buy{font-size:8px;padding:5px 4px;}
+  #menu .design-card{padding:7px;}
+  #menu .design-name{font-size:9px;}
+  #menu .design-desc{font-size:8px;line-height:1.2;}
+  #menu .design-card label{font-size:8px;}
+  #menu .swatch{width:18px;height:18px;min-height:18px;}
+  /* Larger steering controls with a safer inset from both side edges. */
+  .controls{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px));padding:0 max(22px,calc(env(safe-area-inset-right) + 16px)) 0 max(22px,calc(env(safe-area-inset-left) + 16px));}
+  .pad{gap:7px;}
+  .ctrl{width:clamp(54px,8.75vw,68px);height:clamp(54px,15vh,68px);font-size:24px;border-radius:11px;}
+
+
 }
 </style></head><body><div id="stage"></div>
-<div id="menu" class="screen"><div class="card"><button type="button" id="fullscreen-toggle" class="fullscreen-toggle" aria-label="Переключить полноэкранный режим" title="На весь экран">⛶</button>
+<div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
 <div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="tuning" aria-selected="false">ТЮНИНГ</button><button class="tab" data-tab="design" aria-selected="false">ДИЗАЙН</button></div>
 <section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
@@ -212,91 +250,6 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 <div id="league-modal" class="league-modal hidden" role="dialog" aria-modal="true" aria-labelledby="league-modal-title"><div class="league-modal-card"><div class="league-modal-head"><div><div class="section-title" id="league-modal-title">ЧЕМПИОНАТЫ</div><div class="muted">Выбери открытую лигу. Пройденные лиги доступны для повторной игры без наград.</div></div><button type="button" id="league-close" aria-label="Закрыть">✕</button></div><div id="league-list" class="league-list"></div></div></div>
 <div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>СКОРОСТЬ</small><strong id="speed">0</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause">Ⅱ</button><button id="restart" aria-label="Перезапустить гонку">↻</button><button id="exit">ВЫХОД</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div></div>
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
-<script>
-(function(){
-  function sdkScreen(){return window.__autosportYsdk&&window.__autosportYsdk.screen||null}
-  function showFullscreenMessage(message){
-    let note=document.getElementById('fullscreen-note');
-    if(!note){
-      note=document.createElement('div');note.id='fullscreen-note';
-      note.style.cssText='position:fixed;z-index:99999;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:calc(100vw - 28px);padding:11px 15px;border:1px solid #f4c77e88;border-radius:12px;background:#101a22ee;color:#fff;font:600 13px system-ui;text-align:center;box-shadow:0 8px 30px #0009;pointer-events:none';
-      document.body.appendChild(note);
-    }
-    note.textContent=message;note.style.display='block';
-    clearTimeout(window.__autosportFsNoteTimer);
-    window.__autosportFsNoteTimer=setTimeout(function(){note.style.display='none'},4200);
-  }
-  function requestLandscape(){
-    const screenApi=sdkScreen();
-    try{
-      if(screenApi&&screenApi.orientation&&typeof screenApi.orientation.set==='function'){
-        const p=screenApi.orientation.set('landscape');if(p&&typeof p.catch==='function')p.catch(function(){});
-      }
-    }catch(e){}
-    try{
-      if(window.screen&&window.screen.orientation&&typeof window.screen.orientation.lock==='function'){
-        const p=window.screen.orientation.lock('landscape');if(p&&typeof p.catch==='function')p.catch(function(){});
-      }
-    }catch(e){}
-  }
-  function isFullscreen(){
-    const fs=sdkScreen()&&sdkScreen().fullscreen;
-    let status=fs&&fs.status;
-    try{if(typeof status==='function')status=status.call(fs)}catch(e){status='off'}
-    return status==='on'||!!document.fullscreenElement||!!document.webkitFullscreenElement;
-  }
-  function enterFullscreenFromTap(){
-    const screenApi=sdkScreen(),fs=screenApi&&screenApi.fullscreen;
-    let request=null;
-    try{
-      if(fs&&typeof fs.request==='function')request=fs.request();
-      else{
-        const el=document.documentElement,fn=el.requestFullscreen||el.webkitRequestFullscreen;
-        if(fn)request=fn.call(el);
-      }
-    }catch(e){request=Promise.reject(e)}
-    if(request&&typeof request.then==='function'){
-      request.then(function(){requestLandscape();}).catch(function(){
-        showFullscreenMessage('Браузер не разрешил полноэкранный режим. На iPhone открой игру через «На экран Домой».');
-      });
-      return request;
-    }
-    if(request!==null){requestLandscape();return Promise.resolve(request)}
-    showFullscreenMessage('Этот браузер не поддерживает полноэкранный режим для страницы. На iPhone открой игру через «На экран Домой».');
-    return Promise.resolve();
-  }
-  window.__autosportEnterFullscreen=enterFullscreenFromTap;
-  window.__autosportToggleFullscreen=function(){
-    const screenApi=sdkScreen(),fs=screenApi&&screenApi.fullscreen;
-    if(isFullscreen()){
-      try{
-        if(fs&&typeof fs.exit==='function')return fs.exit();
-        const fn=document.exitFullscreen||document.webkitExitFullscreen;
-        if(fn)return fn.call(document);
-      }catch(e){}
-      showFullscreenMessage('Выход из полноэкранного режима недоступен в этом браузере.');
-      return Promise.resolve();
-    }
-    return enterFullscreenFromTap();
-  };
-  function bindButton(){
-    const button=document.getElementById('fullscreen-toggle');
-    if(!button)return;
-    button.onclick=function(event){event.preventDefault();event.stopPropagation();window.__autosportToggleFullscreen();};
-    button.setAttribute('aria-label','Переключить полноэкранный режим');
-  }
-  bindButton();
-  const sdkScript=document.createElement('script');
-  sdkScript.src='https://sdk.games.s3.yandex.net/sdk.js';
-  sdkScript.async=true;
-  sdkScript.onload=function(){
-    if(window.YaGames&&typeof window.YaGames.init==='function'){
-      window.YaGames.init().then(function(sdk){window.__autosportYsdk=sdk;bindButton();}).catch(function(){});
-    }
-  };
-  document.head.appendChild(sdkScript);
-})();
-</script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
@@ -1068,7 +1021,7 @@ $('pause').onclick=()=>{if(mode!=='race')return;paused=!paused;$('pause').textCo
 $('restart').onclick=()=>{if(mode==='race')start()};
 $('exit').onclick=returnToGarage;
 // Fullscreen button is bound in the early non-module script so it works even if the game module is delayed.
-$('start').onclick=()=>{window.__autosportEnterFullscreen();const stage=Math.min(2,save.races);if(selectedReplayLeague===null&&championshipTracks.indexOf(prefs.track)>stage)return;replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld();start()};$('again').onclick=()=>{if(!activeRaceReplay)prefs.track=championshipTracks[Math.min(2,save.races)];replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld();start()};$('home').onclick=returnToGarage;
+$('start').onclick=()=>{const stage=Math.min(2,save.races);if(selectedReplayLeague===null&&championshipTracks.indexOf(prefs.track)>stage)return;replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld();start()};$('again').onclick=()=>{if(!activeRaceReplay)prefs.track=championshipTracks[Math.min(2,save.races)];replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld();start()};$('home').onclick=returnToGarage;
 function saveGarage(){prefs.paint=$('paint').value;prefs.rim=$('rimPaint').value;localStorage.setItem('autosport-garage',JSON.stringify(prefs));if(player)applyGarage()}
 $('paint').addEventListener('input',()=>{document.querySelectorAll('[data-paint]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paint===$('paint').value)));saveGarage()});$('rimPaint').addEventListener('input',()=>{document.querySelectorAll('[data-rim]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rim===$('rimPaint').value)));saveGarage()});document.querySelectorAll('[data-paint]').forEach(b=>b.addEventListener('click',()=>{$('paint').value=b.dataset.paint;saveGarage();document.querySelectorAll('[data-paint]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('[data-rim]').forEach(b=>b.addEventListener('click',()=>{$('rimPaint').value=b.dataset.rim;saveGarage();document.querySelectorAll('[data-rim]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{const index=championshipTracks.indexOf(b.dataset.track),stage=Math.min(2,save.races);if(index<0||(selectedReplayLeague===null&&index>stage))return;prefs.track=b.dataset.track;replayMode=selectedReplayLeague!==null||index<save.races;document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updateMenuStats()}));
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
