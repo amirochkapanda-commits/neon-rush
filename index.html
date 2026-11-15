@@ -144,9 +144,7 @@ if(prefs.track==='coast'){
    }
    const heart=new THREE.Mesh(new THREE.SphereGeometry(.32,9,7),leafMats[1]);heart.position.y=.12;crown.add(heart);scene.add(palm);
   }
-  // Low wind-shaped sand ridges remain distant; the roadside itself stays clear and flat.
-  const ridgeMat=mat('#caa765',1,0);
-  for(let i=0;i<12;i++){const sample=pointAt(i/12*length),side=i%2?1:-1,dist=ROAD/2+58+(i%3)*10,x=sample.p.x+sample.side.x*dist*side,z=sample.p.z+sample.side.z*dist*side;const dune=new THREE.Mesh(new THREE.SphereGeometry(1,20,12),ridgeMat);dune.scale.set(22,2.6,12);dune.position.set(x,1.9,z);dune.rotation.y=Math.atan2(sample.tan.x,sample.tan.z);scene.add(dune)}
+  // The desert floor remains an uninterrupted textured sand field; no oval props near the road.
 
 }else{
  // Coastal cliffs, palms and a visible blue ocean horizon.
