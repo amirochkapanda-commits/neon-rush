@@ -141,7 +141,7 @@ if(prefs.track==='coast'){
   const rg=new THREE.BufferGeometry();rg.setAttribute('position',new THREE.Float32BufferAttribute(rv,3));rg.setAttribute('color',new THREE.Float32BufferAttribute(rc,3));rg.setIndex(ri);rg.computeVertexNormals();
   const ridge=new THREE.Mesh(rg,rockMaterial);ridge.castShadow=true;ridge.receiveShadow=true;scene.add(ridge);
  }
-}}else if(prefs.track==='desert'){
+}else if(prefs.track==='desert'){
   // DESERT RING: dense date palms with thick trunks and broad feathered crowns.
   const bark=mat('#80502d',.98,0),barkLight=mat('#b18451',.96,0);
   const frondMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.94,side:THREE.DoubleSide});
@@ -152,7 +152,7 @@ if(prefs.track==='coast'){
    n=frondPos.length/3;frondPos.push(x,y,0,x+.48,y-.32,-width,nx,ny,0);frondIdx.push(n,n+1,n+2);
   }
   const frondGeo=new THREE.BufferGeometry();frondGeo.setAttribute('position',new THREE.Float32BufferAttribute(frondPos,3));frondGeo.setIndex(frondIdx);frondGeo.computeVertexNormals();
-  const trunkGeo=new THREE.CylinderGeometry(.28,.46,1,14,10),ringGeo=new THREE.TorusGeometry(.34,.045,7,18),stemGeo=new THREE.CylinderGeometry(.035,.055,5.2,7),heartGeo=new THREE.SphereGeometry(.48,14,10);
+  const trunkGeo=new THREE.CylinderGeometry(.28,.46,1,14,10),ringGeo=new THREE.TorusGeometry(.34,.045,7,18),stemGeo=new THREE.TubeGeometry(new THREE.CatmullRomCurve3([new THREE.Vector3(0,.12,0),new THREE.Vector3(1.5,.02,0),new THREE.Vector3(3.2,-.38,0),new THREE.Vector3(5.25,-1.1,0)]),20,.045,6,false),heartGeo=new THREE.SphereGeometry(.48,14,10);
   const palmCount=46,frondsPerPalm=13;
   const trunks=new THREE.InstancedMesh(trunkGeo,bark,palmCount),rings=new THREE.InstancedMesh(ringGeo,barkLight,palmCount*10);
   const stems=new THREE.InstancedMesh(stemGeo,barkLight,palmCount*frondsPerPalm),leaves=new THREE.InstancedMesh(frondGeo,frondMat,palmCount*frondsPerPalm),hearts=new THREE.InstancedMesh(heartGeo,mat('#3d7b38',.96,0),palmCount);
