@@ -89,11 +89,48 @@ function car(color,isPlayer=false){
  const glass=new THREE.MeshPhysicalMaterial({color:'#9bbbc8',metalness:.18,roughness:.085,transparent:true,opacity:.72,clearcoat:1,clearcoatRoughness:.045,side:THREE.DoubleSide,envMapIntensity:1.25});
  const lamp=new THREE.MeshStandardMaterial({color:'#fff1c9',emissive:'#ffe5a5',emissiveIntensity:.48,roughness:.22});
  function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;body.add(o);return o}
- box(2.12,.42,4.42,pm,0,.76,0);box(2.04,.12,3.55,black,0,.55,-.03);
- box(1.94,.15,1.34,pm,0,.99,1.37);box(1.94,.14,.92,pm,0,.96,-1.72);
- const cabinGeo=new THREE.BufferGeometry(),p=[-.88,.96,1.02,.88,.96,1.02,.88,.96,-1.18,-.88,.96,-1.18,-.72,1.48,.58,.72,1.48,.58,.72,1.48,-.82,-.72,1.48,-.82];
- cabinGeo.setAttribute('position',new THREE.Float32BufferAttribute(p,3));cabinGeo.setIndex([0,1,5,0,5,4,1,2,6,1,6,5,2,3,7,2,7,6,3,0,4,3,4,7,4,5,6,4,6,7,3,2,1,3,1,0]);cabinGeo.computeVertexNormals();
- const cabin=new THREE.Mesh(cabinGeo,glass);cabin.castShadow=true;body.add(cabin);box(1.48,.12,1.42,pm,0,1.51,-.12);
+ // Smooth, closed longitudinal lofts replace the old block-built shell.
+ // The envelope is kept within the original body/cabin dimensions.
+ function smoothLoft(sections,material,segments=8,ringSteps=32,exponent=.62){
+  const verts=[],uvs=[],indices=[],count=sections.length;
+  const cat=(p0,p1,p2,p3,t)=>.5*((2*p1)+(-p0+p2)*t+(2*p0-5*p1+4*p2-p3)*t*t+(-p0+3*p1-3*p2+p3)*t*t*t);
+  for(let s=0;s<(count-1)*segments+1;s++){
+   const q=Math.min(count-2,Math.floor(s/segments)),t=s===(count-1)*segments?1:(s-q*segments)/segments;
+   const a=sections[Math.max(0,q-1)],b=sections[q],cc=sections[q+1],d=sections[Math.min(count-1,q+2)];
+   const v={z:cat(a.z,b.z,cc.z,d.z,t),w:cat(a.w,b.w,cc.w,d.w,t),bottom:cat(a.bottom,b.bottom,cc.bottom,d.bottom,t),top:cat(a.top,b.top,cc.top,d.top,t)};
+   const cy=(v.bottom+v.top)*.5,ry=(v.top-v.bottom)*.5;
+   for(let j=0;j<ringSteps;j++){
+    const ang=j/ringSteps*Math.PI*2,cs=Math.cos(ang),sn=Math.sin(ang);
+    const sx=Math.sign(sn)*Math.pow(Math.abs(sn),exponent),sy=Math.sign(cs)*Math.pow(Math.abs(cs),exponent);
+    verts.push(sx*v.w,cy+sy*ry,v.z);uvs.push(j/ringSteps,s/((count-1)*segments));
+   }
+  }
+  const rows=(count-1)*segments+1;
+  for(let s=0;s<rows-1;s++)for(let j=0;j<ringSteps;j++){
+   const a=s*ringSteps+j,b=s*ringSteps+(j+1)%ringSteps,cc=(s+1)*ringSteps+(j+1)%ringSteps,d=(s+1)*ringSteps+j;
+   indices.push(a,d,b,b,d,cc);
+  }
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));g.setIndex(indices);g.computeVertexNormals();
+  const mesh=new THREE.Mesh(g,material);mesh.castShadow=true;mesh.receiveShadow=true;body.add(mesh);return mesh;
+ }
+ smoothLoft([
+  {z:-2.21,w:.78,bottom:.57,top:.82},{z:-2.08,w:.94,bottom:.54,top:.91},
+  {z:-1.78,w:1.00,bottom:.54,top:.97},{z:-1.25,w:1.045,bottom:.54,top:1.00},
+  {z:-.55,w:1.06,bottom:.54,top:1.015},{z:.45,w:1.06,bottom:.54,top:1.015},
+  {z:1.25,w:1.045,bottom:.54,top:1.00},{z:1.78,w:1.00,bottom:.55,top:.96},
+  {z:2.08,w:.91,bottom:.57,top:.90},{z:2.21,w:.76,bottom:.59,top:.81}
+ ],pm,8,40,.58);
+ // Dark undertray retained at the exact original chassis position.
+ box(2.04,.12,3.55,black,0,.55,-.03);
+ // Curved glasshouse with sloped windscreen and rear screen.
+ smoothLoft([
+  {z:-1.18,w:.60,bottom:.97,top:1.02},{z:-1.02,w:.75,bottom:.97,top:1.31},
+  {z:-.82,w:.75,bottom:.97,top:1.46},{z:-.42,w:.74,bottom:.97,top:1.49},
+  {z:.18,w:.74,bottom:.97,top:1.49},{z:.48,w:.72,bottom:.97,top:1.45},
+  {z:.78,w:.78,bottom:.97,top:1.22},{z:1.02,w:.80,bottom:.97,top:1.04}
+ ],glass,8,32,.72);
+ // Roof panel keeps the former roof's placement and outer dimensions.
+ const roof=new THREE.Mesh(new THREE.BoxGeometry(1.48,.12,1.42),pm);roof.position.set(0,1.51,-.12);roof.castShadow=true;body.add(roof);
  for(const side of [-1,1]){box(.035,.28,1.25,glass,side*.885,1.22,-.12);box(.075,.52,.10,black,side*.78,1.22,.53);box(.075,.52,.10,black,side*.78,1.22,-.78);box(.035,.035,.18,black,side*1.065,.78,-.22);box(.10,.13,.32,pm,side*1.12,1.16,.48);box(.07,.07,.12,black,side*1.12,1.19,.48);box(.12,.18,2.35,black,side*1.02,.49,0);box(.025,.18,1.05,black,side*1.071,.76,-.12);box(.045,.045,.18,chrome,side*1.09,.83,-.38)}
  // Instanced wheel assemblies keep detailed rims and arches cheap on mobile GPUs.
  const tireSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.425,.425,.30,36,1),rubber,4);
