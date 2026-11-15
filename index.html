@@ -312,14 +312,26 @@ function update(dt){
   const offLimit=ROAD/2-1.25;
   boundaryHit=Math.max(0,boundaryHit-dt);
   if(Math.abs(signedOffset)>offLimit){
-    // A soft rebound nudges the car slightly back onto the asphalt instead of pinning it to the rail.
+    // Pull the car just inside the rail, then give it a small directional rebound.
     const rebound=.28;
     const safeOffset=Math.sign(signedOffset)*Math.max(0,offLimit-rebound);
     player.position.x=bestSample.p.x+bestSample.side.x*safeOffset;
     player.position.z=bestSample.p.z+bestSample.side.z*safeOffset;
     if(boundaryHit<=0){
-      // Keep the impact noticeable, but preserve most of the car's speed and steering control.
-      speed*=.97;
+      // Reflect a small part of the outward velocity so the car visibly bounces inward.
+      const directionSign=speed<0?-1:1;
+      const nx=-Math.sign(signedOffset)*bestSample.side.x;
+      const nz=-Math.sign(signedOffset)*bestSample.side.z;
+      let vx=Math.sin(heading)*directionSign;
+      let vz=Math.cos(heading)*directionSign;
+      const outward=vx*nx+vz*nz;
+      if(outward<0){
+        const bounce=1.32;
+        vx-=bounce*outward*nx;
+        vz-=bounce*outward*nz;
+        heading=Math.atan2(vx*directionSign,vz*directionSign);
+      }
+      speed*=.98;
       boundaryHit=.42;collisionFlash=.55;
     }
     $('hint').textContent='ЛЁГКИЙ УДАР О БОРТ · СКОРОСТЬ НЕМНОГО СБРОШЕНА';
