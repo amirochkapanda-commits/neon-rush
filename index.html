@@ -105,7 +105,7 @@ const championshipTracks=['coast','forest','desert'];const trackNames=['COAST RU
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 const currentStage=Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||championshipTracks.indexOf(prefs.track)>currentStage)prefs.track=championshipTracks[currentStage];let replayMode=championshipTracks.indexOf(prefs.track)<save.races,activeRaceReplay=false;
  prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.paint=prefs.paint||'#dba14e';prefs.rim=prefs.rim||'#9da6aa';$('paint').value=prefs.paint;$('rimPaint').value=prefs.rim;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
-let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
+let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0,basePixelRatio=1,adaptiveScale=1;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
  const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
@@ -361,7 +361,7 @@ function buildWorld(){if(raf)cancelAnimationFrame(raf);if(weatherCanvas){weather
  const sky=new THREE.Mesh(skyGeo,skyMat);sky.renderOrder=-10;scene.add(sky);
  const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);const mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
-const basePixelRatio=Math.min(devicePixelRatio,mobileQuality?1.0:1.35);let adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(innerWidth,innerHeight);
+basePixelRatio=Math.min(devicePixelRatio,mobileQuality?1.0:1.35);adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
