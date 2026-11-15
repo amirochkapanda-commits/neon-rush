@@ -215,69 +215,75 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 <script>
 (function(){
   function sdkScreen(){return window.__autosportYsdk&&window.__autosportYsdk.screen||null}
-  function fullscreenIsOn(fs){try{return !!(fs&&(typeof fs.status==='function'?fs.status():fs.status)==='on')}catch(e){return false}}
-  function safeCall(fn){try{const result=fn();if(result&&typeof result.catch==='function')result.catch(function(){});return result;}catch(e){return null}}
-  function requestNativeFullscreen(){
-    const el=document.documentElement;
-    const request=el.requestFullscreen||el.webkitRequestFullscreen;
-    if(request)return safeCall(function(){return request.call(el);});
-    return null;
-  }
-  function setLandscape(){
-    const screenApi=sdkScreen();
-    if(screenApi&&screenApi.orientation&&typeof screenApi.orientation.set==='function'){
-      safeCall(function(){return screenApi.orientation.set('landscape');});
+  function showFullscreenMessage(message){
+    let note=document.getElementById('fullscreen-note');
+    if(!note){
+      note=document.createElement('div');note.id='fullscreen-note';
+      note.style.cssText='position:fixed;z-index:99999;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);max-width:calc(100vw - 28px);padding:11px 15px;border:1px solid #f4c77e88;border-radius:12px;background:#101a22ee;color:#fff;font:600 13px system-ui;text-align:center;box-shadow:0 8px 30px #0009;pointer-events:none';
+      document.body.appendChild(note);
     }
+    note.textContent=message;note.style.display='block';
+    clearTimeout(window.__autosportFsNoteTimer);
+    window.__autosportFsNoteTimer=setTimeout(function(){note.style.display='none'},4200);
+  }
+  function requestLandscape(){
+    const screenApi=sdkScreen();
     try{
-      if(window.screen&&window.screen.orientation&&typeof window.screen.orientation.lock==='function'){
-        const lock=window.screen.orientation.lock('landscape');
-        if(lock&&typeof lock.catch==='function')lock.catch(function(){});
+      if(screenApi&&screenApi.orientation&&typeof screenApi.orientation.set==='function'){
+        const p=screenApi.orientation.set('landscape');if(p&&typeof p.catch==='function')p.catch(function(){});
       }
     }catch(e){}
-    document.body.classList.toggle('portrait-mode',window.innerHeight>window.innerWidth);
+    try{
+      if(window.screen&&window.screen.orientation&&typeof window.screen.orientation.lock==='function'){
+        const p=window.screen.orientation.lock('landscape');if(p&&typeof p.catch==='function')p.catch(function(){});
+      }
+    }catch(e){}
   }
-  window.__autosportEnterFullscreen=function(){
+  function isFullscreen(){
+    const fs=sdkScreen()&&sdkScreen().fullscreen;
+    let status=fs&&fs.status;
+    try{if(typeof status==='function')status=status.call(fs)}catch(e){status='off'}
+    return status==='on'||!!document.fullscreenElement||!!document.webkitFullscreenElement;
+  }
+  function enterFullscreenFromTap(){
     const screenApi=sdkScreen(),fs=screenApi&&screenApi.fullscreen;
-    let result=null;
-    if(fs&&typeof fs.request==='function')result=safeCall(function(){return fs.request();});
-    else result=requestNativeFullscreen();
-    setLandscape();
-    return result||Promise.resolve();
-  };
+    let request=null;
+    try{
+      if(fs&&typeof fs.request==='function')request=fs.request();
+      else{
+        const el=document.documentElement,fn=el.requestFullscreen||el.webkitRequestFullscreen;
+        if(fn)request=fn.call(el);
+      }
+    }catch(e){request=Promise.reject(e)}
+    if(request&&typeof request.then==='function'){
+      request.then(function(){requestLandscape();}).catch(function(){
+        showFullscreenMessage('Браузер не разрешил полноэкранный режим. На iPhone открой игру через «На экран Домой».');
+      });
+      return request;
+    }
+    if(request!==null){requestLandscape();return Promise.resolve(request)}
+    showFullscreenMessage('Этот браузер не поддерживает полноэкранный режим для страницы. На iPhone открой игру через «На экран Домой».');
+    return Promise.resolve();
+  }
+  window.__autosportEnterFullscreen=enterFullscreenFromTap;
   window.__autosportToggleFullscreen=function(){
     const screenApi=sdkScreen(),fs=screenApi&&screenApi.fullscreen;
-    let isOn=fullscreenIsOn(fs);
-    if(!isOn&&document.fullscreenElement)isOn=true;
-    if(isOn){
-      if(fs&&typeof fs.exit==='function')return safeCall(function(){return fs.exit();})||Promise.resolve();
-      if(document.exitFullscreen)return safeCall(function(){return document.exitFullscreen();})||Promise.resolve();
+    if(isFullscreen()){
+      try{
+        if(fs&&typeof fs.exit==='function')return fs.exit();
+        const fn=document.exitFullscreen||document.webkitExitFullscreen;
+        if(fn)return fn.call(document);
+      }catch(e){}
+      showFullscreenMessage('Выход из полноэкранного режима недоступен в этом браузере.');
       return Promise.resolve();
     }
-    let result=null;
-    if(fs&&typeof fs.request==='function')result=safeCall(function(){return fs.request();});
-    else result=requestNativeFullscreen();
-    setLandscape();
-    return result||Promise.resolve();
+    return enterFullscreenFromTap();
   };
   function bindButton(){
     const button=document.getElementById('fullscreen-toggle');
-    if(!button||button.dataset.fullscreenBound)return;
-    button.dataset.fullscreenBound='1';
-    button.addEventListener('click',function(event){
-      event.preventDefault();event.stopPropagation();
-      window.__autosportToggleFullscreen();
-    });
-    function sync(){
-      const screenApi=sdkScreen(),fs=screenApi&&screenApi.fullscreen;
-      let on=!!document.fullscreenElement;
-      if(fs)on=fullscreenIsOn(fs)||on;
-      button.setAttribute('aria-pressed',String(on));
-      button.textContent=on?'⛶':'⛶';
-      button.title=on?'Выйти из полноэкранного режима':'На весь экран';
-    }
-    document.addEventListener('fullscreenchange',sync);
-    document.addEventListener('webkitfullscreenchange',sync);
-    sync();
+    if(!button)return;
+    button.onclick=function(event){event.preventDefault();event.stopPropagation();window.__autosportToggleFullscreen();};
+    button.setAttribute('aria-label','Переключить полноэкранный режим');
   }
   bindButton();
   const sdkScript=document.createElement('script');
@@ -289,7 +295,6 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
     }
   };
   document.head.appendChild(sdkScript);
-})();
 </script>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
