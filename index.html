@@ -58,9 +58,39 @@ function makeRoadTexture(){
  const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(1,1);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex;
 }
 function makeDuneGeometry(){
- const nx=24,nz=20,positions=[],indices=[];for(let iz=0;iz<=nz;iz++){const z=-1+2*iz/nz;for(let ix=0;ix<=nx;ix++){const x=-1+2*ix/nx,across=Math.pow(Math.max(0,1-x*x),1.45),ends=Math.pow(Math.max(0,1-z*z),.24),wind=.88+.12*Math.sin(z*4.5+x*1.4);positions.push(x,across*ends*wind,z)}}
+ const nx=42,nz=34,positions=[],colors=[],indices=[];
+ for(let iz=0;iz<=nz;iz++){const z=-1+2*iz/nz;for(let ix=0;ix<=nx;ix++){
+  const x=-1+2*ix/nx,ridge=.18*Math.sin(z*2.9)+.09*Math.sin(z*6.1+.7),q=x-ridge;
+  const windward=Math.pow(Math.max(0,1-q*q),1.18),lee=1-.16*Math.max(0,q);
+  const longWave=.91+.09*Math.sin(z*3.8+x*.65),height=windward*lee*longWave;
+  positions.push(x,height,z);
+  const shade=.83+.14*height+.025*Math.sin(z*13+x*8);colors.push(shade,shade*.91,shade*.76);
+ }}
  for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const a=iz*(nx+1)+ix,b=a+1,e=a+nx+1,d=e+1;indices.push(a,e,b,b,e,d)}
- const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setIndex(indices);g.computeVertexNormals();return g;
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(indices);g.computeVertexNormals();return g;
+}
+function makeRockGeometry(){
+ const g=new THREE.IcosahedronGeometry(1,1),p=g.attributes.position;
+ for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),n=1+.13*Math.sin(x*8.1+y*5.7+z*3.2)+.055*Math.sin(y*17+x*9);p.setXYZ(i,x*n,y*n*(.82+.12*Math.sin(x*4+z*6)),z*n)}
+ p.needsUpdate=true;g.computeVertexNormals();return g;
+}
+function makeMountainGeometry(){
+ const seg=11,rings=[{y:-.5,r:.91},{y:-.25,r:.76},{y:.04,r:.53},{y:.29,r:.28},{y:.43,r:.12}],pos=[],col=[],idx=[];
+ for(let k=0;k<rings.length;k++)for(let j=0;j<seg;j++){
+  const a=j/seg*Math.PI*2,noise=1+.13*Math.sin(j*4.7+k*2.1)+.055*Math.cos(j*7.3-k);
+  const rr=rings[k].r*noise,yy=rings[k].y+(k>0?.035*Math.sin(j*3.1+k):0);
+  pos.push(Math.cos(a)*rr,yy,Math.sin(a)*rr);
+  const shade=.72-.12*(k/rings.length)+.06*Math.sin(j*2.4+k);col.push(shade,shade*1.015,shade*1.04);
+ }
+ const top=pos.length/3;pos.push(.025,.5,-.018);col.push(.9,.92,.94);
+ for(let k=0;k<rings.length-1;k++)for(let j=0;j<seg;j++){const a=k*seg+j,b=k*seg+(j+1)%seg,e=(k+1)*seg+j,d=(k+1)*seg+(j+1)%seg;idx.push(a,b,e,b,d,e)}
+ const last=(rings.length-1)*seg;for(let j=0;j<seg;j++)idx.push(last+j,last+(j+1)%seg,top);
+ const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));g.setIndex(idx);g.computeVertexNormals();return g;
+}
+function makePineCrownGeometry(){
+ const g=new THREE.ConeGeometry(1,1,9,3),p=g.attributes.position;
+ for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),z=p.getZ(i),n=1+.055*Math.sin(i*2.7+x*5+z*4);p.setXYZ(i,x*n,y,z*n)}
+ p.needsUpdate=true;g.computeVertexNormals();return g;
 }
 
 function pointAt(d){let t=((d%length)+length)%length/length,p=curve.getPointAt(t),tan=curve.getTangentAt(t).normalize(),side=new THREE.Vector3(-tan.z,0,tan.x).normalize();return {p,tan,side}}
@@ -253,26 +283,43 @@ curve=new THREE.CatmullRomCurve3(r.points.map((p,i)=>{const t=i/r.points.length,
 // Distinct track biomes: coast, alpine mountain forest and desert dunes.
 if(prefs.track==='coast'){
  const sea=new THREE.Mesh(new THREE.PlaneGeometry(2200,2200),mat('#267f9c',.32,.12));sea.rotation.x=-Math.PI/2;sea.position.y=-.32;scene.add(sea);
- const shore=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),mat('#c8b681'));shore.rotation.x=-Math.PI/2;shore.position.y=-.25;scene.add(shore);
+ // The beach is a narrow, irregular coastal shelf; the sea remains visible beyond it.
 }
 // Biome-specific ground materials: visible sand grains and wind-rippled desert texture.
  const terrainTex=makeGroundTexture(prefs.track);
  const terrainSize=prefs.track==='coast'?430:1100;
- const terrainGeo=new THREE.PlaneGeometry(terrainSize,terrainSize,prefs.track==='forest'?180:1,prefs.track==='forest'?180:1);
- const terrainSamples=prefs.track==='forest'?Array.from({length:360},(_,i)=>pointAt(i/360*length)):[];
+ const terrainSegments=prefs.track==='forest'?180:prefs.track==='coast'?132:112;
+ const terrainGeo=new THREE.PlaneGeometry(terrainSize,terrainSize,terrainSegments,terrainSegments);
+ const terrainSamples=Array.from({length:360},(_,i)=>pointAt(i/360*length));
  const terrainHeightAt=(x,z)=>{
-  if(prefs.track!=='forest')return -.18;
   let nearest=terrainSamples[0],best=Infinity;
   for(const sample of terrainSamples){const dx=x-sample.p.x,dz=z-sample.p.z,d=dx*dx+dz*dz;if(d<best){best=d;nearest=sample}}
   const dist=Math.sqrt(best),t=clamp((dist-8)/78,0,1),blend=1-t*t*(3-2*t);
-  return mix(-.18,nearest.p.y,blend);
+  const base=prefs.track==='forest'?mix(-.18,nearest.p.y,blend):-.18;
+  const fadeT=clamp((dist-(ROAD/2+7))/78,0,1),fade=fadeT*fadeT*(3-2*fadeT);
+  const amp=prefs.track==='forest'?4.2:prefs.track==='coast'?2.4:1.15;
+  const rolling=amp*(.52*Math.sin(x*.021+Math.sin(z*.013)*1.7)*Math.cos(z*.018-x*.009)+.28*Math.sin((x+z)*.047)+.2*Math.cos(x*.038-z*.029));
+  return base+rolling*fade;
  };
- if(prefs.track==='forest'){
+ {
   const p=terrainGeo.attributes.position;
-  for(let i=0;i<p.count;i++){const x=p.getX(i),z=-p.getY(i);p.setZ(i,terrainHeightAt(x,z))}
+  for(let i=0;i<p.count;i++){
+   const x=p.getX(i),z=-p.getY(i);let h=terrainHeightAt(x,z);
+   if(prefs.track==='coast'){
+    const radius=Math.hypot(x,z),a=Math.atan2(z,x),shoreR=280+17*Math.sin(a*3+.4)+11*Math.sin(a*7-1.1);
+    const t=clamp((shoreR+12-radius)/42,0,1),land=t*t*(3-2*t);h=mix(-.43,h,land);
+   }
+   p.setZ(i,h);
+  }
   p.needsUpdate=true;terrainGeo.computeVertexNormals();
  }
- const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:.23,roughness:.94}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
+ const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:prefs.track==='desert'?.32:.28,roughness:.96}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
+ if(prefs.track==='coast'){
+  const shoreGeo=new THREE.PlaneGeometry(1000,1000,190,190),sp=shoreGeo.attributes.position;
+  for(let i=0;i<sp.count;i++){const x=sp.getX(i),z=-sp.getY(i),r=Math.hypot(x,z),a=Math.atan2(z,x),shoreR=280+17*Math.sin(a*3+.4)+11*Math.sin(a*7-1.1),inner=shoreR-38,t=clamp((r-inner)/38,0,1),beach=t*t*(3-2*t),outer=clamp((r-shoreR)/25,0,1),drop=outer*outer*(3-2*outer);sp.setZ(i,mix(-.27,-.095,beach)-.34*drop)}
+  sp.needsUpdate=true;shoreGeo.computeVertexNormals();
+  const beach=new THREE.Mesh(shoreGeo,new THREE.MeshStandardMaterial({color:'#d7c397',roughness:.98,side:THREE.DoubleSide}));beach.rotation.x=-Math.PI/2;beach.position.y=0;beach.receiveShadow=true;scene.add(beach);
+ }
  if(prefs.track==='forest'){
  // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
  const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,metalness:0,vertexColors:true,side:THREE.DoubleSide});
@@ -310,7 +357,7 @@ if(prefs.track==='coast'){
  }
  // Layered alpine peaks behind the roadside rock walls: faceted silhouettes,
  // with every base seated on the height-mapped terrain rather than hovering.
- const peakGeo=new THREE.ConeGeometry(1,1,7,2);
+ const peakGeo=makeMountainGeometry();
  const peakMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,vertexColors:true,flatShading:true});
  const peakCount=52,peakMesh=new THREE.InstancedMesh(peakGeo,peakMat,peakCount),peakDummy=new THREE.Object3D();
  for(let i=0;i<peakCount;i++){
@@ -325,7 +372,7 @@ if(prefs.track==='coast'){
  peakMesh.castShadow=true;peakMesh.receiveShadow=true;scene.add(peakMesh);
  // Alpine pine forest: layered low-poly crowns and trunks seated on existing terrain.
  const pineCount=84,pineTrunk=new THREE.InstancedMesh(new THREE.CylinderGeometry(.22,.38,1,7),mat('#514536',.98),pineCount);
- const pineCrownGeo=new THREE.ConeGeometry(1,1,7,2),pineMats=['#244b3a','#315b43','#3b6749'].map(c=>mat(c,.98));
+ const pineCrownGeo=makePineCrownGeometry(),pineMats=['#244b3a','#315b43','#3b6749'].map(c=>mat(c,.98));
  const pineCrowns=pineMats.map(m=>new THREE.InstancedMesh(pineCrownGeo,m,pineCount*3)),pineDummy=new THREE.Object3D();
  for(let i=0;i<pineCount;i++){
   const sample=pointAt((i/pineCount)*length),side=i%2?1:-1,dist=27+(i%7)*5.6,x=sample.p.x+sample.side.x*dist*side,z=sample.p.z+sample.side.z*dist*side,base=terrainHeightAt(x,z),h=7.5+(i%6)*1.15;
@@ -364,11 +411,23 @@ if(prefs.track==='coast'){
   }
   for(const inst of [trunks,rings,stems,leaves,hearts]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=true;inst.receiveShadow=true;scene.add(inst)}
   if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;
-  // No loose floating rocks or sand props near the racing surface.
+  // Sculpted wind-shaped dune field beyond the palm line; track and vehicle transforms are untouched.
+  const duneGeo=makeDuneGeometry(),duneMat=new THREE.MeshStandardMaterial({color:'#ffffff',vertexColors:true,roughness:1}),duneCount=38;
+  const dunes=new THREE.InstancedMesh(duneGeo,duneMat,duneCount),duneDummy=new THREE.Object3D();
+  for(let i=0;i<duneCount;i++){
+   const s=pointAt((i/duneCount)*length),side=i%2?1:-1,dist=76+(i%6)*10.5,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
+   duneDummy.position.set(x,-.14,z);duneDummy.rotation.set(0,Math.atan2(s.tan.x,s.tan.z)+(i%3-1)*.22,0);
+   duneDummy.scale.set(23+(i%5)*5.2,6.5+(i%6)*1.45,18+(i%4)*6.1);duneDummy.updateMatrix();dunes.setMatrixAt(i,duneDummy.matrix);
+  }
+  dunes.instanceMatrix.needsUpdate=true;dunes.castShadow=true;dunes.receiveShadow=true;scene.add(dunes);
+  // Sparse desert scrub and weathered stones break up the open sand without crowding the route.
+  const scrubGeo=new THREE.IcosahedronGeometry(.55,1),scrubMat=new THREE.MeshStandardMaterial({color:'#8b8050',roughness:1}),scrubCount=54,scrub=new THREE.InstancedMesh(scrubGeo,scrubMat,scrubCount),scrubDummy=new THREE.Object3D();
+  for(let i=0;i<scrubCount;i++){const s=pointAt(((i*17)%scrubCount)/scrubCount*length),side=i%2?1:-1,dist=49+(i%7)*9,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,h=.35+(i%4)*.13;scrubDummy.position.set(x,-.08+h,z);scrubDummy.rotation.set(i*.31,i*1.7,i*.19);scrubDummy.scale.set(1.1,h,1.25);scrubDummy.updateMatrix();scrub.setMatrixAt(i,scrubDummy.matrix)}
+  scrub.instanceMatrix.needsUpdate=true;scrub.castShadow=true;scene.add(scrub);
 }else{
  // Coastal cliffs, palms and a visible blue ocean horizon.
  for(let i=0;i<36;i++){const s=pointAt(i/36*length),side=i%2?1:-1,dist=ROAD/2+20+(i%4)*12,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
-  const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(5+(i%4)*2,0),mat('#887d65'));rock.position.set(x,1.4,z);rock.scale.y=.55;scene.add(rock);
+  const rock=new THREE.Mesh(makeRockGeometry(),new THREE.MeshStandardMaterial({color:i%3?'#8b806c':'#a0957c',roughness:.98}));rock.position.set(x,1.4,z);rock.scale.set(5+(i%4)*2,3.8+(i%3)*1.3,4.5+(i%4)*1.7);rock.rotation.y=i*1.73;rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);
   const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.13,.2,4.5,7),mat('#82603c'));trunk.position.set(x+4,2.2,z+3);trunk.rotation.z=.12;scene.add(trunk);
   for(let j=0;j<5;j++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.45,4,5),mat('#32734b'));leaf.position.set(x+4+Math.cos(j*1.25)*1.5,4.2,z+3+Math.sin(j*1.25)*1.5);leaf.rotation.z=Math.PI/2;leaf.rotation.y=j*1.25;scene.add(leaf)}
  }
