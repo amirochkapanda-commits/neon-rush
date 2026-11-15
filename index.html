@@ -225,7 +225,6 @@ function update(dt){
   }
   // Steering remains effective at low speed; reverse steering is naturally
   // mirrored, and grip upgrades add control without making the car twitchy.
-  const travelDirection=speed<-.15?-1:1;
   const turnRate=.38+Math.min(Math.abs(speed),50)*.012;
   if(steerInput!==0)heading+=steerInput*dt*turnRate*(1+prefs.grip*.045);
   const fx=Math.sin(heading),fz=Math.cos(heading);
@@ -249,8 +248,8 @@ function update(dt){
   }
   progress=bestD;
   if(prefs.track==='forest'){
-    const along=fx*bestSample.tan.x+fz*bestSample.tan.z;
-    speed=clamp(speed-9.81*bestSample.tan.y*along*.42*dt,-13,maxV);
+    // ROCKY PASS elevation is visual/physical body alignment only.
+    // Do not subtract gravity from engine speed: steep samples must never stall the player.
     player.position.y=bestSample.p.y+.05;
     player.rotation.x=-Math.atan2(bestSample.tan.y,Math.hypot(bestSample.tan.x,bestSample.tan.z));
   }else{player.position.y=.05;player.rotation.x=0}
@@ -272,7 +271,6 @@ function update(dt){
   collisionFlash=Math.max(0,collisionFlash-dt);
   for(const a of ai){
     const delta=((progress-a.d)%length+length)%length;
-    if(prefs.track==='forest')a.v=clamp(a.v-9.8*pointAt(a.d).tan.y*dt,22,62);
     let target=a.v;
     if(delta>0&&delta<18)target*=.94;
     a.d+=target*dt;
