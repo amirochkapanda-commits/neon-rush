@@ -26,12 +26,12 @@ let scene,camera,renderer,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=
 const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#a9b6bb',fog:'#a9b6bb',ground:'#46654b',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
-desert:{bg:'#d7b88d',fog:'#d7b88d',ground:'#b69767',points:[[-5,-88],[55,-78],[92,-25],[70,25],[88,72],[20,90],[-45,70],[-90,25],[-68,-25],[-48,-70]],trees:'#92784c'}};
+desert:{bg:'#e5c995',fog:'#e5c995',ground:'#d9b875',points:[[-5,-88],[55,-78],[92,-25],[70,25],[88,72],[20,90],[-45,70],[-90,25],[-68,-25],[-48,-70]],trees:'#92784c'}};
 const mat=(c,r=.75,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 function makeGroundTexture(kind){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d'),base=kind==='desert'?'#d9b875':kind==='forest'?'#536d48':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
  let seed=kind==='desert'?771:kind==='forest'?381:519;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- if(kind==='desert){for(let i=0;i<30000;i++){const x=rnd()*512,y=rnd()*512,a=.035+rnd()*.16;ctx.fillStyle=rnd()>.52?'rgba(255,238,190,'+a+')':'rgba(116,78,35,'+(a*.72)+')';const s=.5+rnd()*1.7;ctx.fillRect(x,y,s,s)}for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*100;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.28,y-5-rnd()*8,x+len*.68,y+4+rnd()*7,x+len,y-1);ctx.strokeStyle=i%3?'rgba(255,238,190,.19)':'rgba(128,91,45,.13)';ctx.lineWidth=.7+rnd()*1.2;ctx.stroke()}}
+ if(kind==='desert'){for(let i=0;i<30000;i++){const x=rnd()*512,y=rnd()*512,a=.035+rnd()*.16;ctx.fillStyle=rnd()>.52?'rgba(255,238,190,'+a+')':'rgba(116,78,35,'+(a*.72)+')';const s=.5+rnd()*1.7;ctx.fillRect(x,y,s,s)}for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*100;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.28,y-5-rnd()*8,x+len*.68,y+4+rnd()*7,x+len,y-1);ctx.strokeStyle=i%3?'rgba(255,238,190,.19)':'rgba(128,91,45,.13)';ctx.lineWidth=.7+rnd()*1.2;ctx.stroke()}}
  else{for(let i=0;i<26000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=kind==='forest'?(rnd()>.5?'rgba(175,190,111,'+a+')':'rgba(22,47,27,'+a+')'):(rnd()>.5?'rgba(220,205,135,'+a+')':'rgba(35,65,35,'+a+')');ctx.fillRect(x,y,1+rnd()*2,1+rnd()*2)}}
  const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(kind==='desert'?18:22,kind==='desert'?18:22);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex;
 }
@@ -69,33 +69,29 @@ function car(color,isPlayer=false){
  root.userData.body=body;return root;
 }
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.paint||$('paint').value);if(rimMat)rimMat.color.set(prefs.rim||$('rimPaint').value)}
-function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,150,370);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);const mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?210:150,prefs.track==='desert'?520:370);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);const mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.25:1.6));renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.35:1.7));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
-scene.add(new THREE.HemisphereLight('#eaf2ff','#54483a',1.55));
+scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':'#54483a',1.72));
 const sun=new THREE.DirectionalLight('#fff0d9',3.1);sun.position.set(-65,105,42);sun.castShadow=true;
-sun.shadow.mapSize.set(1024,1024);
+sun.shadow.mapSize.set(mobileQuality?1024:1536,mobileQuality?1024:1536);
 sun.shadow.camera.left=-115;sun.shadow.camera.right=115;sun.shadow.camera.top=115;sun.shadow.camera.bottom=-115;
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00018;sun.shadow.normalBias=.035;sun.shadow.radius=2;
 scene.add(sun);
-const fill=new THREE.DirectionalLight('#a9c9e8',.62);fill.position.set(55,38,-70);scene.add(fill);
+const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.72);fill.position.set(55,38,-70);scene.add(fill);
 curve=new THREE.CatmullRomCurve3(r.points.map(p=>new THREE.Vector3(p[0]*2.3,0,p[1]*2.3)),true,'catmullrom',.3);length=curve.getLength();
 // Distinct track biomes: coast, alpine mountain forest and desert dunes.
 if(prefs.track==='coast'){
  const sea=new THREE.Mesh(new THREE.PlaneGeometry(2200,2200),mat('#267f9c',.32,.12));sea.rotation.x=-Math.PI/2;sea.position.y=-.38;scene.add(sea);
  const shore=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),mat('#c8b681'));shore.rotation.x=-Math.PI/2;shore.position.y=-.29;scene.add(shore);
 }
-// Flat textured ground keeps the road and all four wheels on a consistent surface.
-const terrainCanvas=document.createElement('canvas');terrainCanvas.width=terrainCanvas.height=256;
-const tctx=terrainCanvas.getContext('2d');tctx.fillStyle=r.ground;tctx.fillRect(0,0,256,256);
-let seed=prefs.track==='desert'?771:prefs.track==='forest'?381:519;
-for(let i=0;i<10000;i++){seed=(seed*1664525+1013904223)>>>0;const x=seed&255;seed=(seed*1664525+1013904223)>>>0;const y=seed&255;const alpha=.025+((seed>>>8)&31)/950;tctx.fillStyle=(seed&1)?'rgba(255,235,190,'+alpha+')':'rgba(20,28,20,'+alpha+')';tctx.fillRect(x,y,1+(seed%2),1+(seed%2));}
-const terrainTex=new THREE.CanvasTexture(terrainCanvas);terrainTex.wrapS=terrainTex.wrapT=THREE.RepeatWrapping;terrainTex.repeat.set(22,22);terrainTex.colorSpace=THREE.SRGBColorSpace;
-const ground=new THREE.Mesh(new THREE.PlaneGeometry(1100,1100),new THREE.MeshStandardMaterial({color:r.ground,map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.2;ground.receiveShadow=true;scene.add(ground);
-if(prefs.track==='forest'){
+// Biome-specific ground materials: visible sand grains and wind-rippled desert texture.
+ const terrainTex=makeGroundTexture(prefs.track);
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(1100,1100),new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.2;ground.receiveShadow=true;scene.add(ground);
+ if(prefs.track==='forest'){
  const pineMats=[mat('#173f32'),mat('#245b3b'),mat('#326b43')];
  for(let i=0;i<180;i++){const s=pointAt(i/180*length),side=i%2?1:-1,dist=ROAD/2+12+(i%7)*4,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
   const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.18,.28,2.8,7),mat('#584332'));trunk.position.set(x,1.3,z);scene.add(trunk);
@@ -107,14 +103,19 @@ if(prefs.track==='forest'){
   const snow=new THREE.Mesh(new THREE.ConeGeometry(5+(i%3),h*.27,6),mat('#e4e9e8'));snow.position.set(x,h*.84,z);scene.add(snow);
  }
 }else if(prefs.track==='desert'){
- // Sand dunes and layered rocky mesas replace the generic roadside forest.
- for(let i=0;i<90;i++){const s=pointAt(i/90*length),side=i%2?1:-1,dist=ROAD/2+15+(i%6)*8,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
-  const dune=new THREE.Mesh(new THREE.SphereGeometry(1,12,8),mat(i%2?'#c49b60':'#d8b477'));dune.position.set(x,-.1,z);dune.scale.set(8+(i%4)*2,1.3,5+(i%3)*2);scene.add(dune);
- }
- for(let i=0;i<24;i++){const s=pointAt(i/24*length),side=i%2?1:-1,dist=65+(i%3)*15,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,h=12+(i%4)*5;
-  const mesa=new THREE.Mesh(new THREE.CylinderGeometry(5+(i%3)*2,10+(i%3)*3,h,5),mat('#98744d'));mesa.position.set(x,h/2-1,z);scene.add(mesa);
-  const cap=new THREE.Mesh(new THREE.CylinderGeometry(7+(i%3)*2,5+(i%3)*2,2,5),mat('#b68b58'));cap.position.set(x,h-1,z);scene.add(cap);
- }
+  // Broad sculpted dunes sit beyond the safety verge; no dune mesh intersects asphalt.
+  const duneGeo=makeDuneGeometry(),duneMats=[mat('#d7b36f',1,0),mat('#e3c482',1,0),mat('#c69b59',1,0)];
+  const duneMeshes=duneMats.map(m=>{const im=new THREE.InstancedMesh(duneGeo,m,84);im.receiveShadow=true;scene.add(im);return im});
+  const dummy=new THREE.Object3D(),counts=[0,0,0];
+  for(let i=0;i<84;i++){const s=pointAt(i/84*length),side=i%2?1:-1,dist=ROAD/2+25+(i%5)*7,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;dummy.position.set(x,-.19,z);dummy.rotation.set(0,Math.atan2(s.tan.x,s.tan.z),0);dummy.scale.set(13+(i%4)*2,3.8+(i%5)*1.15,18+(i%3)*5);dummy.updateMatrix();const mi=i%3;duneMeshes[mi].setMatrixAt(counts[mi]++,dummy.matrix)}
+  duneMeshes.forEach((m,i)=>{m.count=counts[i];m.instanceMatrix.needsUpdate=true});
+  // Layered red sandstone mesas form a distant horizon.
+  const mesaMats=[mat('#a66f47',1,0),mat('#b98250',1,0),mat('#8f6042',1,0)];
+  for(let i=0;i<30;i++){const s=pointAt(i/30*length),side=i%2?1:-1,dist=82+(i%4)*18,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,h=17+(i%5)*5;const rock=new THREE.Mesh(new THREE.DodecahedronGeometry(1,1),mesaMats[i%3]);rock.scale.set(11+(i%3)*3,h,10+(i%4)*3);rock.position.set(x,h-.2,z);rock.rotation.y=i*.73;rock.castShadow=true;scene.add(rock);const cap=new THREE.Mesh(new THREE.DodecahedronGeometry(1,0),mat('#c3925d',1,0));cap.scale.set(9+(i%3)*2,2.2,8+(i%3)*2);cap.position.set(x,h*1.72,z);cap.rotation.y=i*.73;scene.add(cap)}
+  // Scattered desert stones stay well clear of the road.
+  const stoneGeo=new THREE.DodecahedronGeometry(1,0),stoneMat=mat('#9b805e',1,0),stones=new THREE.InstancedMesh(stoneGeo,stoneMat,150),stoneDummy=new THREE.Object3D();
+  for(let i=0;i<150;i++){const s=pointAt((i*17.37%100)/100*length),side=i%2?1:-1,dist=ROAD/2+18+(i%9)*5;stoneDummy.position.set(s.p.x+s.side.x*dist*side,-.02,s.p.z+s.side.z*dist*side);stoneDummy.rotation.set((i%5)*.13,i*1.71,(i%7)*.08);const sc=.35+(i%6)*.16;stoneDummy.scale.set(sc*1.5,sc*.65,sc);stoneDummy.updateMatrix();stones.setMatrixAt(i,stoneDummy.matrix)}
+  stones.castShadow=true;stones.instanceMatrix.needsUpdate=true;scene.add(stones);
 }else{
  // Coastal cliffs, palms and a visible blue ocean horizon.
  for(let i=0;i<36;i++){const s=pointAt(i/36*length),side=i%2?1:-1,dist=ROAD/2+20+(i%4)*12,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
@@ -123,8 +124,12 @@ if(prefs.track==='forest'){
   for(let j=0;j<5;j++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.45,4,5),mat('#32734b'));leaf.position.set(x+4+Math.cos(j*1.25)*1.5,4.2,z+3+Math.sin(j*1.25)*1.5);leaf.rotation.z=Math.PI/2;leaf.rotation.y=j*1.25;scene.add(leaf)}
  }
 }
-let v=[],idx=[];const seg=900;for(let i=0;i<=seg;i++){let s=pointAt(i/seg*length);for(let side of [-1,1])v.push(s.p.x+s.side.x*ROAD*.5*side,.02,s.p.z+s.side.z*ROAD*.5*side);if(i<seg){let n=i*2;idx.push(n,n+2,n+1,n+1,n+2,n+3)}}let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setIndex(idx);geo.computeVertexNormals();let road=new THREE.Mesh(geo,mat('#343a3e',.96));road.receiveShadow=true;scene.add(road);
-/* High-contrast road edge markings: continuous bright lines plus raised rumble strips */
+let v=[],idx=[],uv=[];const seg=900;
+ for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+2,n+1,n+1,n+2,n+3)}}
+ let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
+ const roadTex=makeRoadTexture();roadTex.repeat.set(1,Math.max(1,length/6));
+ let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,roughness:.98}));road.receiveShadow=true;scene.add(road);
+ /* High-contrast road edge markings: continuous bright lines plus raised rumble strips */
 for(const side of [-1,1]){
  const edgePts=[];for(let i=0;i<=seg;i+=2){const s=pointAt(i/seg*length);edgePts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2-.22)*side,.085,s.p.z+s.side.z*(ROAD/2-.22)*side))}
  const edgeLine=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(edgePts),edgePts.length*2,.105,8,false),mat('#fff4d7',.55,.12));scene.add(edgeLine);
