@@ -78,10 +78,11 @@
 }
 @media(max-width:380px){#menu .track-card{height:92px}#menu .track-card span{font-size:8px}#menu .stats small{font-size:7px}}
 
-/* Compact GTA-style race navigator: isolated center-bottom slot between control pads. */
-#race-map{position:absolute;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:150px;height:110px;max-width:34vw;border:1px solid #ffffff55;border-radius:12px;background:rgba(8,17,24,.58);box-shadow:0 5px 20px #0005;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none}
+/* Semi-transparent navigator sits above the control pads, never on top of them. */
+#race-map{position:absolute;left:50%;bottom:calc(max(9px,env(safe-area-inset-bottom)) + 84px);transform:translateX(-50%);width:168px;height:122px;max-width:42vw;border:1px solid #ffffff65;border-radius:13px;overflow:hidden;background:rgba(7,16,23,.54);box-shadow:0 6px 22px #0005;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);pointer-events:none}
 #race-map canvas{width:100%;height:100%;display:block}
-@media(max-width:380px){#race-map{width:126px;height:94px;bottom:max(12px,env(safe-area-inset-bottom))}}
+@media(max-width:380px){#race-map{width:142px;height:104px;bottom:calc(max(9px,env(safe-area-inset-bottom)) + 80px)}}
+@media(max-height:520px){#race-map{width:126px;height:92px;bottom:calc(max(6px,env(safe-area-inset-bottom)) + 72px)}}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -94,7 +95,7 @@
 <section class="panel" id="panel-tuning"><div class="section-title">ГАРАЖ · ПРОКАЧАЙ МАШИНУ</div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=420&q=85" alt="Автомобильный двигатель"><div class="upgrade-info"><div class="upgrade-name">ТУРБО-ДВИГАТЕЛЬ</div><div class="upgrade-desc">Увеличивает разгон и максимальную скорость на прямых.</div><div class="statline"><div class="stathead"><span>МОЩНОСТЬ</span><b id="engineValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="enginePreview"></div><div class="meter-current" id="engineBar"></div></div></div><button class="upgrade-buy" id="engineUpgrade">УЛУЧШИТЬ · 260 TOK</button></div></div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?w=420&q=85" alt="Автомобильные шины"><div class="upgrade-info"><div class="upgrade-name">СПОРТИВНЫЕ ШИНЫ</div><div class="upgrade-desc">Улучшают сцепление с трассой и точность прохождения поворотов.</div><div class="statline"><div class="stathead"><span>СЦЕПЛЕНИЕ</span><b id="gripValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="gripPreview"></div><div class="meter-current" id="gripBar"></div></div></div><button class="upgrade-buy" id="gripUpgrade">УЛУЧШИТЬ · 220 TOK</button></div></div><p class="tiny">Белая полоса — текущий уровень. Зелёный участок — прирост после следующей покупки.</p></section>
 <section class="panel" id="panel-design"><div class="section-title">ВНЕШНИЙ ВИД МАШИНЫ</div><div class="design-colors"><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=520&q=85" alt="Спортивный автомобиль с окрашенным кузовом"><div class="design-name">ОКРАСКА КУЗОВА</div><div class="design-desc">Меняет основной цвет корпуса автомобиля.</div><label>СВОЙ ЦВЕТ<input id="paint" type="color" value="#dba14e"></label><div class="palette"><button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой" aria-pressed="true"></button><button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный"></button><button class="swatch" data-paint="#1768c5" style="background:#1768c5" aria-label="Синий"></button><button class="swatch" data-paint="#f1f1ed" style="background:#f1f1ed" aria-label="Белый"></button><button class="swatch" data-paint="#20252b" style="background:#20252b" aria-label="Чёрный"></button><button class="swatch" data-paint="#20a66a" style="background:#20a66a" aria-label="Зелёный"></button></div></div><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=520&q=85" alt="Колесо спортивного автомобиля"><div class="design-name">ЦВЕТ ДИСКОВ</div><div class="design-desc">Меняет цвет металлических центральных частей колёс.</div><label>СВОЙ ЦВЕТ<input id="rimPaint" type="color" value="#9da6aa"></label><div class="palette"><button class="swatch" data-rim="#9da6aa" style="background:#9da6aa" aria-label="Серебристый" aria-pressed="true"></button><button class="swatch" data-rim="#d4a43c" style="background:#d4a43c" aria-label="Золотой"></button><button class="swatch" data-rim="#d9d9d9" style="background:#d9d9d9" aria-label="Светлый"></button><button class="swatch" data-rim="#262a30" style="background:#262a30" aria-label="Чёрный"></button><button class="swatch" data-rim="#c43d36" style="background:#c43d36" aria-label="Красный"></button><button class="swatch" data-rim="#2474c9" style="background:#2474c9" aria-label="Синий"></button></div></div></div></section>
 </div></div>
-<div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>СКОРОСТЬ</small><strong id="speed">0</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause">Ⅱ</button><button id="restart" aria-label="Перезапустить гонку">↻</button><button id="exit">ВЫХОД</button></div><div class="hint" id="hint">ОБГОНИ СОПЕРНИКОВ</div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="300" height="220"></canvas></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div></div>
+<div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>СКОРОСТЬ</small><strong id="speed">0</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause">Ⅱ</button><button id="restart" aria-label="Перезапустить гонку">↻</button><button id="exit">ВЫХОД</button></div><div class="hint" id="hint">ОБГОНИ СОПЕРНИКОВ</div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div></div>
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -205,24 +206,32 @@ function makePineCrownGeometry(){
 function pointAt(d){let t=((d%length)+length)%length/length,p=curve.getPointAt(t),tan=curve.getTangentAt(t).normalize(),side=new THREE.Vector3(-tan.z,0,tan.x).normalize();return {p,tan,side}}
 function drawRaceMap(dt=0){
  if(!mapCtx||!curve||!length||!player||mode!=='race')return;
- mapClock+=dt;if(mapClock<.09)return;mapClock=0;
- const ctx=mapCtx,w=mapCanvas.width,h=mapCanvas.height,cx=w/2,cy=h/2,fx=Math.sin(heading),fz=Math.cos(heading),rx=-fz,rz=fx;
- const project=(x,z)=>({x:cx+(x-player.position.x)*rx*.48+(z-player.position.z)*rz*.48,y:cy-((x-player.position.x)*fx+(z-player.position.z)*fz)*.48});
+ mapClock+=dt;if(mapClock<.075)return;mapClock=0;
+ const ctx=mapCtx,w=mapCanvas.width,h=mapCanvas.height,cx=w/2,cy=h/2,fx=Math.sin(heading),fz=Math.cos(heading),rx=-fz,rz=fx,scale=.56;
+ const project=(x,z)=>({x:cx+(x-player.position.x)*rx*scale+(z-player.position.z)*rz*scale,y:cy-((x-player.position.x)*fx+(z-player.position.z)*fz)*scale});
  ctx.clearRect(0,0,w,h);
  ctx.fillStyle='rgba(7,16,23,.56)';ctx.fillRect(0,0,w,h);
- // Subtle center crosshair and edge vignette.
- ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,8);ctx.lineTo(cx,h-8);ctx.moveTo(8,cy);ctx.lineTo(w-8,cy);ctx.stroke();
- // Track ribbon, sampled around the player's current progress; coordinates are read-only.
+ // Heading-up view: the player stays centered while the road scrolls and rotates around them.
+ ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,8);ctx.lineTo(cx,h-8);ctx.stroke();
+ // Show a useful section of road both behind and ahead of the player.
  ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
- for(let i=0;i<=150;i++){const d=progress-95+i*2.5,s=pointAt(d),p=project(s.p.x,s.p.z);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}
- ctx.strokeStyle='rgba(0,0,0,.68)';ctx.lineWidth=15;ctx.stroke();
- ctx.strokeStyle='rgba(218,226,229,.88)';ctx.lineWidth=10;ctx.stroke();
- ctx.strokeStyle='rgba(255,255,255,.24)';ctx.lineWidth=1.2;ctx.setLineDash([5,7]);ctx.stroke();ctx.setLineDash([]);
- // Opponents use distinct red/orange markers; player remains a bright cyan arrow.
- for(let i=0;i<ai.length;i++){const carObj=ai[i].car,p=project(carObj.position.x,carObj.position.z);if(p.x<-10||p.x>w+10||p.y<-10||p.y>h+10)continue;ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fillStyle=i===0?'#ff625b':i===1?'#ffb34f':'#d98cff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#101820';ctx.stroke()}
- ctx.save();ctx.translate(cx,cy);ctx.rotate(0);ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(8,9);ctx.lineTo(0,5);ctx.lineTo(-8,9);ctx.closePath();ctx.fillStyle='#55e5ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff';ctx.stroke();ctx.restore();
- // Small legend stays inside the map itself.
- ctx.font='bold 10px system-ui';ctx.textAlign='left';ctx.fillStyle='rgba(7,16,23,.72)';ctx.fillRect(7,7,70,17);ctx.fillStyle='#bdeef5';ctx.fillText('▲ ВЫ',12,19);
+ for(let i=0;i<=170;i++){const d=progress-65+i*1.55,s=pointAt(d),p=project(s.p.x,s.p.z);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}
+ ctx.strokeStyle='rgba(0,0,0,.72)';ctx.lineWidth=19;ctx.stroke();
+ ctx.strokeStyle='rgba(222,231,234,.94)';ctx.lineWidth=13;ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,.34)';ctx.lineWidth=1.4;ctx.setLineDash([5,7]);ctx.stroke();ctx.setLineDash([]);
+ // Rival markers: warm colors and outlined circles; player is always the cyan arrow at center.
+ for(let i=0;i<ai.length;i++){
+  const carObj=ai[i].car,p=project(carObj.position.x,carObj.position.z);
+  if(p.x<-12||p.x>w+12||p.y<-12||p.y>h+12)continue;
+  ctx.beginPath();ctx.arc(p.x,p.y,8,0,Math.PI*2);
+  ctx.fillStyle=['#ff625b','#ffb34f','#d98cff'][i]||'#ff8a55';ctx.fill();
+  ctx.lineWidth=2.5;ctx.strokeStyle='#101820';ctx.stroke();
+  ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
+ }
+ ctx.save();ctx.translate(cx,cy);ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(10,10);ctx.lineTo(0,6);ctx.lineTo(-10,10);ctx.closePath();ctx.fillStyle='#55e5ff';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#ffffff';ctx.stroke();ctx.restore();
+ // Compact legend is contained inside the translucent navigator.
+ ctx.font='bold 11px system-ui';ctx.textAlign='left';ctx.fillStyle='rgba(7,16,23,.76)';ctx.fillRect(8,8,104,20);
+ ctx.fillStyle='#bdeef5';ctx.fillText('▲ ВЫ',14,22);ctx.fillStyle='#ff8874';ctx.beginPath();ctx.arc(75,17,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e5ebee';ctx.fillText('СОПЕРНИКИ',84,21);
 }
 
 function place(obj,d,side=0){let s=pointAt(d);obj.position.set(s.p.x+s.side.x*side,s.p.y+.05,s.p.z+s.side.z*side);obj.rotation.y=Math.atan2(s.tan.x,s.tan.z);obj.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z))}
