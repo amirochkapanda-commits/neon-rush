@@ -97,7 +97,7 @@ sun.shadow.camera.left=-115;sun.shadow.camera.right=115;sun.shadow.camera.top=11
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00018;sun.shadow.normalBias=.035;sun.shadow.radius=2;
 scene.add(sun);
 const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.72);fill.position.set(55,38,-70);scene.add(fill);
-curve=new THREE.CatmullRomCurve3(r.points.map((p,i)=>{const t=i/r.points.length,y=prefs.track==='forest'?13+7*Math.sin(t*Math.PI*2-.35)+2.5*Math.sin(t*Math.PI*4+.55):0;return new THREE.Vector3(p[0]*2.3,y,p[1]*2.3)}),true,'catmullrom',.3);length=curve.getLength();
+curve=new THREE.CatmullRomCurve3(r.points.map((p,i)=>{const t=i/r.points.length,y=prefs.track==='forest'?15+9*Math.sin(t*Math.PI*2-.35)+3*Math.sin(t*Math.PI*4+.55)+1.5*Math.sin(t*Math.PI*6-.2):0;return new THREE.Vector3(p[0]*2.3,y,p[1]*2.3)}),true,'catmullrom',.3);length=curve.getLength();
 // Distinct track biomes: coast, alpine mountain forest and desert dunes.
 if(prefs.track==='coast'){
  const sea=new THREE.Mesh(new THREE.PlaneGeometry(2200,2200),mat('#267f9c',.32,.12));sea.rotation.x=-Math.PI/2;sea.position.y=-.32;scene.add(sea);
@@ -107,60 +107,71 @@ if(prefs.track==='coast'){
  const terrainTex=makeGroundTexture(prefs.track);
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(prefs.track==='coast'?430:1100,prefs.track==='coast'?430:1100),new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.18;ground.receiveShadow=true;scene.add(ground);
  if(prefs.track==='forest'){
- // Rocky Pass: the road climbs and descends through a high-walled mountain canyon.
- const cliffMats=[mat('#555b5c',1,0),mat('#666967',1,0),mat('#777873',1,0)];
- for(let sideSign of [-1,1]){
-  const rows=180,levels=9,verts=[],inds=[];
+ // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
+ const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,metalness:0,vertexColors:true,side:THREE.DoubleSide});
+ for(const sideSign of [-1,1]){
+  const rows=260,levels=18,verts=[],colors=[],inds=[];
   for(let i=0;i<=rows;i++){
-   const s=pointAt(i/rows*length),u=i/rows,offset=ROAD/2+8.5+1.8*Math.sin(u*Math.PI*18+sideSign*.7),peak=17+5*Math.sin(u*Math.PI*14+sideSign)+2.4*Math.sin(u*Math.PI*39+sideSign*.4);
+   const u=i/rows,s=pointAt(u*length),baseDist=ROAD/2+7.2+1.1*Math.sin(u*Math.PI*20+sideSign*.6);
+   const wallHeight=23+5.5*Math.sin(u*Math.PI*12+sideSign*.8)+2.8*Math.sin(u*Math.PI*31+sideSign*.4);
    for(let j=0;j<=levels;j++){
-    const v=j/levels,rough=1+.045*Math.sin(u*117+j*2.7+sideSign)+.025*Math.sin(u*251-j*1.8),dist=offset+v*(1.8+1.1*Math.sin(u*31+j*.9)),y=-2+(s.p.y+peak+2)*v*rough;
+    const v=j/levels,jagged=Math.sin(u*171+j*2.1+sideSign)*.75+Math.sin(u*319-j*1.37)*.38;
+    const dist=baseDist+v*(3.2+1.1*Math.sin(u*37+j*.8))+jagged*(.18+v*.62);
+    const baseY=-6+1.1*Math.sin(u*43+sideSign),topY=s.p.y+wallHeight+2.5*Math.sin(u*57+sideSign+j*.19);
+    const y=mix(baseY,topY,v)+jagged*(.22+v*.75);
     verts.push(s.p.x+s.side.x*dist*sideSign,y,s.p.z+s.side.z*dist*sideSign);
+    const shade=clamp(.76+.12*Math.sin(u*90+j*1.7)+.07*Math.sin(u*211-j*2.4),.48,.98);colors.push(shade,shade*.99,shade*.94);
    }
   }
   for(let i=0;i<rows;i++)for(let j=0;j<levels;j++){const a=i*(levels+1)+j,b=a+1,e=(i+1)*(levels+1)+j,d=e+1;if(sideSign===1)inds.push(a,e,b,b,e,d);else inds.push(a,b,e,b,d,e)}
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(inds);g.computeVertexNormals();
-  const wall=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:sideSign===1?'#626765':'#555d5c',roughness:1,side:THREE.DoubleSide}));wall.castShadow=true;wall.receiveShadow=true;scene.add(wall);
-  for(let i=0;i<36;i++){
-   const s=pointAt(i/36*length),dist=ROAD/2+12+(i%4)*2.2,rock=new THREE.Mesh(new THREE.DodecahedronGeometry(2.2+(i%3)*.65,1),cliffMats[(i+(sideSign===1?1:0))%3]);
-   rock.position.set(s.p.x+s.side.x*dist*sideSign,s.p.y+3.5+(i%5)*1.4,s.p.z+s.side.z*dist*sideSign);rock.scale.set(1.5,2.5+(i%4)*.55,2.1);rock.rotation.set(.13*i,.31*i,.08*i);rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);
-  }
- }
- for(let i=0;i<14;i++){
-  const s=pointAt(i/14*length),side=i%2?1:-1,dist=48+(i%3)*9,peak=new THREE.Mesh(new THREE.DodecahedronGeometry(10+(i%4)*2,1),cliffMats[i%3]);
-  peak.position.set(s.p.x+s.side.x*dist*side,s.p.y+5,s.p.z+s.side.z*dist*side);peak.scale.set(1.8,2.3+(i%3)*.5,1.2);peak.rotation.y=i*.73;peak.castShadow=true;scene.add(peak);
- }
-}else if(prefs.track==='desert'){
-  // Full-sized date palms. Shared instanced geometry keeps the detailed canopy fast on phones.
-  const bark=mat('#805331',.96,0),barkLight=mat('#ad8052',.94,0);
-  const greens=['#285c32','#39753a','#578746','#71954c'];
-  const leafMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.9,side:THREE.DoubleSide});
-  const leafletGeo=new THREE.BufferGeometry(),leafPos=[],leafIdx=[];
-  for(let k=0;k<18;k++)for(const side of [-1,1]){
-   const n=leafPos.length/3,x=.38+k*.19;leafPos.push(x,0,0,x+.62,-.30,side*.54,x+.25,-.18,side*.15);leafIdx.push(n,n+1,n+2);
-  }
-  leafletGeo.setAttribute('position',new THREE.Float32BufferAttribute(leafPos,3));leafletGeo.setIndex(leafIdx);leafletGeo.computeVertexNormals();
-  const stemPoints=[new THREE.Vector3(0,0,0),new THREE.Vector3(.9,-.18,0),new THREE.Vector3(2.1,-.62,0),new THREE.Vector3(3.35,-1.35,0),new THREE.Vector3(4.15,-1.95,0)];
-  const stemGeo=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(stemPoints),18,.055,6,false);
-  const trunkGeo=new THREE.CylinderGeometry(.22,.39,1,12,8),ringGeo=new THREE.TorusGeometry(.30,.035,6,16),heartGeo=new THREE.SphereGeometry(.38,12,9);
-  const trunks=new THREE.InstancedMesh(trunkGeo,bark,32),rings=new THREE.InstancedMesh(ringGeo,barkLight,32*9);
-  const stems=new THREE.InstancedMesh(stemGeo,barkLight,32*11),leaves=new THREE.InstancedMesh(leafletGeo,leafMat,32*11),hearts=new THREE.InstancedMesh(heartGeo,new THREE.MeshStandardMaterial({color:'#39753a',roughness:.9}),32);
-  const dummy=new THREE.Object3D();let ri=0,fi=0;
-  for(let i=0;i<32;i++){
-   const s=pointAt(i/32*length),side=i%2?1:-1,dist=ROAD/2+28+(i%4)*7,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,palmYaw=(i*2.17)%6.28,h=7.2+(i%5)*.55,crownY=-.16+h-.1;
-   dummy.position.set(x,-.16+h/2,z);dummy.rotation.set(0,palmYaw,0);dummy.scale.set(1,h,1);dummy.updateMatrix();trunks.setMatrixAt(i,dummy.matrix);
-   for(let ring=0;ring<9;ring++){
-    dummy.position.set(x,-.16+.65+ring*.72,z);dummy.rotation.set(Math.PI/2,0,0);const sc=1-ring*.025;dummy.scale.set(sc,sc,sc);dummy.updateMatrix();rings.setMatrixAt(ri++,dummy.matrix);
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setAttribute('color',new THREE.Float32BufferAttribute(colors,3));g.setIndex(inds);g.computeVertexNormals();
+  const wall=new THREE.Mesh(g,rockMaterial);wall.castShadow=true;wall.receiveShadow=true;scene.add(wall);
+  const rv=[],rc=[],ri=[],ridgeRows=150,ridgeLevels=7;
+  for(let i=0;i<=ridgeRows;i++){
+   const u=i/ridgeRows,s=pointAt(u*length);
+   for(let j=0;j<=ridgeLevels;j++){
+    const v=j/ridgeLevels,dist=ROAD/2+12+v*(22+7*Math.sin(u*19+sideSign));
+    const crest=s.p.y+24+7*Math.sin(u*Math.PI*10+sideSign*.7)+3*Math.sin(u*Math.PI*27);
+    const y=mix(s.p.y+1.5,crest,v)+Math.sin(u*133+j*1.8)*.7;
+    rv.push(s.p.x+s.side.x*dist*sideSign,y,s.p.z+s.side.z*dist*sideSign);
+    const shade=.56+.18*Math.sin(u*53+j*1.1);rc.push(shade,shade*1.01,shade*.96);
    }
-   for(let f=0;f<11;f++){
-    const angle=f*Math.PI*2/11+(i%3)*.17;dummy.position.set(x,crownY,z);dummy.rotation.set(.08,palmYaw+angle,0);dummy.scale.set(1,1,1);dummy.updateMatrix();
-    stems.setMatrixAt(fi,dummy.matrix);leaves.setMatrixAt(fi,dummy.matrix);leaves.setColorAt(fi,new THREE.Color(greens[(i+f)%greens.length]));fi++;
+  }
+  for(let i=0;i<ridgeRows;i++)for(let j=0;j<ridgeLevels;j++){const a=i*(ridgeLevels+1)+j,b=a+1,e=(i+1)*(ridgeLevels+1)+j,d=e+1;if(sideSign===1)ri.push(a,e,b,b,e,d);else ri.push(a,b,e,b,d,e)}
+  const rg=new THREE.BufferGeometry();rg.setAttribute('position',new THREE.Float32BufferAttribute(rv,3));rg.setAttribute('color',new THREE.Float32BufferAttribute(rc,3));rg.setIndex(ri);rg.computeVertexNormals();
+  const ridge=new THREE.Mesh(rg,rockMaterial);ridge.castShadow=true;ridge.receiveShadow=true;scene.add(ridge);
+ }
+}}else if(prefs.track==='desert'){
+  // DESERT RING: dense date palms with thick trunks and broad feathered crowns.
+  const bark=mat('#80502d',.98,0),barkLight=mat('#b18451',.96,0);
+  const frondMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.94,side:THREE.DoubleSide});
+  const frondPos=[],frondIdx=[],segments=22;
+  for(let k=0;k<segments;k++){
+   const t=k/(segments-1),x=t*5.25,y=.12-1.22*t*t,nextT=(k+1)/(segments-1),nx=nextT*5.25,ny=.12-1.22*nextT*nextT,width=.24+.18*Math.sin(t*Math.PI);
+   let n=frondPos.length/3;frondPos.push(x,y,0,nx,ny,0,x+.48,y-.32,width);frondIdx.push(n,n+1,n+2);
+   n=frondPos.length/3;frondPos.push(x,y,0,x+.48,y-.32,-width,nx,ny,0);frondIdx.push(n,n+1,n+2);
+  }
+  const frondGeo=new THREE.BufferGeometry();frondGeo.setAttribute('position',new THREE.Float32BufferAttribute(frondPos,3));frondGeo.setIndex(frondIdx);frondGeo.computeVertexNormals();
+  const trunkGeo=new THREE.CylinderGeometry(.28,.46,1,14,10),ringGeo=new THREE.TorusGeometry(.34,.045,7,18),stemGeo=new THREE.CylinderGeometry(.035,.055,5.2,7),heartGeo=new THREE.SphereGeometry(.48,14,10);
+  const palmCount=46,frondsPerPalm=13;
+  const trunks=new THREE.InstancedMesh(trunkGeo,bark,palmCount),rings=new THREE.InstancedMesh(ringGeo,barkLight,palmCount*10);
+  const stems=new THREE.InstancedMesh(stemGeo,barkLight,palmCount*frondsPerPalm),leaves=new THREE.InstancedMesh(frondGeo,frondMat,palmCount*frondsPerPalm),hearts=new THREE.InstancedMesh(heartGeo,mat('#3d7b38',.96,0),palmCount);
+  const dummy=new THREE.Object3D();let ringIndex=0,frondIndex=0;
+  const greens=['#285c2e','#36753a','#4d8840','#68964b','#397b35'];
+  for(let i=0;i<palmCount;i++){
+   const s=pointAt((i+.25)/palmCount*length),side=i%2?1:-1,dist=ROAD/2+27+(i%5)*8.5;
+   const x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,yaw=(i*2.399)%6.28,h=8.4+(i%6)*.62,crownY=-.16+h;
+   dummy.position.set(x,-.16+h/2,z);dummy.rotation.set(0,yaw,0);dummy.scale.set(1,h,1);dummy.updateMatrix();trunks.setMatrixAt(i,dummy.matrix);
+   for(let ring=0;ring<10;ring++){dummy.position.set(x,-.16+.55+ring*.78,z);dummy.rotation.set(Math.PI/2,0,0);const sc=1-ring*.018;dummy.scale.set(sc,sc,sc);dummy.updateMatrix();rings.setMatrixAt(ringIndex++,dummy.matrix)}
+   for(let fr=0;fr<frondsPerPalm;fr++){
+    const angle=fr*Math.PI*2/frondsPerPalm+(i%4)*.13;dummy.position.set(x,crownY,z);dummy.rotation.set(-.08,yaw+angle,0);dummy.scale.set(1.08,1.08,1.08);dummy.updateMatrix();
+    stems.setMatrixAt(frondIndex,dummy.matrix);leaves.setMatrixAt(frondIndex,dummy.matrix);leaves.setColorAt(frondIndex,new THREE.Color(greens[(i+fr)%greens.length]));frondIndex++;
    }
    dummy.position.set(x,crownY+.12,z);dummy.rotation.set(0,0,0);dummy.scale.set(1,1,1);dummy.updateMatrix();hearts.setMatrixAt(i,dummy.matrix);
   }
   for(const inst of [trunks,rings,stems,leaves,hearts]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=true;inst.receiveShadow=true;scene.add(inst)}
   if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;
-  // Keep the sandy floor clear around the racing surface.
+  // No loose floating rocks or sand props near the racing surface.
 }else{
  // Coastal cliffs, palms and a visible blue ocean horizon.
  for(let i=0;i<36;i++){const s=pointAt(i/36*length),side=i%2?1:-1,dist=ROAD/2+20+(i%4)*12,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
@@ -170,7 +181,7 @@ if(prefs.track==='coast'){
  }
 }
 let v=[],idx=[],uv=[];const seg=900;
- for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,s.p.y+.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+2,n+1,n+1,n+2,n+3)}}
+ for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,s.p.y+.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+1,n+2,n+1,n+3,n+2)}}
  let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
  const roadTex=makeRoadTexture();roadTex.repeat.set(1,1);
  let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,roughness:.98}));road.receiveShadow=true;scene.add(road);
@@ -180,7 +191,7 @@ for(const side of [-1,1]){
  const edgeLine=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(edgePts),edgePts.length*2,.105,8,false),mat('#fff4d7',.55,.12));scene.add(edgeLine);
  const curbGeo=new THREE.BoxGeometry(.42,.09,1.15),curbMats=[mat('#f5eee1',.8,0),mat('#d64a3f',.8,0)],curbMeshes=curbMats.map(m=>new THREE.InstancedMesh(curbGeo,m,Math.ceil(seg/4)));curbMeshes.forEach(m=>{m.castShadow=false;m.receiveShadow=true;scene.add(m)});const curbDummy=new THREE.Object3D();let curbCounts=[0,0];for(let i=0;i<seg;i+=4){const s=pointAt(i/seg*length),x=s.p.x+s.side.x*(ROAD/2+.16)*side,z=s.p.z+s.side.z*(ROAD/2+.16)*side;curbDummy.position.set(x,s.p.y+.09,z);curbDummy.rotation.set(-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z)),Math.atan2(s.tan.x,s.tan.z),0);curbDummy.updateMatrix();const mi=(i/4)%2;curbMeshes[mi].setMatrixAt(curbCounts[mi]++,curbDummy.matrix)}curbMeshes.forEach((m,i)=>{m.count=curbCounts[i];m.instanceMatrix.needsUpdate=true})
 }
-for(let side of [-1,1]){let pts=[],rail=[];for(let i=0;i<=seg;i+=3){let s=pointAt(i/seg*length);pts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+.6)*side,s.p.y+.14,s.p.z+s.side.z*(ROAD/2+.6)*side));rail.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+1.35)*side,s.p.y+.72,s.p.z+s.side.z*(ROAD/2+1.35)*side))}scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),pts.length*2,.22,6,false),mat('#eee8d8')));scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rail),rail.length*2,.12,6,false),mat('#aeb8bd',.45,.65)))}
+for(let side of [-1,1]){let pts=[],rail=[];for(let i=0;i<=seg;i+=3){let s=pointAt(i/seg*length);pts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+.6)*side,s.p.y+.14,s.p.z+s.side.z*(ROAD/2+.6)*side));rail.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+1.35)*side,s.p.y+.72,s.p.z+s.side.z*(ROAD/2+1.35)*side))}scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),pts.length*2,.16,6,false),mat(prefs.track==='forest'?'#575d5d':'#eee8d8',.94,.02)));scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rail),rail.length*2,.105,6,false),mat(prefs.track==='forest'?'#343b3d':'#687477',.92,.06)))}
 const dashCount=110,dashMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(.16,.035,2.2),mat('#d9d4c7',.82),dashCount),dashDummy=new THREE.Object3D();for(let i=0;i<dashCount;i++){const s=pointAt(i/110*length);dashDummy.position.set(s.p.x,s.p.y+.08,s.p.z);dashDummy.rotation.set(-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z)),Math.atan2(s.tan.x,s.tan.z),0);dashDummy.updateMatrix();dashMesh.setMatrixAt(i,dashDummy.matrix)}dashMesh.instanceMatrix.needsUpdate=true;scene.add(dashMesh);
 let start=pointAt(0),line=new THREE.Mesh(new THREE.BoxGeometry(ROAD,.04,1),mat('#fff'));line.position.set(start.p.x,start.p.y+.06,start.p.z);line.rotation.y=Math.atan2(start.tan.x,start.tan.z);line.rotation.x=-Math.atan2(start.tan.y,Math.hypot(start.tan.x,start.tan.z));scene.add(line);
 // Biome-specific vegetation is created above; no generic trees are placed in the desert.
@@ -192,103 +203,41 @@ function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=n
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
 function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);renderer.render(scene,camera)}
 function update(dt){
-  elapsed+=dt;
-  // Read steering directly from the live input state: no lingering steering
-  // after a finger is released.
-  // Steering is derived only from currently held controls. Never retain a
-  // previous steering value after a touch or key is released.
-  const steerInput=(held.left===held.right)?0:(held.left?1:-1);
-  steer=steerInput;
-  // Gas and reverse are separate commands. Reverse first brakes to zero,
-  // then engages a controlled reverse gear.
-  const accel=9.5+prefs.engine*1.15,maxV=42+prefs.engine*3.8,reverseMax=13;
-  if(held.gas){
-    if(speed<0)speed=Math.min(0,speed+22*dt);
-    else speed=Math.min(maxV,speed+accel*dt);
-  }else if(held.reverse){
-    if(speed>0)speed=Math.max(0,speed-24*dt);
-    else speed=Math.max(-reverseMax,speed-7.5*dt);
-  }else{
-    if(speed>0)speed=Math.max(0,speed-1.9*dt);
-    else speed=Math.min(0,speed+2.8*dt);
+ elapsed+=dt;
+ const steerInput=(held.left===held.right)?0:(held.left?1:-1);
+ const accel=9.5+prefs.engine*1.15,maxV=42+prefs.engine*3.8,reverseMax=13;
+ const currentSample=pointAt(progress);
+ if(held.gas){if(speed<0)speed=Math.min(0,speed+22*dt);else speed=Math.min(maxV,speed+accel*dt)}
+ else if(held.reverse){if(speed>0)speed=Math.max(0,speed-24*dt);else speed=Math.max(-reverseMax,speed-7.5*dt)}
+ else{if(speed>0)speed=Math.max(0,speed-1.9*dt);else speed=Math.min(0,speed+2.8*dt)}
+ // Gravity acts along the 3D track tangent: climbing costs power, descending adds speed.
+ if(prefs.track==='forest')speed=clamp(speed-9.81*currentSample.tan.y*dt,-reverseMax,maxV+15);
+ progress+=speed*dt;
+ const sample=pointAt(progress),lateralRate=2.25+Math.min(Math.abs(speed),48)*.075,offLimit=ROAD/2-1.35;
+ offset+=steerInput*lateralRate*dt;boundaryHit=Math.max(0,boundaryHit-dt);
+ if(Math.abs(offset)>offLimit){offset=clamp(offset,-offLimit,offLimit);if(boundaryHit<=0){speed*=.72;boundaryHit=.38;collisionFlash=.5}}
+ player.position.set(sample.p.x+sample.side.x*offset,sample.p.y+.05,sample.p.z+sample.side.z*offset);
+ const baseHeading=Math.atan2(sample.tan.x,sample.tan.z);heading=baseHeading-steerInput*.105;
+ player.rotation.set(-Math.atan2(sample.tan.y,Math.hypot(sample.tan.x,sample.tan.z)),heading,0);
+ $('hint').textContent=boundaryHit>0?'УДАР О БОРТ · СКОРОСТЬ СБРОШЕНА':collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
+ cameraUpdate(dt);collisionFlash=Math.max(0,collisionFlash-dt);
+ for(const a of ai){
+  const delta=((progress-a.d+length*1.5)%length);
+  if(prefs.track==='forest')a.v=clamp(a.v-9.81*pointAt(a.d).tan.y*dt,22,62);
+  let target=a.v;if(delta>0&&delta<18)target*=.94;a.d+=target*dt;place(a.car,a.d,a.side);
+  const dx=player.position.x-a.car.position.x,dz=player.position.z-a.car.position.z,contactRadius=3.15;
+  if(dx*dx+dz*dz<contactRadius*contactRadius&&a.hit<=0){
+   const dist=Math.max(.001,Math.hypot(dx,dz)),nx=dx/dist,nz=dz/dist,overlap=contactRadius-dist;
+   player.position.x+=nx*overlap*.62;player.position.z+=nz*overlap*.62;
+   offset=clamp(offset+(nx*sample.side.x+nz*sample.side.z)*overlap*.62,-offLimit,offLimit);
+   a.car.position.x-=nx*overlap*.38;a.car.position.z-=nz*overlap*.38;
+   speed=Math.max(speed*.88,speed-3.2);a.hit=.38;collisionFlash=.45;a.side=clamp(a.side+(dx>=0?-.32:.32),-3.8,3.8);
   }
-  // Steering remains effective at low speed; reverse steering is naturally
-  // mirrored, and grip upgrades add control without making the car twitchy.
-  const travelDirection=speed<-.15?-1:1;
-  const turnRate=.38+Math.min(Math.abs(speed),50)*.012;
-  if(steerInput!==0)heading+=steerInput*dt*turnRate*travelDirection*(1+prefs.grip*.045);
-  const fx=Math.sin(heading),fz=Math.cos(heading);
-  player.position.x+=fx*speed*dt;
-  player.position.z+=fz*speed*dt;
-  player.rotation.y=heading;
-  let bestD=progress,bestDist=Infinity,bestSample=null;
-  // Track the nearest point around the current progress. If the car was displaced,
-  // reacquire the route globally instead of letting it drive away forever.
-  for(let k=-56;k<=56;k++){
-    const d=progress+k*.65,sample=pointAt(d);
-    const dx=player.position.x-sample.p.x,dz=player.position.z-sample.p.z,dist=dx*dx+dz*dz;
-    if(dist<bestDist){bestDist=dist;bestD=d;bestSample=sample}
-  }
-  if(bestDist>ROAD*ROAD*2.25){
-    for(let i=0;i<480;i++){
-      const d=i/480*length,sample=pointAt(d);
-      const dx=player.position.x-sample.p.x,dz=player.position.z-sample.p.z,dist=dx*dx+dz*dz;
-      if(dist<bestDist){bestDist=dist;bestD=d;bestSample=sample}
-    }
-  }
-  progress=bestD;
-  if(prefs.track==='forest'){
-    const along=fx*bestSample.tan.x+fz*bestSample.tan.z;
-    speed=clamp(speed-9.8*bestSample.tan.y*along*dt,-13,maxV+12);
-    player.position.y=bestSample.p.y+.05;
-    player.rotation.x=-Math.atan2(bestSample.tan.y,Math.hypot(bestSample.tan.x,bestSample.tan.z));
-  }else{player.position.y=.05;player.rotation.x=0}
-  const dx=player.position.x-bestSample.p.x,dz=player.position.z-bestSample.p.z;
-  const signedOffset=dx*bestSample.side.x+dz*bestSample.side.z;
-  const offLimit=ROAD/2-1.25;
-  boundaryHit=Math.max(0,boundaryHit-dt);
-  if(Math.abs(signedOffset)>offLimit){
-    // Invisible safety barrier: absorb the impact and keep the car on the asphalt.
-    const safeOffset=Math.sign(signedOffset)*offLimit;
-    player.position.x=bestSample.p.x+bestSample.side.x*safeOffset;
-    player.position.z=bestSample.p.z+bestSample.side.z*safeOffset;
-    if(boundaryHit<=0){speed=Math.max(speed*.78,speed-7);boundaryHit=.42;collisionFlash=.55}
-    // A curb is a glancing impact, not a handbrake: keep momentum and gently
-    // turn the car back toward the road centre.
-    $('hint').textContent='УДАР О БОРТ · СКОРОСТЬ СБРОШЕНА';
-  }else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
-  cameraUpdate(dt);
-  collisionFlash=Math.max(0,collisionFlash-dt);
-  for(const a of ai){
-    const delta=((progress-a.d+length*1.5)%length);
-    if(prefs.track==='forest')a.v=clamp(a.v-9.8*pointAt(a.d).tan.y*dt,22,62);
-    let target=a.v;
-    if(delta>0&&delta<18)target*=.94;
-    a.d+=target*dt;
-    place(a.car,a.d,a.side);
-    const dx=player.position.x-a.car.position.x,dz=player.position.z-a.car.position.z;
-    const contactRadius=3.15;
-    if(dx*dx+dz*dz<contactRadius*contactRadius&&a.hit<=0){
-      const dist=Math.max(.001,Math.hypot(dx,dz)),nx=dx/dist,nz=dz/dist;
-      const overlap=contactRadius-dist;
-      player.position.x+=nx*overlap*.62;player.position.z+=nz*overlap*.62;
-      a.car.position.x-=nx*overlap*.38;a.car.position.z-=nz*overlap*.38;
-      speed=Math.max(speed*.88,speed-3.2);a.hit=.38;collisionFlash=.45;
-      a.side=clamp(a.side+(dx>=0?-.32:.32),-3.8,3.8);
-    }
-    a.hit=Math.max(0,a.hit-dt);
-  }
-  const laps=Math.floor(progress/length);
-  const placeNo=1+ai.filter(a=>{
-    let d=((a.d-progress+length*1.5)%length);
-    if(d>length/2)d-=length;
-    return d>0;
-  }).length;
-  $('lap').textContent=Math.min(3,laps+1)+'/3';
-  $('pos').textContent=placeNo+'/4';
-  $('speed').textContent=Math.round(speed*3.6);
-  $('time').textContent=fmt(elapsed);
-  if(laps>=3)finish();
+  a.hit=Math.max(0,a.hit-dt);
+ }
+ const laps=Math.floor(progress/length),placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;
+ $('lap').textContent=Math.max(1,Math.min(3,laps+1))+'/3';$('pos').textContent=placeNo+'/4';
+ $('speed').textContent=Math.round(Math.abs(speed)*3.6);$('time').textContent=fmt(elapsed);if(laps>=3)finish();
 }
 function finish(){
  if(mode!=='race')return;
