@@ -298,7 +298,7 @@ function buildWorld(){if(raf)cancelAnimationFrame(raf);if(weatherCanvas){weather
  const sky=new THREE.Mesh(skyGeo,skyMat);sky.renderOrder=-10;scene.add(sky);
  const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);const mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.5:2));renderer.setSize(innerWidth,innerHeight);
+const basePixelRatio=Math.min(devicePixelRatio,mobileQuality?1.0:1.35);let adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
@@ -333,7 +333,7 @@ $('stage').replaceChildren(renderer.domElement);
  scene.environment=pmremTarget.texture;scene.environmentIntensity=1.08;
 const hemi=new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':prefs.track==='forest'?'#39483c':'#54483a',.82);scene.add(hemi);
 const sun=new THREE.DirectionalLight('#fff0d9',prefs.track==='desert'?3.8:3.35);sun.position.set(-65,105,42);sun.castShadow=true;
-sun.shadow.mapSize.set(mobileQuality?1536:4096,mobileQuality?1536:4096);
+sun.shadow.mapSize.set(mobileQuality?1024:2048,mobileQuality?1024:2048);
 sun.shadow.camera.left=-92;sun.shadow.camera.right=92;sun.shadow.camera.top=92;sun.shadow.camera.bottom=-92;
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00012;sun.shadow.normalBias=.025;sun.shadow.radius=mobileQuality?2:3;
 scene.add(sun);
@@ -343,7 +343,7 @@ const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8'
  const renderTarget=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false});
  composer=new EffectComposer(renderer,renderTarget);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(innerWidth,innerHeight);
  composer.addPass(new RenderPass(scene,camera));
- ssaoPass=new SSAOPass(scene,camera,innerWidth,innerHeight);ssaoPass.kernelRadius=mobileQuality?5:8;ssaoPass.minDistance=.004;ssaoPass.maxDistance=.12;composer.addPass(ssaoPass);
+ ssaoPass=new SSAOPass(scene,camera,innerWidth,innerHeight);ssaoPass.kernelRadius=mobileQuality?3:6;ssaoPass.minDistance=.004;ssaoPass.maxDistance=.12;ssaoPass.enabled=!mobileQuality;composer.addPass(ssaoPass);
  ssaoPass.output=SSAOPass.OUTPUT.Default;
  bloomPass=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),mobileQuality?.2:.3,.32,.88);composer.addPass(bloomPass);
  composer.addPass(new OutputPass());
@@ -529,7 +529,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
 player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:12+i*9,side:[-2.9,2.8,.1][i],v:[142.24,165,185,220,255][Math.max(0,Math.min(4,save.league||0))]*.93/3.6-(2-i)*.7,currentSpeed:0,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,player.position.y+5.3,player.position.z-fz*11),lookTarget=new THREE.Vector3(player.position.x+fx*8,player.position.y+1.1,player.position.z+fz*8);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);if(composer)composer.render();else renderer.render(scene,camera)}
+let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/90;if(avg>target*1.12&&adaptiveScale>.62)adaptiveScale=Math.max(.62,adaptiveScale-.10);else if(avg<target*.82&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.05);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);if(composer)composer.render();else renderer.render(scene,camera)}
 function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
 function updateAtmosphereVisuals(dt){
  if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
@@ -771,7 +771,7 @@ $('paint').addEventListener('input',()=>{document.querySelectorAll('[data-paint]
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
 function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150;if(level>=8){$('mission').textContent='Максимальный уровень этой детали уже установлен.';return}if(save.credits<cost){$('mission').textContent='Не хватает '+(cost-save.credits)+' токенов. Займи место выше и заработай больше.';return}save.credits-=cost;prefs[key]=level+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'!';updateUpgradeLabels()}
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
-addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer)composer.setSize(innerWidth,innerHeight);resizeWeatherCanvas()}});
+addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer){composer.setPixelRatio(basePixelRatio*adaptiveScale);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}resizeWeatherCanvas()}});
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
 updateMenuStats();updateUpgradeLabels();try{buildWorld()}catch(e){console.error(e);$('status').textContent='Ошибка запуска: '+e.message}
 </script></body></html>
