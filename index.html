@@ -46,6 +46,39 @@ coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
 desert:{bg:'#e5c995',fog:'#e5c995',ground:'#d9b875',points:[[-5,-88],[55,-78],[92,-25],[70,25],[88,72],[20,90],[-45,70],[-90,25],[-68,-25],[-48,-70]],trees:'#92784c'}};
 const mat=(c,r=.75,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
+function makeSurfaceMaps(kind,repeat=8){
+ // Procedural tileable micro-normal and roughness maps; no mesh transforms or world coordinates are changed.
+ const size=512,normalData=new Uint8Array(size*size*3),roughData=new Uint8Array(size*size*3);
+ const params={
+  asphalt:[.11,.82,1.7],soil:[.16,.94,1.1],sand:[.24,.98,2.6],
+  rock:[.30,.96,3.4],beach:[.12,.98,1.9],vegetation:[.20,.99,2.2]
+ }[kind]||[.14,.9,1.4];
+ const [strength,roughBase,scale]=params;
+ const height=(x,y)=>{
+  const u=x/size*Math.PI*2,v=y/size*Math.PI*2;
+  const broad=Math.sin(u*3+Math.sin(v*2)*.7)*Math.cos(v*4-u*1.4);
+  const fine=Math.sin(u*17+v*11)*.34+Math.sin(u*37-v*29)*.18+Math.cos(u*71+v*53)*.09;
+  const grain=Math.sin(u*137+Math.cos(v*91))*Math.cos(v*119+Math.sin(u*83))*.045;
+  const striation=kind==='asphalt'?Math.sin(v*31+Math.sin(u*5)*.8)*.24:
+   kind==='sand'?Math.sin(u*7+v*2.2+Math.sin(v*5))* .32:
+   kind==='rock'?Math.sin(u*8+v*11)*.28:0;
+  return broad*.22+fine*.12+grain*.06+striation*.22;
+ };
+ const wrap=(n)=>((n%size)+size)%size;
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  const h=height(x,y),dx=(height(wrap(x+1),y)-height(wrap(x-1),y))*strength*scale;
+  const dy=(height(x,wrap(y+1))-height(x,wrap(y-1)))*strength*scale;
+  let nx=-dx,ny=-dy,nz=1,len=Math.hypot(nx,ny,nz);nx/=len;ny/=len;nz/=len;
+  const i=(y*size+x)*3;normalData[i]=(nx*.5+.5)*255;normalData[i+1]=(ny*.5+.5)*255;normalData[i+2]=(nz*.5+.5)*255;
+  const variation=(Math.sin(x*.091+Math.sin(y*.037))*Math.cos(y*.073+x*.019))*.055;
+  const rough=clamp(roughBase+variation+(h*.035),.58,1);
+  const q=Math.round(rough*255);roughData[i]=roughData[i+1]=roughData[i+2]=q;
+ }
+ const normal=new THREE.DataTexture(normalData,size,size,THREE.RGBFormat),roughness=new THREE.DataTexture(roughData,size,size,THREE.RGBFormat);
+ for(const t of [normal,roughness]){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.repeat.set(repeat,repeat);t.magFilter=THREE.LinearFilter;t.minFilter=THREE.LinearMipmapLinearFilter;t.generateMipmaps=true;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());t.needsUpdate=true}
+ normal.colorSpace=THREE.NoColorSpace;roughness.colorSpace=THREE.NoColorSpace;
+ return {normalMap:normal,roughnessMap:roughness};
+}
 function makeGroundTexture(kind){
  const canvas=document.createElement('canvas');canvas.width=canvas.height=2048;const ctx=canvas.getContext('2d');ctx.scale(4,4);const base=kind==='desert'?'#d9b875':kind==='forest'?'#555b5d':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
  let seed=kind==='desert'?771:kind==='forest'?381:519;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
@@ -343,16 +376,16 @@ if(prefs.track==='coast'){
   }
   p.needsUpdate=true;terrainGeo.computeVertexNormals();
  }
- const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:prefs.track==='desert'?.32:.28,roughness:.96}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
+ const groundMaps=makeSurfaceMaps(prefs.track==='desert'?'sand':prefs.track==='forest'?'soil':'vegetation',prefs.track==='desert'?15:20);const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:prefs.track==='desert'?.24:.19,normalMap:groundMaps.normalMap,roughnessMap:groundMaps.roughnessMap,roughness:.97}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
  if(prefs.track==='coast'){
   const shoreGeo=new THREE.PlaneGeometry(1000,1000,190,190),sp=shoreGeo.attributes.position;
   for(let i=0;i<sp.count;i++){const x=sp.getX(i),z=-sp.getY(i),r=Math.hypot(x,z),a=Math.atan2(z,x),shoreR=280+17*Math.sin(a*3+.4)+11*Math.sin(a*7-1.1),inner=shoreR-38,t=clamp((r-inner)/38,0,1),beach=t*t*(3-2*t),outer=clamp((r-shoreR)/25,0,1),drop=outer*outer*(3-2*outer);sp.setZ(i,mix(-.27,-.095,beach)-.34*drop)}
   sp.needsUpdate=true;shoreGeo.computeVertexNormals();
-  const beach=new THREE.Mesh(shoreGeo,new THREE.MeshStandardMaterial({color:'#d7c397',roughness:.98,side:THREE.DoubleSide}));beach.rotation.x=-Math.PI/2;beach.position.y=0;beach.receiveShadow=true;scene.add(beach);
+  const beach=new THREE.Mesh(shoreGeo,new THREE.MeshStandardMaterial({color:'#d7c397',...makeSurfaceMaps('beach',18),roughness:.98,side:THREE.DoubleSide}));beach.rotation.x=-Math.PI/2;beach.position.y=0;beach.receiveShadow=true;scene.add(beach);
  }
  if(prefs.track==='forest'){
  // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
- const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,metalness:0,vertexColors:true,side:THREE.DoubleSide});
+ const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',...makeSurfaceMaps('rock',12),roughness:.97,metalness:0,vertexColors:true,side:THREE.DoubleSide});
  for(const sideSign of [-1,1]){
   const rows=260,levels=18,verts=[],colors=[],inds=[];
   for(let i=0;i<=rows;i++){
@@ -388,7 +421,7 @@ if(prefs.track==='coast'){
  // Layered alpine peaks behind the roadside rock walls: faceted silhouettes,
  // with every base seated on the height-mapped terrain rather than hovering.
  const peakGeo=makeMountainGeometry();
- const peakMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,vertexColors:true,flatShading:true});
+ const peakMat=new THREE.MeshStandardMaterial({color:'#ffffff',...makeSurfaceMaps('rock',5),roughness:1,vertexColors:true,flatShading:true});
  const peakCount=52,peakMesh=new THREE.InstancedMesh(peakGeo,peakMat,peakCount),peakDummy=new THREE.Object3D();
  for(let i=0;i<peakCount;i++){
   const s=pointAt((i/peakCount)*length),side=i%2?1:-1,dist=48+(i%6)*10.5;
@@ -450,7 +483,7 @@ if(prefs.track==='coast'){
   for(const inst of [trunks,rings,stems,leaves,hearts]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=true;inst.receiveShadow=true;scene.add(inst)}
   if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;
   // Sculpted wind-shaped dune field beyond the palm line; track and vehicle transforms are untouched.
-  const duneGeo=makeDuneGeometry(),duneMat=new THREE.MeshStandardMaterial({color:'#ffffff',vertexColors:true,roughness:1}),duneCount=38;
+  const duneGeo=makeDuneGeometry(),duneMat=new THREE.MeshStandardMaterial({color:'#ffffff',...makeSurfaceMaps('sand',7),vertexColors:true,roughness:1}),duneCount=38;
   const dunes=new THREE.InstancedMesh(duneGeo,duneMat,duneCount),duneDummy=new THREE.Object3D();
   for(let i=0;i<duneCount;i++){
    const s=pointAt((i/duneCount)*length),side=i%2?1:-1,dist=76+(i%6)*10.5,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
@@ -474,7 +507,7 @@ let v=[],idx=[],uv=[];const seg=900;
  for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,s.p.y+.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+1,n+2,n+1,n+3,n+2)}}
  let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
  const roadTex=makeRoadTexture();roadTex.repeat.set(1,1);
- let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,bumpMap:roadTex,bumpScale:.052,roughness:.91}));road.receiveShadow=true;scene.add(road);
+ let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,bumpMap:roadTex,bumpScale:.035,...makeSurfaceMaps('asphalt',1),roughness:.94}));road.receiveShadow=true;scene.add(road);
  /* High-contrast road edge markings: continuous bright lines plus raised rumble strips */
 for(const side of [-1,1]){
  const edgePts=[];for(let i=0;i<=seg;i+=2){const s=pointAt(i/seg*length);edgePts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2-.22)*side,s.p.y+.085,s.p.z+s.side.z*(ROAD/2-.22)*side))}
