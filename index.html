@@ -15,7 +15,7 @@ const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v))
 const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);$('paint').value=prefs.paint;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
-let scene,camera,renderer,clock,curve,length=0,player,paintMat,ai=[],mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0;const held={left:false,right:false,gas:false,brake:false};const ROAD=12;
+let scene,camera,renderer,clock,curve,length=0,player,paintMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0;const held={left:false,right:false,gas:false,brake:false};const ROAD=12;
 const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#a9b6bb',fog:'#a9b6bb',ground:'#46654b',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
@@ -36,7 +36,7 @@ for(let x of [-.88,.88]){let mirror=new THREE.Mesh(new THREE.BoxGeometry(.28,.12
 if(isPlayer){box(.1,.025,1.65,mat('#f4f0e7'),0,1.36,0);box(1.9,.08,.12,pm,0,1.47,-1.82);box(.12,.26,.12,black,-.78,1.32,-1.82);box(.12,.26,.12,black,.78,1.32,-1.82)}
 root.userData.body=body;return root}
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set($('paint').value)}
-function buildWorld(){scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,150,370);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;$('stage').replaceChildren(renderer.domElement);
+function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,150,370);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;$('stage').replaceChildren(renderer.domElement);
 scene.add(new THREE.HemisphereLight('#eaf5ff','#4c5940',2));let sun=new THREE.DirectionalLight('#fff0d5',2.5);sun.position.set(-80,120,50);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
 curve=new THREE.CatmullRomCurve3(r.points.map(p=>new THREE.Vector3(p[0]*2.3,0,p[1]*2.3)),true,'catmullrom',.3);length=curve.getLength();
 let ground=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),mat(r.ground));ground.rotation.x=-Math.PI/2;ground.position.y=-.2;ground.receiveShadow=true;scene.add(ground);
@@ -51,10 +51,10 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
 player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:-12-i*9,side:[-2.9,2.8,.1][i],v:47+i*2,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,5.3,player.position.z-fz*11);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x+fx*8,1.1,player.position.z+fz*8)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);renderer.render(scene,camera)}
+function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);renderer.render(scene,camera)}
 function update(dt){
   elapsed+=dt;
-  const steerInput=(held.right?1:0)-(held.left?1:0);
+  const steerInput=(held.left?1:0)-(held.right?1:0);
   steer=mix(steer,steerInput,dt*8);
   const accel=10+prefs.engine*2.5,maxV=58+prefs.engine*7;
   if(held.gas)speed=Math.min(maxV,speed+accel*dt);else speed=Math.max(0,speed-7*dt);
@@ -110,7 +110,7 @@ hold('left','left');hold('right','right');hold('gas','gas');hold('brake','brake'
 addEventListener('keydown',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA')held.left=true;if(e.code==='ArrowRight'||e.code==='KeyD')held.right=true;if(e.code==='ArrowUp'||e.code==='KeyW')held.gas=true;if(e.code==='ArrowDown'||e.code==='KeyS')held.brake=true;if(e.code==='Escape'&&mode==='race'){paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'}});addEventListener('keyup',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA')held.left=false;if(e.code==='ArrowRight'||e.code==='KeyD')held.right=false;if(e.code==='ArrowUp'||e.code==='KeyW')held.gas=false;if(e.code==='ArrowDown'||e.code==='KeyS')held.brake=false});
 $('pause').onclick=()=>{paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};$('start').onclick=start;$('again').onclick=start;$('home').onclick=()=>{$('result').classList.add('hidden');$('menu').classList.remove('hidden');mode='menu';updateMenuStats()};
 function saveGarage(){prefs.paint=$('paint').value;localStorage.setItem('autosport-garage',JSON.stringify(prefs));if(player)applyGarage()}
-$('paint').addEventListener('input',saveGarage);document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{prefs.track=b.dataset.track;localStorage.setItem('autosport-garage',JSON.stringify(prefs));document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));location.reload()}));
+$('paint').addEventListener('input',saveGarage);document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{if(prefs.track===b.dataset.track)return;prefs.track=b.dataset.track;localStorage.setItem('autosport-garage',JSON.stringify(prefs));document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));buildWorld()}));
 $('engineUpgrade').onclick=()=>buyUpgrade('engine',500);$('gripUpgrade').onclick=()=>buyUpgrade('grip',400);
 function buyUpgrade(key,cost){if(save.credits<cost){$('mission').textContent='Нужно ещё '+(cost-save.credits)+' кредитов. Заработай их в гонке.';return}save.credits-=cost;prefs[key]=(prefs[key]||0)+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'. Теперь машина стала лучше!';updateUpgradeLabels()}
 function updateUpgradeLabels(){$('engineUpgrade').textContent='ДВИГАТЕЛЬ · '+(prefs.engine||0)+' ур. · 500 CR';$('gripUpgrade').textContent='ШИНЫ · '+(prefs.grip||0)+' ур. · 400 CR';}
