@@ -41,18 +41,19 @@ forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[5
 desert:{bg:'#e5c995',fog:'#e5c995',ground:'#d9b875',points:[[-5,-88],[55,-78],[92,-25],[70,25],[88,72],[20,90],[-45,70],[-90,25],[-68,-25],[-48,-70]],trees:'#92784c'}};
 const mat=(c,r=.75,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 function makeGroundTexture(kind){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=1024;const ctx=canvas.getContext('2d');ctx.scale(2,2);const base=kind==='desert'?'#d9b875':kind==='forest'?'#555b5d':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=2048;const ctx=canvas.getContext('2d');ctx.scale(4,4);const base=kind==='desert'?'#d9b875':kind==='forest'?'#555b5d':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
  let seed=kind==='desert'?771:kind==='forest'?381:519;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
  if(kind==='desert'){for(let i=0;i<62000;i++){const x=rnd()*512,y=rnd()*512,a=.035+rnd()*.16;ctx.fillStyle=rnd()>.52?'rgba(255,238,190,'+a+')':'rgba(116,78,35,'+(a*.72)+')';const s=.5+rnd()*1.7;ctx.fillRect(x,y,s,s)}for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*100;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.28,y-5-rnd()*8,x+len*.68,y+4+rnd()*7,x+len,y-1);ctx.strokeStyle=i%3?'rgba(255,238,190,.19)':'rgba(128,91,45,.13)';ctx.lineWidth=.7+rnd()*1.2;ctx.stroke()}}
  else{for(let i=0;i<54000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=kind==='forest'?(rnd()>.5?'rgba(175,190,111,'+a+')':'rgba(22,47,27,'+a+')'):(rnd()>.5?'rgba(220,205,135,'+a+')':'rgba(35,65,35,'+a+')');ctx.fillRect(x,y,1+rnd()*2,1+rnd()*2)}}
  const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(kind==='desert'?18:22,kind==='desert'?18:22);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex;
 }
 function makeRoadTexture(){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=1024;const ctx=canvas.getContext('2d');ctx.scale(2,2);ctx.fillStyle='#303438';ctx.fillRect(0,0,512,512);let seed=901;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- for(let i=0;i<85000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=rnd()>.5?'rgba(190,190,180,'+a+')':'rgba(0,0,0,'+(a*.8)+')';ctx.fillRect(x,y,.5+rnd()*1.5,.5+rnd()*1.5)}
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=2048;const ctx=canvas.getContext('2d');ctx.scale(4,4);ctx.fillStyle='#303438';ctx.fillRect(0,0,512,512);let seed=901;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<145000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=rnd()>.5?'rgba(190,190,180,'+a+')':'rgba(0,0,0,'+(a*.8)+')';ctx.fillRect(x,y,.5+rnd()*1.5,.5+rnd()*1.5)}
   // Fine longitudinal rubber wear and faint repaired-asphalt patches.
   for(const x of [112,145,356,390]){ctx.beginPath();ctx.moveTo(x,0);ctx.bezierCurveTo(x-8,130,x+7,330,x-3,512);ctx.strokeStyle='rgba(8,10,12,.12)';ctx.lineWidth=5+rnd()*7;ctx.stroke()}
-  for(let i=0;i<90;i++){const x=rnd()*512,y=rnd()*512,w=5+rnd()*28,h=2+rnd()*9;ctx.fillStyle='rgba(190,190,180,'+(.018+rnd()*.035)+')';ctx.fillRect(x,y,w,h)}
+  for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,w=5+rnd()*28,h=2+rnd()*9;ctx.fillStyle='rgba(190,190,180,'+(.018+rnd()*.035)+')';ctx.fillRect(x,y,w,h)}
+   for(let i=0;i<34;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*72;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+len*.35,y+2+rnd()*4);ctx.lineTo(x+len,y-2-rnd()*4);ctx.strokeStyle='rgba(8,10,12,'+(.035+rnd()*.055)+')';ctx.lineWidth=.5+rnd()*1.2;ctx.stroke()}
   for(let i=0;i<55;i++){const x=rnd()*512,y=rnd()*512;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+2+rnd()*8,y+3+rnd()*14);ctx.strokeStyle='rgba(5,7,9,.12)';ctx.lineWidth=.45+rnd()*.7;ctx.stroke()}
  const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(1,1);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex;
 }
@@ -83,9 +84,9 @@ function syncBotPosition(a){
  if(bestSample){a.d=bestD;const x=a.car.position.x-bestSample.p.x,z=a.car.position.z-bestSample.p.z;a.side=clamp(x*bestSample.side.x+z*bestSample.side.z,-4.2,4.2);place(a.car,a.d,a.side)}
 }
 function car(color,isPlayer=false){
- let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=new THREE.MeshPhysicalMaterial({color,roughness:.23,metalness:.58,clearcoat:.92,clearcoatRoughness:.14,reflectivity:.82});if(isPlayer)paintMat=pm;
+ let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=new THREE.MeshPhysicalMaterial({color,roughness:.19,metalness:.62,clearcoat:1,clearcoatRoughness:.09,reflectivity:.9,envMapIntensity:1.35});if(isPlayer)paintMat=pm;
  const black=mat('#101519',.52,.18),rubber=mat('#090b0c',.94),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.82),chrome=mat('#bac3c6',.22,.86);if(isPlayer)rimMat=rim;
- const glass=new THREE.MeshPhysicalMaterial({color:'#9bbbc8',metalness:.22,roughness:.12,transparent:true,opacity:.78,clearcoat:.95,clearcoatRoughness:.08,side:THREE.DoubleSide});
+ const glass=new THREE.MeshPhysicalMaterial({color:'#9bbbc8',metalness:.18,roughness:.085,transparent:true,opacity:.72,clearcoat:1,clearcoatRoughness:.045,side:THREE.DoubleSide,envMapIntensity:1.25});
  const lamp=new THREE.MeshStandardMaterial({color:'#fff1c9',emissive:'#ffe5a5',emissiveIntensity:.48,roughness:.22});
  function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;body.add(o);return o}
  box(2.12,.42,4.42,pm,0,.76,0);box(2.04,.12,3.55,black,0,.55,-.03);
@@ -95,10 +96,10 @@ function car(color,isPlayer=false){
  const cabin=new THREE.Mesh(cabinGeo,glass);cabin.castShadow=true;body.add(cabin);box(1.48,.12,1.42,pm,0,1.51,-.12);
  for(const side of [-1,1]){box(.035,.28,1.25,glass,side*.885,1.22,-.12);box(.075,.52,.10,black,side*.78,1.22,.53);box(.075,.52,.10,black,side*.78,1.22,-.78);box(.035,.035,.18,black,side*1.065,.78,-.22);box(.10,.13,.32,pm,side*1.12,1.16,.48);box(.07,.07,.12,black,side*1.12,1.19,.48);box(.12,.18,2.35,black,side*1.02,.49,0);box(.025,.18,1.05,black,side*1.071,.76,-.12);box(.045,.045,.18,chrome,side*1.09,.83,-.38)}
  // Instanced wheel assemblies keep detailed rims and arches cheap on mobile GPUs.
- const tireSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.425,.425,.30,24,1),rubber,4);
- const faceSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.285,.285,.035,20),rim,4);
+ const tireSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.425,.425,.30,36,1),rubber,4);
+ const faceSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.285,.285,.035,32),rim,4);
  const hubSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.105,.105,.045,12),chrome,4);
- const archSet=new THREE.InstancedMesh(new THREE.TorusGeometry(.48,.055,7,20,Math.PI),pm,4);
+ const archSet=new THREE.InstancedMesh(new THREE.TorusGeometry(.48,.055,9,32,Math.PI),pm,4);
  const lugSet=new THREE.InstancedMesh(new THREE.SphereGeometry(.027,7,5),black,20),wheelDummy=new THREE.Object3D();
  let wi=0,li=0;
  for(const z of [-1.42,1.42])for(const x of [-1.08,1.08]){
@@ -174,12 +175,12 @@ function car(color,isPlayer=false){
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.paint||$('paint').value);if(rimMat)rimMat.color.set(prefs.rim||$('rimPaint').value)}
 function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){if(scene.environment)scene.environment.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
  // Cinematic atmospheric sky gradient and distant sun: decorative scene layer only.
- const skyGeo=new THREE.SphereGeometry(690,32,20);
+ const skyGeo=new THREE.SphereGeometry(690,48,32);
  // Soft procedural cloud layers are rendered only on the sky sphere.
- const cloudCanvas=document.createElement('canvas');cloudCanvas.width=1024;cloudCanvas.height=512;
+ const cloudCanvas=document.createElement('canvas');cloudCanvas.width=2048;cloudCanvas.height=1024;
  const cloudCtx=cloudCanvas.getContext('2d');
  for(let i=0;i<115;i++){
-  const x=(i*83)%1024,y=95+((i*47)%245),w=34+(i%9)*17,h=5+(i%5)*3;
+  const x=(i*166)%2048,y=190+((i*94)%490),w=(34+(i%9)*17)*2,h=(5+(i%5)*3)*2;
   cloudCtx.save();cloudCtx.globalAlpha=.025+(i%6)*.009;cloudCtx.filter='blur('+(5+i%5)+'px)';
   const grad=cloudCtx.createLinearGradient(x-w,y,x+w,y);grad.addColorStop(0,'rgba(255,255,255,0)');grad.addColorStop(.5,'rgba(255,255,255,.9)');grad.addColorStop(1,'rgba(255,255,255,0)');
   cloudCtx.fillStyle=grad;cloudCtx.beginPath();cloudCtx.ellipse(x,y,w,h,(i%7-3)*.025,0,Math.PI*2);cloudCtx.fill();cloudCtx.restore();
@@ -189,28 +190,28 @@ function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dis
  const sky=new THREE.Mesh(skyGeo,skyMat);sky.renderOrder=-10;scene.add(sky);
  const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);const mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
-renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.35:1.7));renderer.setSize(innerWidth,innerHeight);
-renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.5:2));renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
  // Procedural image-based ambient reflections for paint, glass and metal.
- const envCanvas=document.createElement('canvas');envCanvas.width=1024;envCanvas.height=512;
- const envCtx=envCanvas.getContext('2d'),envGrad=envCtx.createLinearGradient(0,0,0,512);
- envGrad.addColorStop(0,'#263c55');envGrad.addColorStop(.38,'#8ea8b5');envGrad.addColorStop(.53,'#f2d7b2');envGrad.addColorStop(.67,'#4b5357');envGrad.addColorStop(1,'#111b23');
- envCtx.fillStyle=envGrad;envCtx.fillRect(0,0,1024,512);
+ const envCanvas=document.createElement('canvas');envCanvas.width=2048;envCanvas.height=1024;
+ const envCtx=envCanvas.getContext('2d'),envGrad=envCtx.createLinearGradient(0,0,0,1024);
+ envGrad.addColorStop(0,'#1d314b');envGrad.addColorStop(.28,'#718fa5');envGrad.addColorStop(.47,'#d7c9b2');envGrad.addColorStop(.53,'#f4dfbf');envGrad.addColorStop(.68,'#424b50');envGrad.addColorStop(1,'#101820');
+ envCtx.fillStyle=envGrad;envCtx.fillRect(0,0,2048,1024);
  envCtx.save();envCtx.filter='blur(16px)';envCtx.globalAlpha=.48;
- for(let i=0;i<34;i++){const x=i*31,w=12+(i%5)*9,h=24+(i*17)%100;envCtx.fillStyle=i%3?'#26343d':'#c1c6c3';envCtx.fillRect(x,260-h,w,h)}
+ for(let i=0;i<68;i++){const x=i*31,w=(12+(i%5)*9)*2,h=(24+(i*17)%100)*2;envCtx.fillStyle=i%3?'#26343d':'#c1c6c3';envCtx.fillRect(x,520-h,w,h)}
  envCtx.restore();
- for(let i=0;i<160;i++){const x=(i*67)%1024,y=210+(i*29)%110;envCtx.fillStyle='rgba(255,239,205,'+(0.025+(i%4)*.012)+')';envCtx.fillRect(x,y,2+(i%5)*2,1+(i%3))}
+ for(let i=0;i<320;i++){const x=(i*134)%2048,y=420+(i*58)%220;envCtx.fillStyle='rgba(255,239,205,'+(0.025+(i%4)*.012)+')';envCtx.fillRect(x,y,2+(i%5)*2,1+(i%3))}
  const envTexture=new THREE.CanvasTexture(envCanvas);envTexture.mapping=THREE.EquirectangularReflectionMapping;envTexture.colorSpace=THREE.SRGBColorSpace;
- scene.environment=envTexture;scene.environmentIntensity=.52;
-scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':'#54483a',1.72));
-const sun=new THREE.DirectionalLight('#fff0d9',3.1);sun.position.set(-65,105,42);sun.castShadow=true;
-sun.shadow.mapSize.set(mobileQuality?1024:2048,mobileQuality?1024:2048);
-sun.shadow.camera.left=-115;sun.shadow.camera.right=115;sun.shadow.camera.top=115;sun.shadow.camera.bottom=-115;
+ scene.environment=envTexture;scene.environmentIntensity=.78;
+scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':'#54483a',1.48));
+const sun=new THREE.DirectionalLight('#fff0d9',3.45);sun.position.set(-65,105,42);sun.castShadow=true;
+sun.shadow.mapSize.set(mobileQuality?1536:3072,mobileQuality?1536:3072);
+sun.shadow.camera.left=-92;sun.shadow.camera.right=92;sun.shadow.camera.top=92;sun.shadow.camera.bottom=-92;
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00018;sun.shadow.normalBias=.035;sun.shadow.radius=2;
 scene.add(sun);
-const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.72);fill.position.set(55,38,-70);scene.add(fill);
+const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.88);fill.position.set(55,38,-70);scene.add(fill);
 curve=new THREE.CatmullRomCurve3(r.points.map((p,i)=>{const t=i/r.points.length,y=prefs.track==='forest'?15+9*Math.sin(t*Math.PI*2-.35)+3*Math.sin(t*Math.PI*4+.55)+1.5*Math.sin(t*Math.PI*6-.2):0;return new THREE.Vector3(p[0]*2.3,y,p[1]*2.3)}),true,'catmullrom',.3);length=curve.getLength();
 // Distinct track biomes: coast, alpine mountain forest and desert dunes.
 if(prefs.track==='coast'){
@@ -234,7 +235,7 @@ if(prefs.track==='coast'){
   for(let i=0;i<p.count;i++){const x=p.getX(i),z=-p.getY(i);p.setZ(i,terrainHeightAt(x,z))}
   p.needsUpdate=true;terrainGeo.computeVertexNormals();
  }
- const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:.16,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
+ const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,bumpMap:terrainTex,bumpScale:.23,roughness:.94}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
  if(prefs.track==='forest'){
  // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
  const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,metalness:0,vertexColors:true,side:THREE.DoubleSide});
@@ -339,7 +340,7 @@ let v=[],idx=[],uv=[];const seg=900;
  for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,s.p.y+.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+1,n+2,n+1,n+3,n+2)}}
  let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
  const roadTex=makeRoadTexture();roadTex.repeat.set(1,1);
- let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,bumpMap:roadTex,bumpScale:.028,roughness:.96}));road.receiveShadow=true;scene.add(road);
+ let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,bumpMap:roadTex,bumpScale:.052,roughness:.91}));road.receiveShadow=true;scene.add(road);
  /* High-contrast road edge markings: continuous bright lines plus raised rumble strips */
 for(const side of [-1,1]){
  const edgePts=[];for(let i=0;i<=seg;i+=2){const s=pointAt(i/seg*length);edgePts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2-.22)*side,s.p.y+.085,s.p.z+s.side.z*(ROAD/2-.22)*side))}
