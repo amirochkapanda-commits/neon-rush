@@ -19,7 +19,7 @@
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
 const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
-const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);
+const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=0;save.races=0;save.points=0; // Championship reset for the new rules; credits, upgrades, wins and records remain.
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.paint=prefs.paint||'#dba14e';prefs.rim=prefs.rim||'#9da6aa';$('paint').value=prefs.paint;$('rimPaint').value=prefs.rim;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
 let scene,camera,renderer,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
@@ -188,8 +188,36 @@ function update(dt){
   $('time').textContent=fmt(elapsed);
   if(laps>=3)finish();
 }
-function finish(){if(mode!=='race')return;mode='result';let placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;let pts=[5,4,3,2][placeNo-1],cash=[300,240,180,130][placeNo-1];save.points+=pts;save.leaguePoints+=pts;save.credits+=cash;save.rep+=([30,18,10,5][placeNo-1]);save.races++;if(placeNo===1)save.wins++;save.best=save.best?Math.min(save.best,elapsed):elapsed;let seriesEnd=save.races>=3,leagueUp=false;if(seriesEnd){save.lastSeason=save.leaguePoints;leagueUp=save.league<4&&save.leaguePoints>=11;if(leagueUp){save.league++;save.leaguePoints=0;save.points=0;save.races=0}else if(save.league===4){save.seasons++;save.leaguePoints=0;save.points=0;save.races=0}else{save.races=0;save.points=0}}localStorage.setItem('autosport-career',JSON.stringify(save));$('hud').style.display='none';$('result').classList.remove('hidden');$('heading').textContent=leagueUp?'НОВАЯ ЛИГА ОТКРЫТА!':seriesEnd?'СЕРИЯ ЗАЕЗДОВ ЗАВЕРШЕНА':'ЭТАП ЗАВЕРШЁН';$('rank').textContent=placeNo+' МЕСТО';$('summary').textContent='Время '+fmt(elapsed)+'. '+(leagueUp?'Ты прошёл отбор и вышел в лигу '+(save.league+1)+'. Соперники станут быстрее! ':seriesEnd?'За три гонки пока не хватило очков до 11. Прогресс сохранён — новая серия продолжит его! ':'Следующий заезд ждёт тебя. ')+(placeNo===1?'Отличная гонка!':'Продолжай борьбу и улучшай машину.');$('earned').textContent='+'+pts;$('reward').textContent='+'+cash;$('total').textContent=save.leaguePoints;$('again').textContent=leagueUp?'ВЫЙТИ В НОВУЮ ЛИГУ →':seriesEnd?'ПОВТОРИТЬ СЕРИЮ →':'СЛЕДУЮЩИЙ ЗАЕЗД →';updateMenuStats()}
-function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];$('season').textContent=(save.races+1)+'/3';$('points').textContent=save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;$('leagueName').textContent='ЛИГА '+(save.league+1)+' · '+names[save.league];$('mission').textContent='За места дают 5 / 4 / 3 / 2 очка. Цель — 11. Если за 3 гонки не хватит, очки сохранятся в следующей серии.';updateUpgradeLabels()}
+function finish(){
+ if(mode!=='race')return;
+ mode='result';
+ let placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;
+ let pts=[5,4,3,2][placeNo-1],cash=[300,240,180,130][placeNo-1];
+ save.points+=pts;save.leaguePoints+=pts;save.credits+=cash;save.rep+=([30,18,10,5][placeNo-1]);save.races++;
+ if(placeNo===1)save.wins++;
+ save.best=save.best?Math.min(save.best,elapsed):elapsed;
+ let seriesEnd=save.races>=3,leagueUp=false,champion=false,seriesFailed=false;
+ if(seriesEnd){
+   save.lastSeason=save.leaguePoints;
+   const qualified=save.leaguePoints>=11;
+   leagueUp=save.league<4&&qualified;
+   champion=save.league===4&&qualified;
+   seriesFailed=!qualified;
+   if(leagueUp)save.league++;
+   if(champion)save.seasons++;
+   // Every three-race championship is self-contained: its points never carry over.
+   save.leaguePoints=0;save.points=0;save.races=0;
+ }
+ localStorage.setItem('autosport-career',JSON.stringify(save));
+ $('hud').style.display='none';$('result').classList.remove('hidden');
+ $('heading').textContent=leagueUp?'НОВАЯ ЛИГА ОТКРЫТА!':champion?'ЧЕМПИОН ЛИГИ!':seriesEnd?'ЧЕМПИОНАТ ЗАВЕРШЁН':'ЭТАП ЗАВЕРШЁН';
+ $('rank').textContent=placeNo+' МЕСТО';
+ $('summary').textContent='Время '+fmt(elapsed)+'. '+(leagueUp?'Ты набрал 11 или больше очков за 3 гонки и перешёл в лигу '+(save.league+1)+'. Соперники станут быстрее! ':champion?'Ты набрал 11 или больше очков и подтвердил статус чемпиона лиги! ':seriesFailed?'За 3 гонки набрано '+save.lastSeason+' из 11 очков. Чемпионат не пройден — очки сброшены. Токены, улучшения и победы сохранены. ':'Следующий заезд ждёт тебя. ')+(placeNo===1?'Отличная гонка!':'Продолжай борьбу и улучшай машину.');
+ $('earned').textContent='+'+pts;$('reward').textContent='+'+cash;$('total').textContent=seriesEnd?save.lastSeason:save.leaguePoints;
+ $('again').textContent=leagueUp?'ВЫЙТИ В НОВУЮ ЛИГУ →':seriesEnd?'НАЧАТЬ НОВЫЙ ЧЕМПИОНАТ →':'СЛЕДУЮЩИЙ ЗАЕЗД →';
+ updateMenuStats()
+}
+function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];$('season').textContent=(save.races+1)+'/3';$('points').textContent=save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;$('leagueName').textContent='ЛИГА '+(save.league+1)+' · '+names[save.league];$('mission').textContent='Чемпионат — 3 гонки. За места дают 5 / 4 / 3 / 2 очка. Нужно набрать 11 очков за чемпионат. Не хватит — очки сбросятся; токены, улучшения и победы сохраняются.';updateUpgradeLabels()}
 function start(){mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{a.d=-12-i*9;a.side=[-2.9,2.8,.1][i];a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;cameraUpdate(.1)}
 // Reliable multi-touch input: pointer capture keeps a press alive when a
 // finger drifts outside its button. Keyboard and touch states are independent.
