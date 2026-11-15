@@ -48,6 +48,24 @@ function makeDuneGeometry(){
 
 function pointAt(d){let t=((d%length)+length)%length/length,p=curve.getPointAt(t),tan=curve.getTangentAt(t).normalize(),side=new THREE.Vector3(-tan.z,0,tan.x).normalize();return {p,tan,side}}
 function place(obj,d,side=0){let s=pointAt(d);obj.position.set(s.p.x+s.side.x*side,s.p.y+.05,s.p.z+s.side.z*side);obj.rotation.y=Math.atan2(s.tan.x,s.tan.z);obj.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z))}
+function carContact(a,b){
+ const dx=b.position.x-a.position.x,dz=b.position.z-a.position.z;
+ const axes=[{x:Math.cos(a.rotation.y),z:-Math.sin(a.rotation.y)},{x:Math.sin(a.rotation.y),z:Math.cos(a.rotation.y)},{x:Math.cos(b.rotation.y),z:-Math.sin(b.rotation.y)},{x:Math.sin(b.rotation.y),z:Math.cos(b.rotation.y)}];
+ let min=Infinity,nx=0,nz=0;
+ for(const axis of axes){
+  const ra=1.18*Math.abs(axis.x*Math.cos(a.rotation.y)-axis.z*Math.sin(a.rotation.y))+2.34*Math.abs(axis.x*Math.sin(a.rotation.y)+axis.z*Math.cos(a.rotation.y));
+  const rb=1.18*Math.abs(axis.x*Math.cos(b.rotation.y)-axis.z*Math.sin(b.rotation.y))+2.34*Math.abs(axis.x*Math.sin(b.rotation.y)+axis.z*Math.cos(b.rotation.y));
+  const along=dx*axis.x+dz*axis.z,overlap=ra+rb-Math.abs(along);
+  if(overlap<=0)return null;
+  if(overlap<min){min=overlap;const sign=along>=0?1:-1;nx=axis.x*sign;nz=axis.z*sign}
+ }
+ return {nx,nz,overlap:min};
+}
+function syncBotPosition(a){
+ let bestD=a.d,bestDist=Infinity,bestSample=null;
+ for(let k=-12;k<=12;k++){const d=a.d+k*.25,s=pointAt(d),x=a.car.position.x-s.p.x,z=a.car.position.z-s.p.z,dist=x*x+z*z;if(dist<bestDist){bestDist=dist;bestD=d;bestSample=s}}
+ if(bestSample){a.d=bestD;const x=a.car.position.x-bestSample.p.x,z=a.car.position.z-bestSample.p.z;a.side=clamp(x*bestSample.side.x+z*bestSample.side.z,-4.2,4.2);place(a.car,a.d,a.side)}
+}
 function car(color,isPlayer=false){
  let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=mat(color,.27,.42);if(isPlayer)paintMat=pm;
  const black=mat('#101519',.52,.18),rubber=mat('#090b0c',.94),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.82),chrome=mat('#bac3c6',.22,.86);if(isPlayer)rimMat=rim;
@@ -308,23 +326,37 @@ function update(dt){
   }else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
   cameraUpdate(dt);
   collisionFlash=Math.max(0,collisionFlash-dt);
+  // Move every rival first, then resolve full-car footprint collisions.
+  // The rectangular collider covers the complete chassis and cabin/glass footprint.
   for(const a of ai){
     const delta=((progress-a.d)%length+length)%length;
     let target=a.v;
     if(delta>0&&delta<18)target*=.94;
     a.d+=target*dt;
     place(a.car,a.d,a.side);
-    const dx=player.position.x-a.car.position.x,dz=player.position.z-a.car.position.z;
-    const contactRadius=3.15;
-    if(dx*dx+dz*dz<contactRadius*contactRadius&&a.hit<=0){
-      const dist=Math.max(.001,Math.hypot(dx,dz)),nx=dx/dist,nz=dz/dist;
-      const overlap=contactRadius-dist;
-      player.position.x+=nx*overlap*.62;player.position.z+=nz*overlap*.62;
-      a.car.position.x-=nx*overlap*.38;a.car.position.z-=nz*overlap*.38;
-      speed=Math.max(speed*.88,speed-3.2);a.hit=.38;collisionFlash=.45;
-      a.side=clamp(a.side+(dx>=0?-.32:.32),-3.8,3.8);
-    }
     a.hit=Math.max(0,a.hit-dt);
+  }
+  // Player versus every rival: oriented box SAT, not a small center-point circle.
+  for(const a of ai){
+    const contact=carContact(player,a.car);
+    if(contact){
+      const push=contact.overlap+.015;
+      player.position.x-=contact.nx*push*.56;player.position.z-=contact.nz*push*.56;
+      a.car.position.x+=contact.nx*push*.44;a.car.position.z+=contact.nz*push*.44;
+      syncBotPosition(a);
+      if(a.hit<=0){speed=Math.max(speed*.88,speed-3.2);a.hit=.34;collisionFlash=.45}
+    }
+  }
+  // Rivals also collide with one another and cannot drive through each other.
+  for(let i=0;i<ai.length;i++)for(let j=i+1;j<ai.length;j++){
+    const a=ai[i],b=ai[j],contact=carContact(a.car,b.car);
+    if(contact){
+      const push=contact.overlap+.015;
+      a.car.position.x-=contact.nx*push*.5;a.car.position.z-=contact.nz*push*.5;
+      b.car.position.x+=contact.nx*push*.5;b.car.position.z+=contact.nz*push*.5;
+      syncBotPosition(a);syncBotPosition(b);
+      if(a.hit<=0&&b.hit<=0){a.hit=.3;b.hit=.3}
+    }
   }
   const laps=Math.floor(progress/length);
   const placeNo=1+ai.filter(a=>{let d=(((a.d-progress)%length+length)%length);if(d>length/2)d-=length;return d>0}).length;
