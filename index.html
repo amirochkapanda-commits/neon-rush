@@ -40,7 +40,7 @@ const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v))
 const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);if(!save.championshipRulesV2){save.leaguePoints=0;save.races=0;save.points=0;save.championshipRulesV2=true;localStorage.setItem('autosport-career',JSON.stringify(save));} // One-time reset for the new championship rules; future reloads keep current progress.
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.paint=prefs.paint||'#dba14e';prefs.rim=prefs.rim||'#9da6aa';$('paint').value=prefs.paint;$('rimPaint').value=prefs.rim;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
-let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
+let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
 const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
@@ -279,7 +279,7 @@ function car(color,isPlayer=false){
  root.userData.body=body;return root;
 }
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.paint||$('paint').value);if(rimMat)rimMat.color.set(prefs.rim||$('rimPaint').value)}
-function buildWorld(){if(raf)cancelAnimationFrame(raf);if(ssaoPass){ssaoPass.dispose();ssaoPass=null}if(bloomPass){bloomPass.dispose();bloomPass=null}if(composer){composer.dispose();composer=null}if(pmremTarget){pmremTarget.dispose();pmremTarget=null}if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
+function buildWorld(){if(raf)cancelAnimationFrame(raf);if(weatherCanvas){weatherCanvas.remove();weatherCanvas=null;weatherCtx=null;weatherParticles=[]}if(ssaoPass){ssaoPass.dispose();ssaoPass=null}if(bloomPass){bloomPass.dispose();bloomPass=null}if(composer){composer.dispose();composer=null}if(pmremTarget){pmremTarget.dispose();pmremTarget=null}if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
  // Cinematic atmospheric sky gradient and distant sun: decorative scene layer only.
  const skyGeo=new THREE.SphereGeometry(690,48,32);
  // Soft procedural cloud layers are rendered only on the sky sphere.
@@ -300,6 +300,8 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.5:2));renderer.
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
+ // Screen-space weather layer: visual only, independent of track geometry and vehicle simulation.
+ weatherCanvas=document.createElement('canvas');weatherCanvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:3';$('stage').appendChild(weatherCanvas);weatherCtx=weatherCanvas.getContext('2d');resizeWeatherCanvas();weatherParticles=Array.from({length:110},()=>({x:Math.random(),y:Math.random(),v:.35+Math.random()*.9,len:8+Math.random()*15,r:1+Math.random()*1.8}));
  // Procedural HDR radiance environment: a high-dynamic-range sky, warm horizon,
  // broad studio-like reflection cards and a bright solar source for realistic paint/glass.
  const envW=512,envH=256,envData=new Float32Array(envW*envH*3);
@@ -327,13 +329,14 @@ $('stage').replaceChildren(renderer.domElement);
  hdrTexture.mapping=THREE.EquirectangularReflectionMapping;hdrTexture.colorSpace=THREE.LinearSRGBColorSpace;hdrTexture.needsUpdate=true;
  const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();pmremTarget=pmrem.fromEquirectangular(hdrTexture);pmrem.dispose();hdrTexture.dispose();
  scene.environment=pmremTarget.texture;scene.environmentIntensity=1.08;
-scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':prefs.track==='forest'?'#39483c':'#54483a',.82));
+const hemi=new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':prefs.track==='forest'?'#39483c':'#54483a',.82);scene.add(hemi);
 const sun=new THREE.DirectionalLight('#fff0d9',prefs.track==='desert'?3.8:3.35);sun.position.set(-65,105,42);sun.castShadow=true;
 sun.shadow.mapSize.set(mobileQuality?1536:4096,mobileQuality?1536:4096);
 sun.shadow.camera.left=-92;sun.shadow.camera.right=92;sun.shadow.camera.top=92;sun.shadow.camera.bottom=-92;
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00012;sun.shadow.normalBias=.025;sun.shadow.radius=mobileQuality?2:3;
 scene.add(sun);
 const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.62);fill.position.set(55,38,-70);scene.add(fill);
+ atmosphereLights={sun,fill,hemi,skyMat,sunDisc,baseFogNear:prefs.track==='desert'?230:135,baseFogFar:prefs.track==='desert'?590:405,track:prefs.track};
  // Screen-space ambient occlusion and restrained cinematic bloom.
  const renderTarget=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false});
  composer=new EffectComposer(renderer,renderTarget);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(innerWidth,innerHeight);
@@ -524,7 +527,26 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
 player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:12+i*9,side:[-2.9,2.8,.1][i],v:[142.24,165,185,220,255][Math.max(0,Math.min(4,save.league||0))]*.93/3.6-(2-i)*.7,currentSpeed:0,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,player.position.y+5.3,player.position.z-fz*11),lookTarget=new THREE.Vector3(player.position.x+fx*8,player.position.y+1.1,player.position.z+fz*8);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);if(composer)composer.render();else renderer.render(scene,camera)}
+function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);if(composer)composer.render();else renderer.render(scene,camera)}
+function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
+function updateAtmosphereVisuals(dt){
+ if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
+ const a=atmosphereLights,t=(elapsed%240)/240,day=.5+.5*Math.cos(t*Math.PI*2);
+ const dusk=Math.max(0,1-Math.abs(t-.25)*5),night=1-day;
+ const topDay=new THREE.Color('#397a9b'),topDusk=new THREE.Color('#6e5268'),topNight=new THREE.Color('#081322');
+ const horizonDay=new THREE.Color('#d6c7a5'),horizonDusk=new THREE.Color('#f09a61'),horizonNight=new THREE.Color('#263c55');
+ const top=topNight.clone().lerp(topDay,day).lerp(topDusk,dusk*.72),horizon=horizonNight.clone().lerp(horizonDay,day).lerp(horizonDusk,dusk);
+ a.skyMat.uniforms.topColor.value.copy(top);a.skyMat.uniforms.horizonColor.value.copy(horizon);
+ const warm=new THREE.Color('#ffb16d'),cool=new THREE.Color('#d7e6ff');a.sun.color.copy(cool.clone().lerp(warm,dusk));a.sun.intensity=(.48+day*2.9)*(1-night*.42);a.fill.intensity=.18+day*.5;a.hemi.intensity=.32+day*.52;
+ a.sunDisc.material.color.copy(new THREE.Color('#fff0c8').lerp(warm,dusk).lerp(new THREE.Color('#8296bd'),night*.8));a.sunDisc.material.opacity=.25+day*.75;
+ renderer.toneMappingExposure=.78+day*.38;
+ const weather=Math.floor(elapsed/32)%4;const rain=weather===1,snow=weather===3,fog=weather===2;
+ scene.fog.near=a.baseFogNear*(fog?.42:rain?.78:1);scene.fog.far=a.baseFogFar*(fog?.48:rain?.82:1);
+ scene.fog.color.copy(fog?new THREE.Color('#aab8bf'):snow?new THREE.Color('#c4d0d7'):rain?new THREE.Color('#718494'):horizon);
+ const ctx=weatherCtx,w=weatherCanvas.width,h=weatherCanvas.height;ctx.clearRect(0,0,w,h);
+ if(fog){const g=ctx.createLinearGradient(0,h*.35,0,h);g.addColorStop(0,'rgba(190,205,214,0)');g.addColorStop(1,'rgba(190,205,214,.20)');ctx.fillStyle=g;ctx.fillRect(0,0,w,h)}
+ if(rain||snow){ctx.lineWidth=rain?1.1:1.7;ctx.strokeStyle=rain?'rgba(190,218,235,.34)':'rgba(245,250,255,.78)';ctx.fillStyle='rgba(245,250,255,.72)';for(const p of weatherParticles){p.y+=p.v*dt*(rain?1.65:.32);p.x+=rain?-.16*dt:Math.sin(p.y*8)*.025*dt;if(p.y>1.08){p.y=-.08;p.x=Math.random()}if(p.x<-.05)p.x=1.05;const x=p.x*w,y=p.y*h;if(rain){ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x-4*p.v,y+p.len*p.v);ctx.stroke()}else{ctx.beginPath();ctx.arc(x,y,p.r,0,Math.PI*2);ctx.fill()}}}
+}
 function update(dt){
   elapsed+=dt;
   // Read steering directly from the live input state: no lingering steering
@@ -747,7 +769,7 @@ $('paint').addEventListener('input',()=>{document.querySelectorAll('[data-paint]
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
 function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150;if(level>=8){$('mission').textContent='Максимальный уровень этой детали уже установлен.';return}if(save.credits<cost){$('mission').textContent='Не хватает '+(cost-save.credits)+' токенов. Займи место выше и заработай больше.';return}save.credits-=cost;prefs[key]=level+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'!';updateUpgradeLabels()}
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
-addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer)composer.setSize(innerWidth,innerHeight)}});
+addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer)composer.setSize(innerWidth,innerHeight);resizeWeatherCanvas()}});
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
 updateMenuStats();updateUpgradeLabels();try{buildWorld()}catch(e){console.error(e);$('status').textContent='Ошибка запуска: '+e.message}
 </script></body></html>
