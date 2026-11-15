@@ -77,6 +77,11 @@
  #menu .design-photo{height:100px}
 }
 @media(max-width:380px){#menu .track-card{height:92px}#menu .track-card span{font-size:8px}#menu .stats small{font-size:7px}}
+
+/* Compact GTA-style race navigator: isolated center-bottom slot between control pads. */
+#race-map{position:absolute;left:50%;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);width:150px;height:110px;max-width:34vw;border:1px solid #ffffff55;border-radius:12px;background:rgba(8,17,24,.58);box-shadow:0 5px 20px #0005;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);pointer-events:none}
+#race-map canvas{width:100%;height:100%;display:block}
+@media(max-width:380px){#race-map{width:126px;height:94px;bottom:max(12px,env(safe-area-inset-bottom))}}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -89,7 +94,7 @@
 <section class="panel" id="panel-tuning"><div class="section-title">ГАРАЖ · ПРОКАЧАЙ МАШИНУ</div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=420&q=85" alt="Автомобильный двигатель"><div class="upgrade-info"><div class="upgrade-name">ТУРБО-ДВИГАТЕЛЬ</div><div class="upgrade-desc">Увеличивает разгон и максимальную скорость на прямых.</div><div class="statline"><div class="stathead"><span>МОЩНОСТЬ</span><b id="engineValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="enginePreview"></div><div class="meter-current" id="engineBar"></div></div></div><button class="upgrade-buy" id="engineUpgrade">УЛУЧШИТЬ · 260 TOK</button></div></div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?w=420&q=85" alt="Автомобильные шины"><div class="upgrade-info"><div class="upgrade-name">СПОРТИВНЫЕ ШИНЫ</div><div class="upgrade-desc">Улучшают сцепление с трассой и точность прохождения поворотов.</div><div class="statline"><div class="stathead"><span>СЦЕПЛЕНИЕ</span><b id="gripValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="gripPreview"></div><div class="meter-current" id="gripBar"></div></div></div><button class="upgrade-buy" id="gripUpgrade">УЛУЧШИТЬ · 220 TOK</button></div></div><p class="tiny">Белая полоса — текущий уровень. Зелёный участок — прирост после следующей покупки.</p></section>
 <section class="panel" id="panel-design"><div class="section-title">ВНЕШНИЙ ВИД МАШИНЫ</div><div class="design-colors"><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=520&q=85" alt="Спортивный автомобиль с окрашенным кузовом"><div class="design-name">ОКРАСКА КУЗОВА</div><div class="design-desc">Меняет основной цвет корпуса автомобиля.</div><label>СВОЙ ЦВЕТ<input id="paint" type="color" value="#dba14e"></label><div class="palette"><button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой" aria-pressed="true"></button><button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный"></button><button class="swatch" data-paint="#1768c5" style="background:#1768c5" aria-label="Синий"></button><button class="swatch" data-paint="#f1f1ed" style="background:#f1f1ed" aria-label="Белый"></button><button class="swatch" data-paint="#20252b" style="background:#20252b" aria-label="Чёрный"></button><button class="swatch" data-paint="#20a66a" style="background:#20a66a" aria-label="Зелёный"></button></div></div><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=520&q=85" alt="Колесо спортивного автомобиля"><div class="design-name">ЦВЕТ ДИСКОВ</div><div class="design-desc">Меняет цвет металлических центральных частей колёс.</div><label>СВОЙ ЦВЕТ<input id="rimPaint" type="color" value="#9da6aa"></label><div class="palette"><button class="swatch" data-rim="#9da6aa" style="background:#9da6aa" aria-label="Серебристый" aria-pressed="true"></button><button class="swatch" data-rim="#d4a43c" style="background:#d4a43c" aria-label="Золотой"></button><button class="swatch" data-rim="#d9d9d9" style="background:#d9d9d9" aria-label="Светлый"></button><button class="swatch" data-rim="#262a30" style="background:#262a30" aria-label="Чёрный"></button><button class="swatch" data-rim="#c43d36" style="background:#c43d36" aria-label="Красный"></button><button class="swatch" data-rim="#2474c9" style="background:#2474c9" aria-label="Синий"></button></div></div></div></section>
 </div></div>
-<div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>СКОРОСТЬ</small><strong id="speed">0</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause">Ⅱ</button><button id="restart" aria-label="Перезапустить гонку">↻</button><button id="exit">ВЫХОД</button></div><div class="hint" id="hint">ОБГОНИ СОПЕРНИКОВ</div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div></div>
+<div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>СКОРОСТЬ</small><strong id="speed">0</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause">Ⅱ</button><button id="restart" aria-label="Перезапустить гонку">↻</button><button id="exit">ВЫХОД</button></div><div class="hint" id="hint">ОБГОНИ СОПЕРНИКОВ</div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="300" height="220"></canvas></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div></div>
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -105,7 +110,7 @@ const championshipTracks=['coast','forest','desert'];const trackNames=['COAST RU
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 const currentStage=Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||championshipTracks.indexOf(prefs.track)>currentStage)prefs.track=championshipTracks[currentStage];let replayMode=championshipTracks.indexOf(prefs.track)<save.races,activeRaceReplay=false;
  prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.paint=prefs.paint||'#dba14e';prefs.rim=prefs.rim||'#9da6aa';$('paint').value=prefs.paint;$('rimPaint').value=prefs.rim;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
-let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0,basePixelRatio=1,adaptiveScale=1;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
+let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0,basePixelRatio=1,adaptiveScale=1,mapCanvas=null,mapCtx=null,mapClock=0;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
  const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
@@ -198,6 +203,28 @@ function makePineCrownGeometry(){
 }
 
 function pointAt(d){let t=((d%length)+length)%length/length,p=curve.getPointAt(t),tan=curve.getTangentAt(t).normalize(),side=new THREE.Vector3(-tan.z,0,tan.x).normalize();return {p,tan,side}}
+function drawRaceMap(dt=0){
+ if(!mapCtx||!curve||!length||!player||mode!=='race')return;
+ mapClock+=dt;if(mapClock<.09)return;mapClock=0;
+ const ctx=mapCtx,w=mapCanvas.width,h=mapCanvas.height,cx=w/2,cy=h/2,fx=Math.sin(heading),fz=Math.cos(heading),rx=-fz,rz=fx;
+ const project=(x,z)=>({x:cx+(x-player.position.x)*rx*.48+(z-player.position.z)*rz*.48,y:cy-((x-player.position.x)*fx+(z-player.position.z)*fz)*.48});
+ ctx.clearRect(0,0,w,h);
+ ctx.fillStyle='rgba(7,16,23,.56)';ctx.fillRect(0,0,w,h);
+ // Subtle center crosshair and edge vignette.
+ ctx.strokeStyle='rgba(255,255,255,.10)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,8);ctx.lineTo(cx,h-8);ctx.moveTo(8,cy);ctx.lineTo(w-8,cy);ctx.stroke();
+ // Track ribbon, sampled around the player's current progress; coordinates are read-only.
+ ctx.lineCap='round';ctx.lineJoin='round';ctx.beginPath();
+ for(let i=0;i<=150;i++){const d=progress-95+i*2.5,s=pointAt(d),p=project(s.p.x,s.p.z);if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y)}
+ ctx.strokeStyle='rgba(0,0,0,.68)';ctx.lineWidth=15;ctx.stroke();
+ ctx.strokeStyle='rgba(218,226,229,.88)';ctx.lineWidth=10;ctx.stroke();
+ ctx.strokeStyle='rgba(255,255,255,.24)';ctx.lineWidth=1.2;ctx.setLineDash([5,7]);ctx.stroke();ctx.setLineDash([]);
+ // Opponents use distinct red/orange markers; player remains a bright cyan arrow.
+ for(let i=0;i<ai.length;i++){const carObj=ai[i].car,p=project(carObj.position.x,carObj.position.z);if(p.x<-10||p.x>w+10||p.y<-10||p.y>h+10)continue;ctx.beginPath();ctx.arc(p.x,p.y,7,0,Math.PI*2);ctx.fillStyle=i===0?'#ff625b':i===1?'#ffb34f':'#d98cff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#101820';ctx.stroke()}
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(0);ctx.beginPath();ctx.moveTo(0,-12);ctx.lineTo(8,9);ctx.lineTo(0,5);ctx.lineTo(-8,9);ctx.closePath();ctx.fillStyle='#55e5ff';ctx.fill();ctx.lineWidth=2;ctx.strokeStyle='#ffffff';ctx.stroke();ctx.restore();
+ // Small legend stays inside the map itself.
+ ctx.font='bold 10px system-ui';ctx.textAlign='left';ctx.fillStyle='rgba(7,16,23,.72)';ctx.fillRect(7,7,70,17);ctx.fillStyle='#bdeef5';ctx.fillText('▲ ВЫ',12,19);
+}
+
 function place(obj,d,side=0){let s=pointAt(d);obj.position.set(s.p.x+s.side.x*side,s.p.y+.05,s.p.z+s.side.z*side);obj.rotation.y=Math.atan2(s.tan.x,s.tan.z);obj.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z))}
 function carContact(a,b){
  const dx=b.position.x-a.position.x,dz=b.position.z-a.position.z;
@@ -593,7 +620,7 @@ player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,player.position.y+5.3,player.position.z-fz*11),lookTarget=new THREE.Vector3(player.position.x+fx*8,player.position.y+1.1,player.position.z+fz*8);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
 let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/90;if(avg>target*1.12&&adaptiveScale>.62)adaptiveScale=Math.max(.62,adaptiveScale-.10);else if(avg<target*.82&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.05);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);if(composer)composer.render();else renderer.render(scene,camera)}
-function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
+function initRaceMap(){mapCanvas=$('race-map-canvas');mapCtx=mapCanvas?mapCanvas.getContext('2d'):null}function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
 function updateAtmosphereVisuals(dt){
  if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
  const a=atmosphereLights,day=1,dusk=0,night=0;
@@ -725,7 +752,7 @@ function update(dt){
   $('lap').textContent=Math.min(3,laps+1)+'/3';
   $('pos').textContent=placeNo+'/4';
   $('speed').textContent=Math.round(speed*3.6);
-  $('time').textContent=fmt(elapsed);
+  $('time').textContent=fmt(elapsed);drawRaceMap(dt);
   if(laps>=3)finish();
 }
 function finish(){
@@ -761,7 +788,7 @@ function finish(){
  updateMenuStats()
 }
 function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const stage=Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||championshipTracks.indexOf(prefs.track)>stage)prefs.track=championshipTracks[stage];replayMode=championshipTracks.indexOf(prefs.track)<save.races;$('season').textContent=(stage+1)+'/3';$('points').textContent=save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;$('leagueName').textContent='ЛИГА '+(save.league+1)+' · '+names[save.league];$('mission').textContent=replayMode?'Повторный заезд: '+trackNames[championshipTracks.indexOf(prefs.track)]+'. Награды и прогресс не начисляются.': 'Текущий этап '+(stage+1)+'/3: '+trackNames[stage]+'. Пройденные этапы можно повторять без наград.';document.querySelectorAll('.track-card').forEach(b=>{const index=championshipTracks.indexOf(b.dataset.track),active=b.dataset.track===prefs.track,available=index<=stage;b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-disabled',String(!available));b.dataset.replay=String(available&&index<save.races)});$('start').textContent=replayMode?'ПОВТОРИТЬ ЗАЕЗД · БЕЗ НАГРАД ↻':'НАЧАТЬ ГОНКУ →';updateUpgradeLabels()}
-function start(){activeRaceReplay=replayMode;mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{a.d=12+i*9;a.side=[-2.9,2.8,.1][i];a.currentSpeed=0;a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));cameraUpdate(.1)}
+function start(){activeRaceReplay=replayMode;mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{a.d=12+i*9;a.side=[-2.9,2.8,.1][i];a.currentSpeed=0;a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);if(mapCtx)drawRaceMap(.1);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));cameraUpdate(.1)}
 // Reliable multi-touch input: pointer capture keeps a press alive when a
 // finger drifts outside its button. Keyboard and touch states are independent.
 const activeControlPointers=new Map();
