@@ -7,7 +7,7 @@
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
 <div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="tuning" aria-selected="false">ТЮНИНГ</button><button class="tab" data-tab="design" aria-selected="false">ДИЗАЙН</button></div>
 <section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
-<div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST RUN</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ALPINE FOREST</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT RING</span></button></div>
+<div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST RUN</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY PASS</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT RING</span></button></div>
 <div class="league-chip" id="leagueName">ЛИГА 1 · НОВИЧОК</div><div class="mission" id="mission">Финишируй в топе, зарабатывай токены и открывай новые лиги.</div>
 <div class="stats menu-stats"><div><small>ЗАЕЗД</small><b id="season">1/3</b></div><div><small>ОЧКИ ЛИГИ</small><b id="points">0</b></div><div><small>ПОБЕДЫ</small><b id="wins">0</b></div><div><small>ТОКЕНЫ</small><b id="credits">0</b></div></div>
 <button id="start" class="primary">НАЧАТЬ ГОНКУ →</button><p id="status" class="tiny">Загрузка…</p></section>
@@ -25,11 +25,11 @@ prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.pain
 let scene,camera,renderer,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
 const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
-forest:{bg:'#a9b6bb',fog:'#a9b6bb',ground:'#46654b',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
+forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
 desert:{bg:'#e5c995',fog:'#e5c995',ground:'#d9b875',points:[[-5,-88],[55,-78],[92,-25],[70,25],[88,72],[20,90],[-45,70],[-90,25],[-68,-25],[-48,-70]],trees:'#92784c'}};
 const mat=(c,r=.75,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 function makeGroundTexture(kind){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d'),base=kind==='desert'?'#d9b875':kind==='forest'?'#536d48':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d'),base=kind==='desert'?'#d9b875':kind==='forest'?'#555b5d':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
  let seed=kind==='desert'?771:kind==='forest'?381:519;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
  if(kind==='desert'){for(let i=0;i<30000;i++){const x=rnd()*512,y=rnd()*512,a=.035+rnd()*.16;ctx.fillStyle=rnd()>.52?'rgba(255,238,190,'+a+')':'rgba(116,78,35,'+(a*.72)+')';const s=.5+rnd()*1.7;ctx.fillRect(x,y,s,s)}for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*100;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.28,y-5-rnd()*8,x+len*.68,y+4+rnd()*7,x+len,y-1);ctx.strokeStyle=i%3?'rgba(255,238,190,.19)':'rgba(128,91,45,.13)';ctx.lineWidth=.7+rnd()*1.2;ctx.stroke()}}
  else{for(let i=0;i<26000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=kind==='forest'?(rnd()>.5?'rgba(175,190,111,'+a+')':'rgba(22,47,27,'+a+')'):(rnd()>.5?'rgba(220,205,135,'+a+')':'rgba(35,65,35,'+a+')');ctx.fillRect(x,y,1+rnd()*2,1+rnd()*2)}}
@@ -47,7 +47,7 @@ function makeDuneGeometry(){
 }
 
 function pointAt(d){let t=((d%length)+length)%length/length,p=curve.getPointAt(t),tan=curve.getTangentAt(t).normalize(),side=new THREE.Vector3(-tan.z,0,tan.x).normalize();return {p,tan,side}}
-function place(obj,d,side=0){let s=pointAt(d);obj.position.set(s.p.x+s.side.x*side,.05,s.p.z+s.side.z*side);obj.rotation.y=Math.atan2(s.tan.x,s.tan.z)}
+function place(obj,d,side=0){let s=pointAt(d);obj.position.set(s.p.x+s.side.x*side,s.p.y+.05,s.p.z+s.side.z*side);obj.rotation.y=Math.atan2(s.tan.x,s.tan.z);obj.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z))}
 function car(color,isPlayer=false){
  let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=mat(color,.27,.42);if(isPlayer)paintMat=pm;
  const black=mat('#101519',.52,.18),rubber=mat('#090b0c',.94),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.82),chrome=mat('#bac3c6',.22,.86);if(isPlayer)rimMat=rim;
@@ -97,7 +97,7 @@ sun.shadow.camera.left=-115;sun.shadow.camera.right=115;sun.shadow.camera.top=11
 sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00018;sun.shadow.normalBias=.035;sun.shadow.radius=2;
 scene.add(sun);
 const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.72);fill.position.set(55,38,-70);scene.add(fill);
-curve=new THREE.CatmullRomCurve3(r.points.map(p=>new THREE.Vector3(p[0]*2.3,0,p[1]*2.3)),true,'catmullrom',.3);length=curve.getLength();
+curve=new THREE.CatmullRomCurve3(r.points.map((p,i)=>{const t=i/r.points.length,y=prefs.track==='forest'?15+9*Math.sin(t*Math.PI*4-.35)+3.5*Math.sin(t*Math.PI*10+.55):0;return new THREE.Vector3(p[0]*2.3,y,p[1]*2.3)}),true,'catmullrom',.3);length=curve.getLength();
 // Distinct track biomes: coast, alpine mountain forest and desert dunes.
 if(prefs.track==='coast'){
  const sea=new THREE.Mesh(new THREE.PlaneGeometry(2200,2200),mat('#267f9c',.32,.12));sea.rotation.x=-Math.PI/2;sea.position.y=-.32;scene.add(sea);
@@ -107,45 +107,52 @@ if(prefs.track==='coast'){
  const terrainTex=makeGroundTexture(prefs.track);
  const ground=new THREE.Mesh(new THREE.PlaneGeometry(prefs.track==='coast'?430:1100,prefs.track==='coast'?430:1100),new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.18;ground.receiveShadow=true;scene.add(ground);
  if(prefs.track==='forest'){
- const pineMats=[mat('#173f32'),mat('#245b3b'),mat('#326b43')];
- for(let i=0;i<180;i++){const s=pointAt(i/180*length),side=i%2?1:-1,dist=ROAD/2+12+(i%7)*4,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
-  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.18,.28,2.8,7),mat('#584332'));trunk.position.set(x,1.3,z);scene.add(trunk);
-  const crown=new THREE.Mesh(new THREE.ConeGeometry(2.7+(i%3)*.35,7+(i%4)*.5,7),pineMats[i%3]);crown.position.set(x,5.2,z);crown.castShadow=true;scene.add(crown);
- }
- // Distant, low alpine ridgelines: broad irregular silhouettes instead of repeated cartoon cones.
- const ridgeMats=[mat('#53645f',1,0),mat('#66756d',1,0),mat('#788078',1,0)];
- for(let r=0;r<8;r++){
-  const base=pointAt((r/8)*length),side=r%2?1:-1,dist=94+(r%3)*18,cx=base.p.x+base.side.x*dist*side,cz=base.p.z+base.side.z*dist*side;
-  const verts=[],inds=[],nx=28,nz=8;
-  for(let iz=0;iz<=nz;iz++){const v=iz/nz;for(let ix=0;ix<=nx;ix++){const u=ix/nx,x=(u-.5)*100,z=(v-.5)*25,shape=Math.pow(Math.sin(Math.PI*u),.72),wave=.78+.16*Math.sin(u*17+r*1.7)+.07*Math.sin(u*39+r);const y=Math.max(.25,shape*wave*(19+(r%4)*3)*(1-v*.28));verts.push(x,y,z)}}
-  for(let iz=0;iz<nz;iz++)for(let ix=0;ix<nx;ix++){const a=iz*(nx+1)+ix,b=a+1,d=a+nx+2,e=a+nx+1;inds.push(a,e,b,b,e,d)}
-  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(inds);g.computeVertexNormals();
-  const ridge=new THREE.Mesh(g,ridgeMats[r%3]);ridge.position.set(cx,0,cz);ridge.rotation.y=Math.atan2(base.tan.x,base.tan.z);ridge.castShadow=true;ridge.receiveShadow=true;scene.add(ridge);
- }
-
-}else if(prefs.track==='desert'){
-  // Desert palms: curved segmented trunks and broad green fronds, safely beyond the road shoulder.
-  const trunkMat=mat('#795033',.96,0),trunkLight=mat('#a4774d',.92,0),leafMats=[mat('#315f35',.88,0),mat('#477b3d',.9,0),mat('#668b43',.92,0)];
-  function palmLeafGeometry(){
-   const verts=[],inds=[],steps=12;
-   for(let i=0;i<=steps;i++){const t=i/steps,y=2.5+Math.sin(t*Math.PI*.82)*1.55-t*.48,w=(.46*Math.sin(Math.PI*t*.88)+.025)*(1-.25*t);verts.push(-w,y,0,w,y,0)}
-   for(let i=0;i<steps;i++){const a=i*2;inds.push(a,a+1,a+2,a+1,a+3,a+2)}
-   const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(inds);g.computeVertexNormals();return g;
-  }
-  const leafGeo=palmLeafGeometry();
-  for(let i=0;i<26;i++){
-   const sample=pointAt((i/26)*length),side=i%2?1:-1,dist=ROAD/2+24+(i%4)*8,x=sample.p.x+sample.side.x*dist*side,z=sample.p.z+sample.side.z*dist*side;
-   const palm=new THREE.Group();palm.position.set(x,-.16,z);palm.rotation.y=(i*2.17)%6.28;const height=6.2+(i%5)*.48;
-   const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.19,.34,height,9,5),trunkMat);trunk.position.y=height/2;trunk.castShadow=true;palm.add(trunk);
-   for(let ring=0;ring<5;ring++){const band=new THREE.Mesh(new THREE.TorusGeometry(.245-ring*.012,.035,5,12),trunkLight);band.rotation.x=Math.PI/2;band.position.set(0,.7+ring*1.02,0);palm.add(band)}
-   const crown=new THREE.Group();crown.position.y=height-.12;palm.add(crown);
-   for(let f=0;f<8;f++){
-    const angle=f*Math.PI/4+(i%3)*.19,frond=new THREE.Mesh(leafGeo,leafMats[(i+f)%3]);frond.rotation.set(-.12,angle,0);frond.castShadow=true;crown.add(frond);
+ // Rocky Pass: the road climbs and descends through a high-walled mountain canyon.
+ const cliffMats=[mat('#555b5c',1,0),mat('#666967',1,0),mat('#777873',1,0)];
+ for(let sideSign of [-1,1]){
+  const rows=180,levels=9,verts=[],inds=[];
+  for(let i=0;i<=rows;i++){
+   const s=pointAt(i/rows*length),u=i/rows,offset=ROAD/2+8.5+1.8*Math.sin(u*Math.PI*18+sideSign*.7),peak=17+5*Math.sin(u*Math.PI*14+sideSign)+2.4*Math.sin(u*Math.PI*39+sideSign*.4);
+   for(let j=0;j<=levels;j++){
+    const v=j/levels,rough=1+.045*Math.sin(u*117+j*2.7+sideSign)+.025*Math.sin(u*251-j*1.8),dist=offset+v*(1.8+1.1*Math.sin(u*31+j*.9)),y=-2+(s.p.y+peak+2)*v*rough;
+    verts.push(s.p.x+s.side.x*dist*sideSign,y,s.p.z+s.side.z*dist*sideSign);
    }
-   const heart=new THREE.Mesh(new THREE.SphereGeometry(.32,9,7),leafMats[1]);heart.position.y=.12;crown.add(heart);scene.add(palm);
   }
-  // The desert floor remains an uninterrupted textured sand field; no oval props near the road.
-
+  for(let i=0;i<rows;i++)for(let j=0;j<levels;j++){const a=i*(levels+1)+j,b=a+1,e=(i+1)*(levels+1)+j,d=e+1;if(sideSign===1)inds.push(a,e,b,b,e,d);else inds.push(a,b,e,b,d,e)}
+  const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(verts,3));g.setIndex(inds);g.computeVertexNormals();
+  const wall=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:sideSign===1?'#626765':'#555d5c',roughness:1,side:THREE.DoubleSide}));wall.castShadow=true;wall.receiveShadow=true;scene.add(wall);
+  for(let i=0;i<36;i++){
+   const s=pointAt(i/36*length),dist=ROAD/2+12+(i%4)*2.2,rock=new THREE.Mesh(new THREE.DodecahedronGeometry(2.2+(i%3)*.65,1),cliffMats[(i+(sideSign===1?1:0))%3]);
+   rock.position.set(s.p.x+s.side.x*dist*sideSign,s.p.y+3.5+(i%5)*1.4,s.p.z+s.side.z*dist*sideSign);rock.scale.set(1.5,2.5+(i%4)*.55,2.1);rock.rotation.set(.13*i,.31*i,.08*i);rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);
+  }
+ }
+ for(let i=0;i<14;i++){
+  const s=pointAt(i/14*length),side=i%2?1:-1,dist=48+(i%3)*9,peak=new THREE.Mesh(new THREE.DodecahedronGeometry(10+(i%4)*2,1),cliffMats[i%3]);
+  peak.position.set(s.p.x+s.side.x*dist*side,s.p.y+5,s.p.z+s.side.z*dist*side);peak.scale.set(1.8,2.3+(i%3)*.5,1.2);peak.rotation.y=i*.73;peak.castShadow=true;scene.add(peak);
+ }
+}else if(prefs.track==='desert'){
+  // Full-sized date palms with broad radial fronds, visible leaflets and ringed trunks.
+  const bark=mat('#805331',.96,0),barkLight=mat('#ad8052',.94,0);
+  const greens=[mat('#285c32',.9,0),mat('#39753a',.9,0),mat('#578746',.92,0),mat('#71954c',.94,0)];
+  greens.forEach(m=>m.side=THREE.DoubleSide);
+  const leafletGeo=new THREE.BufferGeometry(),leafPos=[],leafIdx=[];
+  for(let k=0;k<18;k++)for(const side of [-1,1]){
+   const n=leafPos.length/3;leafPos.push(.38+k*.19,0,0,.38+k*.19+.62,-.30,side*.54,.38+k*.19+.25,-.18,side*.15);leafIdx.push(n,n+1,n+2);
+  }
+  leafletGeo.setAttribute('position',new THREE.Float32BufferAttribute(leafPos,3));leafletGeo.setIndex(leafIdx);leafletGeo.computeVertexNormals();
+  for(let i=0;i<32;i++){
+   const s=pointAt(i/32*length),side=i%2?1:-1,dist=ROAD/2+28+(i%4)*7,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,palm=new THREE.Group();palm.position.set(x,-.16,z);palm.rotation.y=(i*2.17)%6.28;
+   const h=7.2+(i%5)*.55,trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.39,h,12,8),bark);trunk.position.y=h/2;trunk.castShadow=true;palm.add(trunk);
+   for(let ring=0;ring<9;ring++){const band=new THREE.Mesh(new THREE.TorusGeometry(.30-ring*.009,.035,6,16),barkLight);band.rotation.x=Math.PI/2;band.position.y=.65+ring*.72;palm.add(band)}
+   const crown=new THREE.Group();crown.position.y=h-.1;palm.add(crown);
+   for(let f=0;f<11;f++){
+    const angle=f*Math.PI*2/11+(i%3)*.17,frond=new THREE.Group(),points=[new THREE.Vector3(0,0,0),new THREE.Vector3(.9,-.18,0),new THREE.Vector3(2.1,-.62,0),new THREE.Vector3(3.35,-1.35,0),new THREE.Vector3(4.15,-1.95,0)];
+    frond.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),18,.055,6,false),barkLight));
+    const blades=new THREE.Mesh(leafletGeo,greens[(i+f)%greens.length]);blades.position.y=-.02;blades.castShadow=true;frond.add(blades);frond.rotation.y=angle;frond.rotation.x=.08;crown.add(frond);
+   }
+   const heart=new THREE.Mesh(new THREE.SphereGeometry(.38,12,9),greens[1]);heart.position.y=.12;crown.add(heart);scene.add(palm);
+  }
+  // Keep the sandy floor clear around the racing surface.
 }else{
  // Coastal cliffs, palms and a visible blue ocean horizon.
  for(let i=0;i<36;i++){const s=pointAt(i/36*length),side=i%2?1:-1,dist=ROAD/2+20+(i%4)*12,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
@@ -155,25 +162,25 @@ if(prefs.track==='coast'){
  }
 }
 let v=[],idx=[],uv=[];const seg=900;
- for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+2,n+1,n+1,n+2,n+3)}}
+ for(let i=0;i<=seg;i++){const s=pointAt(i/seg*length);for(let side of [-1,1]){v.push(s.p.x+s.side.x*ROAD*.5*side,s.p.y+.02,s.p.z+s.side.z*ROAD*.5*side);uv.push(side===-1?0:1,(i/seg*length)/6)}if(i<seg){let n=i*2;idx.push(n,n+2,n+1,n+1,n+2,n+3)}}
  let geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(v,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
  const roadTex=makeRoadTexture();roadTex.repeat.set(1,1);
  let road=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({color:'#ffffff',map:roadTex,roughness:.98}));road.receiveShadow=true;scene.add(road);
  /* High-contrast road edge markings: continuous bright lines plus raised rumble strips */
 for(const side of [-1,1]){
- const edgePts=[];for(let i=0;i<=seg;i+=2){const s=pointAt(i/seg*length);edgePts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2-.22)*side,.085,s.p.z+s.side.z*(ROAD/2-.22)*side))}
+ const edgePts=[];for(let i=0;i<=seg;i+=2){const s=pointAt(i/seg*length);edgePts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2-.22)*side,s.p.y+.085,s.p.z+s.side.z*(ROAD/2-.22)*side))}
  const edgeLine=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(edgePts),edgePts.length*2,.105,8,false),mat('#fff4d7',.55,.12));scene.add(edgeLine);
- const curbGeo=new THREE.BoxGeometry(.42,.09,1.15),curbMats=[mat('#f5eee1',.8,0),mat('#d64a3f',.8,0)],curbMeshes=curbMats.map(m=>new THREE.InstancedMesh(curbGeo,m,Math.ceil(seg/4)));curbMeshes.forEach(m=>{m.castShadow=false;m.receiveShadow=true;scene.add(m)});const curbDummy=new THREE.Object3D();let curbCounts=[0,0];for(let i=0;i<seg;i+=4){const s=pointAt(i/seg*length),x=s.p.x+s.side.x*(ROAD/2+.16)*side,z=s.p.z+s.side.z*(ROAD/2+.16)*side;curbDummy.position.set(x,.09,z);curbDummy.rotation.set(0,Math.atan2(s.tan.x,s.tan.z),0);curbDummy.updateMatrix();const mi=(i/4)%2;curbMeshes[mi].setMatrixAt(curbCounts[mi]++,curbDummy.matrix)}curbMeshes.forEach((m,i)=>{m.count=curbCounts[i];m.instanceMatrix.needsUpdate=true})
+ const curbGeo=new THREE.BoxGeometry(.42,.09,1.15),curbMats=[mat('#f5eee1',.8,0),mat('#d64a3f',.8,0)],curbMeshes=curbMats.map(m=>new THREE.InstancedMesh(curbGeo,m,Math.ceil(seg/4)));curbMeshes.forEach(m=>{m.castShadow=false;m.receiveShadow=true;scene.add(m)});const curbDummy=new THREE.Object3D();let curbCounts=[0,0];for(let i=0;i<seg;i+=4){const s=pointAt(i/seg*length),x=s.p.x+s.side.x*(ROAD/2+.16)*side,z=s.p.z+s.side.z*(ROAD/2+.16)*side;curbDummy.position.set(x,s.p.y+.09,z);curbDummy.rotation.set(0,Math.atan2(s.tan.x,s.tan.z),0);curbDummy.updateMatrix();const mi=(i/4)%2;curbMeshes[mi].setMatrixAt(curbCounts[mi]++,curbDummy.matrix)}curbMeshes.forEach((m,i)=>{m.count=curbCounts[i];m.instanceMatrix.needsUpdate=true})
 }
-for(let side of [-1,1]){let pts=[],rail=[];for(let i=0;i<=seg;i+=3){let s=pointAt(i/seg*length);pts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+.6)*side,.14,s.p.z+s.side.z*(ROAD/2+.6)*side));rail.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+1.35)*side,.72,s.p.z+s.side.z*(ROAD/2+1.35)*side))}scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),pts.length*2,.22,6,false),mat('#eee8d8')));scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rail),rail.length*2,.12,6,false),mat('#aeb8bd',.45,.65)))}
-const dashCount=110,dashMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(.16,.035,2.2),mat('#d9d4c7',.82),dashCount),dashDummy=new THREE.Object3D();for(let i=0;i<dashCount;i++){const s=pointAt(i/110*length);dashDummy.position.set(s.p.x,.08,s.p.z);dashDummy.rotation.set(0,Math.atan2(s.tan.x,s.tan.z),0);dashDummy.updateMatrix();dashMesh.setMatrixAt(i,dashDummy.matrix)}dashMesh.instanceMatrix.needsUpdate=true;scene.add(dashMesh);
-let start=pointAt(0),line=new THREE.Mesh(new THREE.BoxGeometry(ROAD,.04,1),mat('#fff'));line.position.set(start.p.x,.06,start.p.z);line.rotation.y=Math.atan2(start.tan.x,start.tan.z);scene.add(line);
+for(let side of [-1,1]){let pts=[],rail=[];for(let i=0;i<=seg;i+=3){let s=pointAt(i/seg*length);pts.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+.6)*side,s.p.y+.14,s.p.z+s.side.z*(ROAD/2+.6)*side));rail.push(new THREE.Vector3(s.p.x+s.side.x*(ROAD/2+1.35)*side,s.p.y+.72,s.p.z+s.side.z*(ROAD/2+1.35)*side))}scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),pts.length*2,.22,6,false),mat('#eee8d8')));scene.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(rail),rail.length*2,.12,6,false),mat('#aeb8bd',.45,.65)))}
+const dashCount=110,dashMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(.16,.035,2.2),mat('#d9d4c7',.82),dashCount),dashDummy=new THREE.Object3D();for(let i=0;i<dashCount;i++){const s=pointAt(i/110*length);dashDummy.position.set(s.p.x,s.p.y+.08,s.p.z);dashDummy.rotation.set(0,Math.atan2(s.tan.x,s.tan.z),0);dashDummy.updateMatrix();dashMesh.setMatrixAt(i,dashDummy.matrix)}dashMesh.instanceMatrix.needsUpdate=true;scene.add(dashMesh);
+let start=pointAt(0),line=new THREE.Mesh(new THREE.BoxGeometry(ROAD,.04,1),mat('#fff'));line.position.set(start.p.x,start.p.y+.06,start.p.z);line.rotation.y=Math.atan2(start.tan.x,start.tan.z);scene.add(line);
 // Biome-specific vegetation is created above; no generic trees are placed in the desert.
 // Tall raceway lights and trackside advertising panels add depth and scale
 for(let i=0;i<22;i++){let s=pointAt(i/22*length),side=i%2?1:-1,dist=ROAD/2+5,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;let pole=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,7,8),mat('#424b50',.45,.65));pole.position.set(x,3.5,z);scene.add(pole);let arm=new THREE.Mesh(new THREE.BoxGeometry(1.7,.12,.16),mat('#424b50',.4,.6));arm.position.set(x-s.side.x*side*.7,6.85,z-s.side.z*side*.7);scene.add(arm);let lamp=new THREE.Mesh(new THREE.BoxGeometry(.7,.13,.42),mat('#fff0c8',.25,.1));lamp.position.set(x-s.side.x*side*1.25,6.72,z-s.side.z*side*1.25);scene.add(lamp)}
 for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROAD/2+9,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;let board=new THREE.Mesh(new THREE.BoxGeometry(5.8,2.1,.22),mat(i%2?'#263a49':'#9c4c2e',.5,.25));board.position.set(x,5,z);board.rotation.y=Math.atan2(s.tan.x,s.tan.z);scene.add(board);let post=new THREE.Mesh(new THREE.BoxGeometry(.18,4,.18),mat('#4c5559'));post.position.set(x,2.1,z);scene.add(post)}
 player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:-12-i*9,side:[-2.9,2.8,.1][i],v:27+(save.league||0)*2.2+i*.7,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
-function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,5.3,player.position.z-fz*11);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x+fx*8,1.1,player.position.z+fz*8)}
+function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,player.position.y+5.3,player.position.z-fz*11);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x+fx*8,player.position.y+1.1,player.position.z+fz*8)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
 function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);renderer.render(scene,camera)}
 function update(dt){
@@ -222,6 +229,12 @@ function update(dt){
     }
   }
   progress=bestD;
+  if(prefs.track==='forest'){
+    const along=fx*bestSample.tan.x+fz*bestSample.tan.z;
+    speed=clamp(speed-9.8*bestSample.tan.y*along*dt,-13,maxV+12);
+    player.position.y=bestSample.p.y+.05;
+    player.rotation.x=-Math.atan2(bestSample.tan.y,Math.hypot(bestSample.tan.x,bestSample.tan.z));
+  }else{player.position.y=.05;player.rotation.x=0}
   const dx=player.position.x-bestSample.p.x,dz=player.position.z-bestSample.p.z;
   const signedOffset=dx*bestSample.side.x+dz*bestSample.side.z;
   const offLimit=ROAD/2-1.25;
@@ -240,6 +253,7 @@ function update(dt){
   collisionFlash=Math.max(0,collisionFlash-dt);
   for(const a of ai){
     const delta=((progress-a.d+length*1.5)%length);
+    if(prefs.track==='forest')a.v=clamp(a.v-9.8*pointAt(a.d).tan.y*dt,22,62);
     let target=a.v;
     if(delta>0&&delta<18)target*=.94;
     a.d+=target*dt;
@@ -298,7 +312,7 @@ function finish(){
  updateMenuStats()
 }
 function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];$('season').textContent=(save.races+1)+'/3';$('points').textContent=save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;$('leagueName').textContent='ЛИГА '+(save.league+1)+' · '+names[save.league];$('mission').textContent='Чемпионат — 3 гонки. За места дают 5 / 4 / 3 / 2 очка. Нужно набрать 11 очков за чемпионат. Не хватит — очки сбросятся; токены, улучшения и победы сохраняются.';updateUpgradeLabels()}
-function start(){mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{a.d=-12-i*9;a.side=[-2.9,2.8,.1][i];a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;cameraUpdate(.1)}
+function start(){mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{a.d=-12-i*9;a.side=[-2.9,2.8,.1][i];a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));cameraUpdate(.1)}
 // Reliable multi-touch input: pointer capture keeps a press alive when a
 // finger drifts outside its button. Keyboard and touch states are independent.
 const activeControlPointers=new Map();
