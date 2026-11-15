@@ -531,15 +531,15 @@ function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getD
 function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
 function updateAtmosphereVisuals(dt){
  if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
- const a=atmosphereLights,t=(elapsed%240)/240,day=.5+.5*Math.cos(t*Math.PI*2);
+ const a=atmosphereLights,t=(elapsed%480)/480,day=.72+.28*Math.cos(t*Math.PI*2);
  const dusk=Math.max(0,1-Math.abs(t-.25)*5),night=1-day;
  const topDay=new THREE.Color('#397a9b'),topDusk=new THREE.Color('#6e5268'),topNight=new THREE.Color('#081322');
  const horizonDay=new THREE.Color('#d6c7a5'),horizonDusk=new THREE.Color('#f09a61'),horizonNight=new THREE.Color('#263c55');
  const top=topNight.clone().lerp(topDay,day).lerp(topDusk,dusk*.72),horizon=horizonNight.clone().lerp(horizonDay,day).lerp(horizonDusk,dusk);
  a.skyMat.uniforms.topColor.value.copy(top);a.skyMat.uniforms.horizonColor.value.copy(horizon);
- const warm=new THREE.Color('#ffb16d'),cool=new THREE.Color('#d7e6ff');a.sun.color.copy(cool.clone().lerp(warm,dusk));a.sun.intensity=(.48+day*2.9)*(1-night*.42);a.fill.intensity=.18+day*.5;a.hemi.intensity=.32+day*.52;
+ const warm=new THREE.Color('#ffb16d'),cool=new THREE.Color('#d7e6ff');a.sun.color.copy(cool.clone().lerp(warm,dusk));a.sun.intensity=2.45+day*1.25;a.fill.intensity=.52+day*.28;a.hemi.intensity=.72+day*.28;
  a.sunDisc.material.color.copy(new THREE.Color('#fff0c8').lerp(warm,dusk).lerp(new THREE.Color('#8296bd'),night*.8));a.sunDisc.material.opacity=.25+day*.75;
- renderer.toneMappingExposure=.78+day*.38;
+ renderer.toneMappingExposure=1.12+day*.08;
  const weather=Math.floor(elapsed/32)%4;const rain=weather===1,snow=weather===3,fog=weather===2;
  scene.fog.near=a.baseFogNear*(fog?.42:rain?.78:1);scene.fog.far=a.baseFogFar*(fog?.48:rain?.82:1);
  scene.fog.color.copy(fog?new THREE.Color('#aab8bf'):snow?new THREE.Color('#c4d0d7'):rain?new THREE.Color('#718494'):horizon);
