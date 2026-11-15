@@ -333,7 +333,7 @@ function update(dt){
     // Rivals launch from rest instead of instantly moving at full speed.
     // Their launch acceleration is deliberately below the player's so they
     // cannot rear-end the player while the player is building speed.
-    a.currentSpeed=Math.min(target,(a.currentSpeed||0)+7.5*dt);
+    a.currentSpeed=Math.min(target,(a.currentSpeed||0)+accel*1.1*dt);
     a.d+=a.currentSpeed*dt;
     place(a.car,a.d,a.side);
     a.hit=Math.max(0,a.hit-dt);
