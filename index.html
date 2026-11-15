@@ -208,7 +208,7 @@ function update(dt){
   // after a finger is released.
   // Steering is derived only from currently held controls. Never retain a
   // previous steering value after a touch or key is released.
-  const steerInput=(held.left===held.right)?0:(held.left?-1:1);
+  const steerInput=(held.left===held.right)?0:(held.left?1:-1);
   steer=steerInput;
   // Gas and reverse are separate commands. Reverse first brakes to zero,
   // then engages a controlled reverse gear.
@@ -263,20 +263,12 @@ function update(dt){
     player.position.x=bestSample.p.x+bestSample.side.x*safeOffset;
     player.position.z=bestSample.p.z+bestSample.side.z*safeOffset;
     if(boundaryHit<=0){
-      // Rocky Pass has tighter mountain bends. A car that reaches the edge
-      // while pointing outwards must be turned back onto the road, otherwise
-      // the safety barrier can pin it in place forever.
-      speed=Math.max(0,speed-(prefs.track==='forest'?2.2:7));
+      // A barrier hit slows the car but never changes its steering direction.
+      // The player remains fully in control and can steer back onto the road.
+      speed=Math.max(speed*.78,speed-(prefs.track==='forest'?2.2:7));
       boundaryHit=.42;collisionFlash=.55;
     }
-    if(prefs.track==='forest'){
-      const roadHeading=Math.atan2(bestSample.tan.x,bestSample.tan.z);
-      const targetHeading=roadHeading+Math.sign(signedOffset)*.28;
-      const angleDelta=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
-      heading+=clamp(angleDelta,-dt*3.8,dt*3.8);
-      player.rotation.y=heading;
-    }
-    $('hint').textContent='УДАР О БОРТ · ВОЗВРАЩАЕМСЯ НА ТРАССУ';
+    $('hint').textContent='УДАР О БОРТ · СКОРОСТЬ СБРОШЕНА';
   }else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
   cameraUpdate(dt);
   collisionFlash=Math.max(0,collisionFlash-dt);
