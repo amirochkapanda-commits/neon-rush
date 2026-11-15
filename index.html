@@ -131,27 +131,35 @@ if(prefs.track==='coast'){
   peak.position.set(s.p.x+s.side.x*dist*side,s.p.y+5,s.p.z+s.side.z*dist*side);peak.scale.set(1.8,2.3+(i%3)*.5,1.2);peak.rotation.y=i*.73;peak.castShadow=true;scene.add(peak);
  }
 }else if(prefs.track==='desert'){
-  // Full-sized date palms with broad radial fronds, visible leaflets and ringed trunks.
+  // Full-sized date palms. Shared instanced geometry keeps the detailed canopy fast on phones.
   const bark=mat('#805331',.96,0),barkLight=mat('#ad8052',.94,0);
-  const greens=[mat('#285c32',.9,0),mat('#39753a',.9,0),mat('#578746',.92,0),mat('#71954c',.94,0)];
-  greens.forEach(m=>m.side=THREE.DoubleSide);
+  const greens=['#285c32','#39753a','#578746','#71954c'];
+  const leafMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.9,side:THREE.DoubleSide});
   const leafletGeo=new THREE.BufferGeometry(),leafPos=[],leafIdx=[];
   for(let k=0;k<18;k++)for(const side of [-1,1]){
-   const n=leafPos.length/3;leafPos.push(.38+k*.19,0,0,.38+k*.19+.62,-.30,side*.54,.38+k*.19+.25,-.18,side*.15);leafIdx.push(n,n+1,n+2);
+   const n=leafPos.length/3,x=.38+k*.19;leafPos.push(x,0,0,x+.62,-.30,side*.54,x+.25,-.18,side*.15);leafIdx.push(n,n+1,n+2);
   }
   leafletGeo.setAttribute('position',new THREE.Float32BufferAttribute(leafPos,3));leafletGeo.setIndex(leafIdx);leafletGeo.computeVertexNormals();
+  const stemPoints=[new THREE.Vector3(0,0,0),new THREE.Vector3(.9,-.18,0),new THREE.Vector3(2.1,-.62,0),new THREE.Vector3(3.35,-1.35,0),new THREE.Vector3(4.15,-1.95,0)];
+  const stemGeo=new THREE.TubeGeometry(new THREE.CatmullRomCurve3(stemPoints),18,.055,6,false);
+  const trunkGeo=new THREE.CylinderGeometry(.22,.39,1,12,8),ringGeo=new THREE.TorusGeometry(.30,.035,6,16),heartGeo=new THREE.SphereGeometry(.38,12,9);
+  const trunks=new THREE.InstancedMesh(trunkGeo,bark,32),rings=new THREE.InstancedMesh(ringGeo,barkLight,32*9);
+  const stems=new THREE.InstancedMesh(stemGeo,barkLight,32*11),leaves=new THREE.InstancedMesh(leafletGeo,leafMat,32*11),hearts=new THREE.InstancedMesh(heartGeo,new THREE.MeshStandardMaterial({color:'#39753a',roughness:.9}),32);
+  const dummy=new THREE.Object3D();let ri=0,fi=0;
   for(let i=0;i<32;i++){
-   const s=pointAt(i/32*length),side=i%2?1:-1,dist=ROAD/2+28+(i%4)*7,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,palm=new THREE.Group();palm.position.set(x,-.16,z);palm.rotation.y=(i*2.17)%6.28;
-   const h=7.2+(i%5)*.55,trunk=new THREE.Mesh(new THREE.CylinderGeometry(.22,.39,h,12,8),bark);trunk.position.y=h/2;trunk.castShadow=true;palm.add(trunk);
-   for(let ring=0;ring<9;ring++){const band=new THREE.Mesh(new THREE.TorusGeometry(.30-ring*.009,.035,6,16),barkLight);band.rotation.x=Math.PI/2;band.position.y=.65+ring*.72;palm.add(band)}
-   const crown=new THREE.Group();crown.position.y=h-.1;palm.add(crown);
-   for(let f=0;f<11;f++){
-    const angle=f*Math.PI*2/11+(i%3)*.17,frond=new THREE.Group(),points=[new THREE.Vector3(0,0,0),new THREE.Vector3(.9,-.18,0),new THREE.Vector3(2.1,-.62,0),new THREE.Vector3(3.35,-1.35,0),new THREE.Vector3(4.15,-1.95,0)];
-    frond.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(points),18,.055,6,false),barkLight));
-    const blades=new THREE.Mesh(leafletGeo,greens[(i+f)%greens.length]);blades.position.y=-.02;blades.castShadow=true;frond.add(blades);frond.rotation.y=angle;frond.rotation.x=.08;crown.add(frond);
+   const s=pointAt(i/32*length),side=i%2?1:-1,dist=ROAD/2+28+(i%4)*7,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,palmYaw=(i*2.17)%6.28,h=7.2+(i%5)*.55,crownY=-.16+h-.1;
+   dummy.position.set(x,-.16+h/2,z);dummy.rotation.set(0,palmYaw,0);dummy.scale.set(1,h,1);dummy.updateMatrix();trunks.setMatrixAt(i,dummy.matrix);
+   for(let ring=0;ring<9;ring++){
+    dummy.position.set(x,-.16+.65+ring*.72,z);dummy.rotation.set(Math.PI/2,0,0);const sc=1-ring*.025;dummy.scale.set(sc,sc,sc);dummy.updateMatrix();rings.setMatrixAt(ri++,dummy.matrix);
    }
-   const heart=new THREE.Mesh(new THREE.SphereGeometry(.38,12,9),greens[1]);heart.position.y=.12;crown.add(heart);scene.add(palm);
+   for(let f=0;f<11;f++){
+    const angle=f*Math.PI*2/11+(i%3)*.17;dummy.position.set(x,crownY,z);dummy.rotation.set(.08,palmYaw+angle,0);dummy.scale.set(1,1,1);dummy.updateMatrix();
+    stems.setMatrixAt(fi,dummy.matrix);leaves.setMatrixAt(fi,dummy.matrix);leaves.setColorAt(fi,new THREE.Color(greens[(i+f)%greens.length]));fi++;
+   }
+   dummy.position.set(x,crownY+.12,z);dummy.rotation.set(0,0,0);dummy.scale.set(1,1,1);dummy.updateMatrix();hearts.setMatrixAt(i,dummy.matrix);
   }
+  for(const inst of [trunks,rings,stems,leaves,hearts]){inst.instanceMatrix.needsUpdate=true;inst.castShadow=true;inst.receiveShadow=true;scene.add(inst)}
+  if(leaves.instanceColor)leaves.instanceColor.needsUpdate=true;
   // Keep the sandy floor clear around the racing surface.
 }else{
  // Coastal cliffs, palms and a visible blue ocean horizon.
