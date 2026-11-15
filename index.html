@@ -30,11 +30,16 @@
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { EffectComposer } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/RenderPass.js';
+import { SSAOPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/SSAOPass.js';
+import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/OutputPass.js';
 const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
 const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);if(!save.championshipRulesV2){save.leaguePoints=0;save.races=0;save.points=0;save.championshipRulesV2=true;localStorage.setItem('autosport-career',JSON.stringify(save));} // One-time reset for the new championship rules; future reloads keep current progress.
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.paint=prefs.paint||'#dba14e';prefs.rim=prefs.rim||'#9da6aa';$('paint').value=prefs.paint;$('rimPaint').value=prefs.rim;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
-let scene,camera,cameraAim,renderer,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
+let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
 const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
@@ -240,7 +245,7 @@ function car(color,isPlayer=false){
  root.userData.body=body;return root;
 }
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.paint||$('paint').value);if(rimMat)rimMat.color.set(prefs.rim||$('rimPaint').value)}
-function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){if(scene.environment)scene.environment.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
+function buildWorld(){if(raf)cancelAnimationFrame(raf);if(composer){composer.dispose();composer=null}if(pmremTarget){pmremTarget.dispose();pmremTarget=null}if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
  // Cinematic atmospheric sky gradient and distant sun: decorative scene layer only.
  const skyGeo=new THREE.SphereGeometry(690,48,32);
  // Soft procedural cloud layers are rendered only on the sky sphere.
@@ -259,26 +264,50 @@ function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dis
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.5:2));renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.08;renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
- // Procedural image-based ambient reflections for paint, glass and metal.
- const envCanvas=document.createElement('canvas');envCanvas.width=2048;envCanvas.height=1024;
- const envCtx=envCanvas.getContext('2d'),envGrad=envCtx.createLinearGradient(0,0,0,1024);
- envGrad.addColorStop(0,'#1d314b');envGrad.addColorStop(.28,'#718fa5');envGrad.addColorStop(.47,'#d7c9b2');envGrad.addColorStop(.53,'#f4dfbf');envGrad.addColorStop(.68,'#424b50');envGrad.addColorStop(1,'#101820');
- envCtx.fillStyle=envGrad;envCtx.fillRect(0,0,2048,1024);
- envCtx.save();envCtx.filter='blur(16px)';envCtx.globalAlpha=.48;
- for(let i=0;i<68;i++){const x=i*31,w=(12+(i%5)*9)*2,h=(24+(i*17)%100)*2;envCtx.fillStyle=i%3?'#26343d':'#c1c6c3';envCtx.fillRect(x,520-h,w,h)}
- envCtx.restore();
- for(let i=0;i<320;i++){const x=(i*134)%2048,y=420+(i*58)%220;envCtx.fillStyle='rgba(255,239,205,'+(0.025+(i%4)*.012)+')';envCtx.fillRect(x,y,2+(i%5)*2,1+(i%3))}
- const envTexture=new THREE.CanvasTexture(envCanvas);envTexture.mapping=THREE.EquirectangularReflectionMapping;envTexture.colorSpace=THREE.SRGBColorSpace;
- scene.environment=envTexture;scene.environmentIntensity=.78;
-scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':'#54483a',1.48));
-const sun=new THREE.DirectionalLight('#fff0d9',3.45);sun.position.set(-65,105,42);sun.castShadow=true;
-sun.shadow.mapSize.set(mobileQuality?1536:3072,mobileQuality?1536:3072);
+ // Procedural HDR radiance environment: a high-dynamic-range sky, warm horizon,
+ // broad studio-like reflection cards and a bright solar source for realistic paint/glass.
+ const envW=512,envH=256,envData=new Float32Array(envW*envH*3);
+ const sunU=.73,sunV=.365;
+ for(let y=0;y<envH;y++)for(let x=0;x<envW;x++){
+  const u=x/envW,v=y/envH,h=1-v,skyT=THREE.MathUtils.smoothstep(h,.03,.72);
+  const desert=prefs.track==='desert',forest=prefs.track==='forest';
+  const top=desert?[.19,.28,.39]:forest?[.075,.13,.19]:[.10,.24,.34];
+  const horizon=desert?[1.18,.72,.37]:forest?[.72,.78,.77]:[.86,.78,.64];
+  let rr=THREE.MathUtils.lerp(horizon[0],top[0],skyT),gg=THREE.MathUtils.lerp(horizon[1],top[1],skyT),bb=THREE.MathUtils.lerp(horizon[2],top[2],skyT);
+  const sunDx=Math.min(Math.abs(u-sunU),1-Math.abs(u-sunU)),sunDist=Math.hypot(sunDx*2.0,(v-sunV)*1.25);
+  const solar=Math.exp(-sunDist*sunDist*1050)*18,halo=Math.exp(-sunDist*sunDist*38)*1.7;
+  rr+=solar+halo*.98;gg+=solar*.82+halo*.82;bb+=solar*.58+halo*.62;
+  const horizonBand=Math.exp(-Math.pow((v-.49)*18,2));
+  const studioBand=(Math.sin(u*6.283*7+0.6)*.5+.5)*horizonBand;
+  const reflectionCard=Math.pow(Math.max(0,Math.sin(u*6.283*5+1.2)),18)*Math.exp(-Math.pow((v-.56)*9,2));
+  const groundMix=THREE.MathUtils.smoothstep(v,.51,.72);
+  rr=THREE.MathUtils.lerp(rr,desert?.36:forest?.105:.16,groundMix);
+  gg=THREE.MathUtils.lerp(gg,desert?.25:forest?.12:.18,groundMix);
+  bb=THREE.MathUtils.lerp(bb,desert?.13:forest?.12:.17,groundMix);
+  const card=(studioBand*.24+reflectionCard*.85)*(1-groundMix);
+  const idx=(y*envW+x)*3;envData[idx]=rr+card*1.8;envData[idx+1]=gg+card*1.75;envData[idx+2]=bb+card*1.55;
+ }
+ const hdrTexture=new THREE.DataTexture(envData,envW,envH,THREE.RGBFormat,THREE.FloatType);
+ hdrTexture.mapping=THREE.EquirectangularReflectionMapping;hdrTexture.colorSpace=THREE.LinearSRGBColorSpace;hdrTexture.needsUpdate=true;
+ const pmrem=new THREE.PMREMGenerator(renderer);pmrem.compileEquirectangularShader();pmremTarget=pmrem.fromEquirectangular(hdrTexture);pmrem.dispose();hdrTexture.dispose();
+ scene.environment=pmremTarget.texture;scene.environmentIntensity=1.08;
+scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':prefs.track==='forest'?'#39483c':'#54483a',.82));
+const sun=new THREE.DirectionalLight('#fff0d9',prefs.track==='desert'?3.8:3.35);sun.position.set(-65,105,42);sun.castShadow=true;
+sun.shadow.mapSize.set(mobileQuality?1536:4096,mobileQuality?1536:4096);
 sun.shadow.camera.left=-92;sun.shadow.camera.right=92;sun.shadow.camera.top=92;sun.shadow.camera.bottom=-92;
-sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00018;sun.shadow.normalBias=.035;sun.shadow.radius=2;
+sun.shadow.camera.near=1;sun.shadow.camera.far=260;sun.shadow.bias=-0.00012;sun.shadow.normalBias=.025;sun.shadow.radius=mobileQuality?2:3;
 scene.add(sun);
-const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.88);fill.position.set(55,38,-70);scene.add(fill);
+const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8',.62);fill.position.set(55,38,-70);scene.add(fill);
+ // Screen-space ambient occlusion and restrained cinematic bloom.
+ const renderTarget=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false});
+ composer=new EffectComposer(renderer,renderTarget);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(innerWidth,innerHeight);
+ composer.addPass(new RenderPass(scene,camera));
+ ssaoPass=new SSAOPass(scene,camera,innerWidth,innerHeight);ssaoPass.kernelRadius=mobileQuality?5:8;ssaoPass.minDistance=.004;ssaoPass.maxDistance=.12;composer.addPass(ssaoPass);
+ ssaoPass.output=SSAOPass.OUTPUT.DEFAULT;
+ bloomPass=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),mobileQuality?.2:.3,.32,.88);composer.addPass(bloomPass);
+ composer.addPass(new OutputPass());
 curve=new THREE.CatmullRomCurve3(r.points.map((p,i)=>{const t=i/r.points.length,y=prefs.track==='forest'?15+9*Math.sin(t*Math.PI*2-.35)+3*Math.sin(t*Math.PI*4+.55)+1.5*Math.sin(t*Math.PI*6-.2):0;return new THREE.Vector3(p[0]*2.3,y,p[1]*2.3)}),true,'catmullrom',.3);length=curve.getLength();
 // Distinct track biomes: coast, alpine mountain forest and desert dunes.
 if(prefs.track==='coast'){
@@ -461,7 +490,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
 player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:12+i*9,side:[-2.9,2.8,.1][i],v:[142.24,165,185,220,255][Math.max(0,Math.min(4,save.league||0))]*.93/3.6-(2-i)*.7,currentSpeed:0,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,player.position.y+5.3,player.position.z-fz*11),lookTarget=new THREE.Vector3(player.position.x+fx*8,player.position.y+1.1,player.position.z+fz*8);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);renderer.render(scene,camera)}
+function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);if(composer)composer.render();else renderer.render(scene,camera)}
 function update(dt){
   elapsed+=dt;
   // Read steering directly from the live input state: no lingering steering
@@ -684,7 +713,7 @@ $('paint').addEventListener('input',()=>{document.querySelectorAll('[data-paint]
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
 function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150;if(level>=8){$('mission').textContent='Максимальный уровень этой детали уже установлен.';return}if(save.credits<cost){$('mission').textContent='Не хватает '+(cost-save.credits)+' токенов. Займи место выше и заработай больше.';return}save.credits-=cost;prefs[key]=level+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'!';updateUpgradeLabels()}
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
-addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)}});
+addEventListener('resize',()=>{if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer)composer.setSize(innerWidth,innerHeight);if(bloomPass)bloomPass.setSize(innerWidth,innerHeight)}});
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
 updateMenuStats();updateUpgradeLabels();try{buildWorld()}catch(e){console.error(e);$('status').textContent='Ошибка запуска: '+e.message}
 </script></body></html>
