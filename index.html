@@ -14,6 +14,69 @@
  .primary{background:linear-gradient(110deg,#9c5928,#f4c77e 52%,#c88b45);box-shadow:0 7px 22px #bd813d44;color:#17120d}
  .box{background:linear-gradient(155deg,#1c2b35eF,#0a1119eF);box-shadow:0 4px 16px #0005}
  .ctrl{box-shadow:0 5px 18px #0008,inset 0 1px #ffffff20}
+
+/* MENU REDESIGN — interface only; gameplay, tracks, coordinates and controls untouched. */
+#menu{align-items:center;padding:clamp(10px,2.5vw,28px);background:radial-gradient(ellipse at 12% 8%,#38566b88,transparent 38%),radial-gradient(ellipse at 90% 90%,#9a642b55,transparent 34%),linear-gradient(135deg,#071019ed,#101c27eF 55%,#080e15f5);backdrop-filter:blur(10px)}
+#menu>.card{width:min(1060px,100%);max-height:calc(100dvh - 28px);padding:clamp(16px,2.6vw,30px);border:1px solid #d9b77b55;border-radius:25px;background:linear-gradient(145deg,#1b2a36f7,#0b121bf9 72%);box-shadow:0 28px 100px #000b,inset 0 1px #ffffff20;position:relative;overflow:auto}
+#menu>.card:before{content:"";position:absolute;top:0;left:7%;right:7%;height:2px;background:linear-gradient(90deg,transparent,#f4c77e,#fff0c4,#f4c77e,transparent);opacity:.9}
+#menu .brand{font-size:clamp(40px,7vw,68px);letter-spacing:-.085em;line-height:.95}
+#menu .tag{font-size:10px;letter-spacing:.32em;color:#c7d5dc;margin:9px 0 22px}
+#menu .tabs{display:flex;gap:8px;margin:0 0 22px;padding:5px;width:max-content;max-width:100%;border:1px solid #ffffff18;border-radius:14px;background:#071019a8}
+#menu .tab{min-width:112px;padding:11px 18px;border:1px solid transparent;border-radius:10px;background:transparent;color:#aebdc7;font-size:10px;letter-spacing:.12em;transition:.2s}
+#menu .tab[aria-selected=true]{background:linear-gradient(110deg,#f0b967,#f8d99d);color:#17120d;border-color:#ffe0a5;box-shadow:0 4px 18px #d69b4b44}
+#menu .section-title{font-size:11px;letter-spacing:.2em;color:#f5ca84;margin:2px 0 13px}
+#panel-race.active{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(260px,.85fr);grid-template-areas:"heading heading" "tracks league" "tracks mission" "tracks stats" "tracks start" "tracks status";column-gap:22px;align-items:start}
+#panel-race>.section-title{grid-area:heading}
+#panel-race>.track-picker{grid-area:tracks;grid-template-columns:1fr;gap:10px;margin:0}
+#panel-race>.league-chip{grid-area:league;justify-self:start;margin:0 0 9px;padding:7px 12px;border:1px solid #f0bd6950;background:#f0bd6919;letter-spacing:.08em}
+#panel-race>.mission{grid-area:mission;min-height:74px;padding:14px 15px;border-radius:13px;border-color:#ffffff20;background:linear-gradient(120deg,#ffffff0b,#ffffff04);font-size:12px;line-height:1.55}
+#panel-race>.menu-stats{grid-area:stats;margin:0;padding:14px 5px;border:1px solid #ffffff1c;border-radius:14px;background:#ffffff08}
+#panel-race>#start{grid-area:start;margin:0;min-height:54px;border-radius:13px;font-size:14px;letter-spacing:.06em}
+#panel-race>#status{grid-area:status;margin:0;text-align:center;min-height:13px}
+#menu .track-card{height:clamp(112px,17vh,160px);border-radius:15px;border-width:1px;background-position:center 55%;box-shadow:inset 0 -70px 55px #050b12c9,0 8px 22px #0005;transition:transform .18s,border-color .18s,filter .18s}
+#menu .track-card:after{inset:35% 0 0;background:linear-gradient(transparent,#050b12ee)}
+#menu .track-card span{left:15px;bottom:13px;font-size:14px;letter-spacing:.1em;text-shadow:0 2px 8px #000}
+#menu .track-card[aria-pressed=true]{border:2px solid #ffd18a;box-shadow:0 0 0 3px #f3bd6933,0 10px 28px #0008,inset 0 -70px 55px #050b12c9}
+#menu .track-card[aria-disabled=true]{filter:grayscale(.8) brightness(.42)}
+#menu .stats{gap:4px}
+#menu .stats>div{flex:1;min-width:0;padding:6px 3px}
+#menu .stats small{font-size:8px;letter-spacing:.08em}
+#menu .stats b{font-size:clamp(17px,2.5vw,23px);font-weight:950;color:#fff}
+#menu .stats>div:last-child b{color:#f4c77e}
+#menu .primary{background:linear-gradient(110deg,#a96630,#f6d18d 55%,#d79a4b);box-shadow:0 8px 26px #d79a4b38,inset 0 1px #fff8;color:#17120d}
+#menu button:not(.primary):not(.tab):not(.track-card):not(.swatch){border-color:#ffffff28}
+#panel-tuning.active,#panel-design.active{display:block}
+#menu .upgrade-card{grid-template-columns:minmax(110px,180px) 1fr;gap:16px;padding:15px;border-radius:16px}
+#menu .upgrade-photo{width:100%;height:150px}
+#menu .upgrade-name,#menu .design-name{font-size:14px;letter-spacing:.04em}
+#menu .upgrade-desc,#menu .design-desc{font-size:11px;line-height:1.5}
+#menu .upgrade-buy{min-height:38px;border-radius:9px}
+#menu .design-colors{gap:14px}
+#menu .design-card{padding:13px;border-radius:16px}
+#menu .design-photo{height:150px}
+#menu .design-card label{margin-top:12px}
+#menu input[type=color]{height:42px}
+@media(max-width:680px){
+ #menu{align-items:flex-start;padding: max(8px,env(safe-area-inset-top)) 8px max(8px,env(safe-area-inset-bottom))}
+ #menu>.card{max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);padding:16px;border-radius:19px}
+ #menu .tag{margin-bottom:15px}
+ #menu .tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:100%;gap:5px;margin-bottom:17px}
+ #menu .tab{min-width:0;padding:11px 5px;font-size:9px}
+ #panel-race.active{grid-template-columns:1fr;grid-template-areas:"heading" "tracks" "league" "mission" "stats" "start" "status";gap:11px}
+ #panel-race>.track-picker{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+ #menu .track-card{height:clamp(100px,17vh,145px);border-radius:11px}
+ #menu .track-card span{left:7px;bottom:8px;font-size:clamp(8px,2.6vw,11px);letter-spacing:0}
+ #panel-race>.league-chip{margin:1px 0 0}
+ #panel-race>.mission{min-height:0;padding:11px 12px;font-size:11px}
+ #panel-race>.menu-stats{padding:10px 2px}
+ #panel-race>#start{min-height:49px}
+ #menu .upgrade-card{grid-template-columns:92px 1fr;gap:10px;padding:10px}
+ #menu .upgrade-photo{height:112px}
+ #menu .design-colors{gap:9px}
+ #menu .design-card{padding:9px}
+ #menu .design-photo{height:100px}
+}
+@media(max-width:380px){#menu .track-card{height:92px}#menu .track-card span{font-size:8px}#menu .stats small{font-size:7px}}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
