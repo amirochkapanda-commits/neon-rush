@@ -312,19 +312,17 @@ function update(dt){
   const offLimit=ROAD/2-1.25;
   boundaryHit=Math.max(0,boundaryHit-dt);
   if(Math.abs(signedOffset)>offLimit){
-    // A soft rebound nudges the car slightly back onto the asphalt instead of pinning it to the rail.
-    const rebound=.28;
-    const safeOffset=Math.sign(signedOffset)*Math.max(0,offLimit-rebound);
+    // Clamp only the small amount outside the track to avoid a visible positional snap.
+    const safeOffset=Math.sign(signedOffset)*Math.max(0,offLimit-.06);
     player.position.x=bestSample.p.x+bestSample.side.x*safeOffset;
     player.position.z=bestSample.p.z+bestSample.side.z*safeOffset;
     if(boundaryHit<=0){
-      // Keep the impact noticeable, but preserve most of the car's speed and steering control.
-      speed*=.97;
-      boundaryHit=.42;collisionFlash=.55;
+      // A clear but controlled speed penalty on each barrier impact.
+      speed*=.84;
+      boundaryHit=.55;collisionFlash=.55;
     }
     $('hint').textContent='ЛЁГКИЙ УДАР О БОРТ · СКОРОСТЬ НЕМНОГО СБРОШЕНА';
   }else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
-  cameraUpdate(dt);
   collisionFlash=Math.max(0,collisionFlash-dt);
   // Move every rival first, then resolve full-car footprint collisions.
   // The rectangular collider covers the complete chassis and cabin/glass footprint.
@@ -344,7 +342,7 @@ function update(dt){
       player.position.x-=contact.nx*push*.56;player.position.z-=contact.nz*push*.56;
       a.car.position.x+=contact.nx*push*.44;a.car.position.z+=contact.nz*push*.44;
       syncBotPosition(a);
-      if(a.hit<=0){speed=Math.max(speed*.88,speed-3.2);a.hit=.34;collisionFlash=.45}
+      if(a.hit<=0){speed=Math.sign(speed)*Math.max(0,Math.min(Math.abs(speed)*.84,Math.abs(speed)-5));a.hit=.42;collisionFlash=.45}
     }
   }
   // Rivals also collide with one another and cannot drive through each other.
@@ -358,6 +356,8 @@ function update(dt){
       if(a.hit<=0&&b.hit<=0){a.hit=.3;b.hit=.3}
     }
   }
+  // Update the smoothed chase camera after all collision corrections.
+  cameraUpdate(dt);
   const laps=Math.floor(progress/length);
   const placeNo=1+ai.filter(a=>{let d=(((a.d-progress)%length+length)%length);if(d>length/2)d-=length;return d>0}).length;
   $('lap').textContent=Math.min(3,laps+1)+'/3';
