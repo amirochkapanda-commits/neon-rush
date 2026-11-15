@@ -222,7 +222,7 @@ function update(dt){
  $('hint').textContent=boundaryHit>0?'УДАР О БОРТ · СКОРОСТЬ СБРОШЕНА':collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
  cameraUpdate(dt);collisionFlash=Math.max(0,collisionFlash-dt);
  for(const a of ai){
-  const delta=((progress-a.d+length*1.5)%length);
+  const delta=((progress-a.d)%length+length)%length;
   if(prefs.track==='forest')a.v=clamp(a.v-9.81*pointAt(a.d).tan.y*dt,22,62);
   let target=a.v;if(delta>0&&delta<18)target*=.94;a.d+=target*dt;place(a.car,a.d,a.side);
   const dx=player.position.x-a.car.position.x,dz=player.position.z-a.car.position.z,contactRadius=3.15;
