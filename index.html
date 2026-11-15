@@ -102,10 +102,24 @@ function update(dt){
   elapsed+=dt;
   const steerInput=(held.left?1:0)-(held.right?1:0);
   steer=mix(steer,steerInput,dt*8);
-  const accel=14+prefs.engine*2.5,maxV=58+prefs.engine*7;
-  if(held.gas)speed=Math.min(maxV,speed+accel*dt);else speed=Math.max(0,speed-7*dt);
-  if(held.brake)speed=Math.max(0,speed-32*dt);
-  heading+=steer*dt*(.55+speed*.025)*(1+prefs.grip*.08);
+  // Progressive throttle and a real reverse gear. The down button brakes while
+  // moving forward, then gently accelerates backwards once the car stops.
+  const accel=6.2+prefs.engine*1.15,maxV=47+prefs.engine*3.5,reverseMax=11;
+  if(held.gas){
+    if(speed<0)speed=Math.min(0,speed+17*dt);
+    else speed=Math.min(maxV,speed+accel*dt);
+  }else if(held.brake){
+    if(speed>0)speed=Math.max(0,speed-17*dt);
+    else speed=Math.max(-reverseMax,speed-5.2*dt);
+  }else{
+    if(speed>0)speed=Math.max(0,speed-1.65*dt);
+    else speed=Math.min(0,speed+1.65*dt);
+  }
+  // Steering remains effective at low speed; reverse steering is naturally
+  // mirrored, and grip upgrades add control without making the car twitchy.
+  const travelDirection=speed<-.15?-1:1;
+  const turnRate=.38+Math.min(Math.abs(speed),50)*.012;
+  heading+=steer*dt*turnRate*travelDirection*(1+prefs.grip*.045);
   const fx=Math.sin(heading),fz=Math.cos(heading);
   player.position.x+=fx*speed*dt;
   player.position.z+=fz*speed*dt;
