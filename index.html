@@ -38,11 +38,11 @@ import { UnrealBloomPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/exam
 import { OutputPass } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/postprocessing/OutputPass.js';
 const $=id=>document.getElementById(id),clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
 const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);if(!save.championshipRulesV2){save.leaguePoints=0;save.races=0;save.points=0;save.championshipRulesV2=true;localStorage.setItem('autosport-career',JSON.stringify(save));} // One-time reset for the new championship rules; future reloads keep current progress.
+const championshipTracks=['coast','forest','desert'];const trackNames=['COAST RUN','ROCKY PASS','DESERT RING'];
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 prefs.track=championshipTracks[Math.min(2,save.races)]||'coast';
  prefs.engine=Number(prefs.engine||0);prefs.grip=Number(prefs.grip||0);prefs.paint=prefs.paint||'#dba14e';prefs.rim=prefs.rim||'#9da6aa';$('paint').value=prefs.paint;$('rimPaint').value=prefs.rim;document.querySelectorAll('.track-card').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.track===prefs.track)));
 let scene,camera,cameraAim,renderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,collisionFlash=0,boundaryHit=0;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=12;
-const championshipTracks=['coast','forest','desert'];const trackNames=['COAST RUN','ROCKY PASS','DESERT RING'];
  const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[-5,-80],[42,-72],[78,-35],[83,15],[52,58],[0,78],[-53,55],[-80,10],[-70,-42],[-38,-73]],trees:'#39764b'},
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[58,-40],[35,-8],[75,28],[38,78],[-15,65],[-56,30],[-78,-20],[-48,-70]],trees:'#28533a'},
