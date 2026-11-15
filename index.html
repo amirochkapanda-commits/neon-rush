@@ -207,11 +207,19 @@ function update(dt){
  const steerInput=(held.left===held.right)?0:(held.left?1:-1);
  const accel=9.5+prefs.engine*1.15,maxV=42+prefs.engine*3.8,reverseMax=13;
  const currentSample=pointAt(progress);
- if(held.gas){if(speed<0)speed=Math.min(0,speed+22*dt);else speed=Math.min(maxV,speed+accel*dt)}
- else if(held.reverse){if(speed>0)speed=Math.max(0,speed-24*dt);else speed=Math.max(-reverseMax,speed-7.5*dt)}
- else{if(speed>0)speed=Math.max(0,speed-1.9*dt);else speed=Math.min(0,speed+2.8*dt)}
- // Gravity acts along the 3D track tangent: climbing costs power, descending adds speed.
- if(prefs.track==='forest')speed=clamp(speed-9.81*currentSample.tan.y*dt,-reverseMax,maxV+15);
+ const slope=prefs.track==='forest'?clamp(currentSample.tan.y,-.55,.55):0;
+ // Engine thrust always wins over the hill at low speed; gravity is a limited slope force.
+ if(held.gas){
+  const motorForce=speed<0?26:accel;
+  speed=Math.max(0,speed)+Math.max(4.5,motorForce-9.81*slope*.42)*dt;
+  speed=Math.min(maxV+8,speed);
+ }else if(held.reverse){
+  if(speed>0)speed=Math.max(0,speed-24*dt);
+  else speed=Math.max(-reverseMax,speed-7.5*dt);
+ }else{
+  const gravity=prefs.track==='forest'?-9.81*slope*.42:0;
+  speed=clamp(speed+(speed>0?-1.9:2.8)*dt+gravity*dt,-reverseMax,maxV+8);
+ }
  progress+=speed*dt;
  const sample=pointAt(progress),lateralRate=2.25+Math.min(Math.abs(speed),48)*.075,offLimit=ROAD/2-1.35;
  offset+=steerInput*lateralRate*dt;boundaryHit=Math.max(0,boundaryHit-dt);
@@ -305,6 +313,13 @@ function hold(id,key){
  el.addEventListener('lostpointercapture',releaseControlPointer);
 }
 hold('left','left');hold('right','right');hold('gas','gas');hold('brake','reverse');
+// Extra touch fallback for mobile browsers that lose a pointer event.
+document.getElementById('gas').addEventListener('touchstart',e=>{if(mode==='race'&&!paused){e.preventDefault();keyboardHeld.add('gas');refreshHeld()}},{passive:false});
+document.getElementById('gas').addEventListener('touchend',()=>{keyboardHeld.delete('gas');refreshHeld()},{passive:true});
+document.getElementById('gas').addEventListener('touchcancel',()=>{keyboardHeld.delete('gas');refreshHeld()},{passive:true});
+document.getElementById('brake').addEventListener('touchstart',e=>{if(mode==='race'&&!paused){e.preventDefault();keyboardHeld.add('reverse');refreshHeld()}},{passive:false});
+document.getElementById('brake').addEventListener('touchend',()=>{keyboardHeld.delete('reverse');refreshHeld()},{passive:true});
+document.getElementById('brake').addEventListener('touchcancel',()=>{keyboardHeld.delete('reverse');refreshHeld()},{passive:true});
 addEventListener('pointerup',releaseControlPointer,true);
 addEventListener('pointercancel',releaseControlPointer,true);
 // iOS/Safari safety net: if the final finger leaves the screen, clear any
