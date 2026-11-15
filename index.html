@@ -102,7 +102,9 @@ function update(dt){
   elapsed+=dt;
   // Read steering directly from the live input state: no lingering steering
   // after a finger is released.
-  const steerInput=(held.left?1:0)-(held.right?1:0);
+  // Steering is derived only from currently held controls. Never retain a
+  // previous steering value after a touch or key is released.
+  const steerInput=(held.left===held.right)?0:(held.left?1:-1);
   steer=steerInput;
   // Gas and reverse are separate commands. Reverse first brakes to zero,
   // then engages a controlled reverse gear.
@@ -226,7 +228,7 @@ const keyboardHeld=new Set();
 const keyMap={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'gas',KeyW:'gas',ArrowDown:'reverse',KeyS:'reverse'};
 function refreshHeld(){
  for(const key of Object.keys(held)){
-  held[key]=keyboardHeld.has(key)||[...activeControlPointers.values()].includes(key);
+  held[key]=keyboardHeld.has(key)||[...activeControlPointers.values()].some(v=>v.key===key);
  }
 }
 function releaseControlPointer(e){
@@ -234,12 +236,18 @@ function releaseControlPointer(e){
  activeControlPointers.delete(e.pointerId);
  refreshHeld();
 }
+function releaseTouchPointers(){
+ for(const [id,control] of activeControlPointers){
+  if(control.pointerType==='touch')activeControlPointers.delete(id);
+ }
+ refreshHeld();
+}
 function hold(id,key){
  const el=$(id);
  el.addEventListener('pointerdown',e=>{
   if(mode!=='race'||paused)return;
   e.preventDefault();
-  activeControlPointers.set(e.pointerId,key);
+  activeControlPointers.set(e.pointerId,{key,pointerType:e.pointerType||'unknown'});
   refreshHeld();
   try{el.setPointerCapture(e.pointerId)}catch{}
  },{passive:false});
@@ -250,14 +258,23 @@ function hold(id,key){
 hold('left','left');hold('right','right');hold('gas','gas');hold('brake','reverse');
 addEventListener('pointerup',releaseControlPointer,true);
 addEventListener('pointercancel',releaseControlPointer,true);
+// iOS/Safari safety net: if the final finger leaves the screen, clear any
+// touch pointer that the browser failed to report as released.
+document.addEventListener('touchend',e=>{if(e.touches.length===0)releaseTouchPointers()},{passive:true});
+document.addEventListener('touchcancel',releaseTouchPointers,{passive:true});
 addEventListener('keydown',e=>{
  const key=keyMap[e.code];
  if(key){e.preventDefault();keyboardHeld.add(key);refreshHeld()}
  if(e.code==='Escape'&&mode==='race'){paused=!paused;clearControls();$('pause').textContent=paused?'▶':'Ⅱ'}
 });
 addEventListener('keyup',e=>{const key=keyMap[e.code];if(key){keyboardHeld.delete(key);refreshHeld()}});
-function clearControls(){activeControlPointers.clear();keyboardHeld.clear();Object.keys(held).forEach(k=>held[k]=false)}
+function clearControls(){
+ activeControlPointers.clear();keyboardHeld.clear();
+ Object.keys(held).forEach(k=>held[k]=false);
+ steer=0;
+}
 addEventListener('blur',clearControls);
+addEventListener('pagehide',clearControls);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearControls()});
 function returnToGarage(){mode='menu';paused=false;speed=0;boundaryHit=0;clearControls();$('hud').style.display='none';$('result').classList.add('hidden');$('menu').classList.remove('hidden');$('pause').textContent='Ⅱ';updateMenuStats()}
 $('pause').onclick=()=>{if(mode!=='race')return;paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};
