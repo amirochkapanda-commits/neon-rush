@@ -262,10 +262,21 @@ function update(dt){
     const safeOffset=Math.sign(signedOffset)*offLimit;
     player.position.x=bestSample.p.x+bestSample.side.x*safeOffset;
     player.position.z=bestSample.p.z+bestSample.side.z*safeOffset;
-    if(boundaryHit<=0){speed=Math.max(speed*.78,speed-7);boundaryHit=.42;collisionFlash=.55}
-    // A curb is a glancing impact, not a handbrake: keep momentum and gently
-    // turn the car back toward the road centre.
-    $('hint').textContent='УДАР О БОРТ · СКОРОСТЬ СБРОШЕНА';
+    if(boundaryHit<=0){
+      // Rocky Pass has tighter mountain bends. A car that reaches the edge
+      // while pointing outwards must be turned back onto the road, otherwise
+      // the safety barrier can pin it in place forever.
+      speed=Math.max(0,speed-(prefs.track==='forest'?2.2:7));
+      boundaryHit=.42;collisionFlash=.55;
+    }
+    if(prefs.track==='forest'){
+      const roadHeading=Math.atan2(bestSample.tan.x,bestSample.tan.z);
+      const targetHeading=roadHeading+Math.sign(signedOffset)*.28;
+      const angleDelta=Math.atan2(Math.sin(targetHeading-heading),Math.cos(targetHeading-heading));
+      heading+=clamp(angleDelta,-dt*3.8,dt*3.8);
+      player.rotation.y=heading;
+    }
+    $('hint').textContent='УДАР О БОРТ · ВОЗВРАЩАЕМСЯ НА ТРАССУ';
   }else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
   cameraUpdate(dt);
   collisionFlash=Math.max(0,collisionFlash-dt);
