@@ -197,13 +197,13 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #menu .swatch{width:16px;height:16px;min-height:16px}
 
   /* More comfortable landscape spacing and readable menu sizing on phones. */
-  #menu{padding:max(12px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));}
-  #menu>.card{width:min(1100px,100%);height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px);padding:11px 18px;overflow-y:auto;border-radius:18px;}
+  #menu{padding:0;overflow:hidden;align-items:stretch;justify-content:stretch;}
+  #menu>.card{width:100%;height:100dvh;max-height:none;min-height:0;margin:0;padding:max(8px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left));border:0;border-radius:0;box-shadow:none;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;}
   #menu .brand{font-size:clamp(29px,6.2vh,40px);line-height:.92;}
   #menu .tag{font-size:8px;margin:4px 0 8px;letter-spacing:.24em;}
   #menu .tabs{margin-bottom:8px;gap:6px;padding:3px;}
   #menu .tab{padding:7px 10px;font-size:9px;}
-  #menu .panel.active{overflow-y:auto;overscroll-behavior:contain;}
+  #menu .panel.active{min-height:0;overflow:hidden;overscroll-behavior:none;}
   #panel-race.active{column-gap:14px;row-gap:6px;grid-template-columns:minmax(0,1.15fr) minmax(205px,.85fr);}
   #panel-race>.section-title{font-size:10px;margin:1px 0 4px;}
   #panel-race>.track-picker{gap:7px;}
