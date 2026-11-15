@@ -105,7 +105,22 @@ if(prefs.track==='coast'){
 }
 // Biome-specific ground materials: visible sand grains and wind-rippled desert texture.
  const terrainTex=makeGroundTexture(prefs.track);
- const ground=new THREE.Mesh(new THREE.PlaneGeometry(prefs.track==='coast'?430:1100,prefs.track==='coast'?430:1100),new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=-.18;ground.receiveShadow=true;scene.add(ground);
+ const terrainSize=prefs.track==='coast'?430:1100;
+ const terrainGeo=new THREE.PlaneGeometry(terrainSize,terrainSize,prefs.track==='forest'?180:1,prefs.track==='forest'?180:1);
+ const terrainSamples=prefs.track==='forest'?Array.from({length:360},(_,i)=>pointAt(i/360*length)):[];
+ const terrainHeightAt=(x,z)=>{
+  if(prefs.track!=='forest')return -.18;
+  let nearest=terrainSamples[0],best=Infinity;
+  for(const sample of terrainSamples){const dx=x-sample.p.x,dz=z-sample.p.z,d=dx*dx+dz*dz;if(d<best){best=d;nearest=sample}}
+  const dist=Math.sqrt(best),t=clamp((dist-8)/78,0,1),blend=1-t*t*(3-2*t);
+  return mix(-.18,nearest.p.y,blend);
+ };
+ if(prefs.track==='forest'){
+  const p=terrainGeo.attributes.position;
+  for(let i=0;i<p.count;i++){const x=p.getX(i),z=-p.getY(i);p.setZ(i,terrainHeightAt(x,z))}
+  p.needsUpdate=true;terrainGeo.computeVertexNormals();
+ }
+ const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,roughness:1}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=true;scene.add(ground);
  if(prefs.track==='forest'){
  // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
  const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,metalness:0,vertexColors:true,side:THREE.DoubleSide});
@@ -141,6 +156,22 @@ if(prefs.track==='coast'){
   const rg=new THREE.BufferGeometry();rg.setAttribute('position',new THREE.Float32BufferAttribute(rv,3));rg.setAttribute('color',new THREE.Float32BufferAttribute(rc,3));rg.setIndex(ri);rg.computeVertexNormals();
   const ridge=new THREE.Mesh(rg,rockMaterial);ridge.castShadow=true;ridge.receiveShadow=true;scene.add(ridge);
  }
+ // Layered alpine peaks behind the roadside rock walls: faceted silhouettes,
+ // with every base seated on the height-mapped terrain rather than hovering.
+ const peakGeo=new THREE.ConeGeometry(1,1,7,2);
+ const peakMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:1,vertexColors:true,flatShading:true});
+ const peakCount=52,peakMesh=new THREE.InstancedMesh(peakGeo,peakMat,peakCount),peakDummy=new THREE.Object3D();
+ for(let i=0;i<peakCount;i++){
+  const s=pointAt((i/peakCount)*length),side=i%2?1:-1,dist=48+(i%6)*10.5;
+  const x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
+  const h=19+(i%7)*4.2,w=10+(i%5)*2.8,base=terrainHeightAt(x,z);
+  peakDummy.position.set(x,base+h/2,z);peakDummy.rotation.set(0,(i*2.399)%6.28,0);peakDummy.scale.set(w,h,w*.82);peakDummy.updateMatrix();
+  peakMesh.setMatrixAt(i,peakDummy.matrix);
+  const shade=.58+(i%5)*.045;peakMesh.setColorAt(i,new THREE.Color(shade,shade*1.015,shade*1.04));
+ }
+ peakMesh.instanceMatrix.needsUpdate=true;if(peakMesh.instanceColor)peakMesh.instanceColor.needsUpdate=true;
+ peakMesh.castShadow=true;peakMesh.receiveShadow=true;scene.add(peakMesh);
+
 }else if(prefs.track==='desert'){
   // DESERT RING: dense date palms with thick trunks and broad feathered crowns.
   const bark=mat('#80502d',.98,0),barkLight=mat('#b18451',.96,0);
@@ -196,8 +227,8 @@ const dashCount=110,dashMesh=new THREE.InstancedMesh(new THREE.BoxGeometry(.16,.
 let start=pointAt(0),line=new THREE.Mesh(new THREE.BoxGeometry(ROAD,.04,1),mat('#fff'));line.position.set(start.p.x,start.p.y+.06,start.p.z);line.rotation.y=Math.atan2(start.tan.x,start.tan.z);line.rotation.x=-Math.atan2(start.tan.y,Math.hypot(start.tan.x,start.tan.z));scene.add(line);
 // Biome-specific vegetation is created above; no generic trees are placed in the desert.
 // Tall raceway lights and trackside advertising panels add depth and scale
-for(let i=0;i<22;i++){let s=pointAt(i/22*length),side=i%2?1:-1,dist=ROAD/2+5,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;const baseY=prefs.track==='forest'?s.p.y:0;let pole=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,7,8),mat('#424b50',.45,.65));pole.position.set(x,baseY+3.5,z);scene.add(pole);let arm=new THREE.Mesh(new THREE.BoxGeometry(1.7,.12,.16),mat('#424b50',.4,.6));arm.position.set(x-s.side.x*side*.7,baseY+6.85,z-s.side.z*side*.7);scene.add(arm);let lamp=new THREE.Mesh(new THREE.BoxGeometry(.7,.13,.42),mat('#fff0c8',.25,.1));lamp.position.set(x-s.side.x*side*1.25,baseY+6.72,z-s.side.z*side*1.25);scene.add(lamp)}
-for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROAD/2+9,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;const baseY=prefs.track==='forest'?s.p.y:0;let board=new THREE.Mesh(new THREE.BoxGeometry(5.8,2.1,.22),mat(i%2?'#263a49':'#9c4c2e',.5,.25));board.position.set(x,baseY+5,z);board.rotation.y=Math.atan2(s.tan.x,s.tan.z);scene.add(board);let post=new THREE.Mesh(new THREE.BoxGeometry(.18,4,.18),mat('#4c5559'));post.position.set(x,baseY+2.1,z);scene.add(post)}
+for(let i=0;i<22;i++){let s=pointAt(i/22*length),side=i%2?1:-1,dist=ROAD/2+5,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;const baseY=prefs.track==='forest'?terrainHeightAt(x,z):0;const footing=new THREE.Mesh(new THREE.CylinderGeometry(.34,.42,.42,8),mat('#626b6d',.95,0));footing.position.set(x,baseY+.21,z);footing.castShadow=true;scene.add(footing);let pole=new THREE.Mesh(new THREE.CylinderGeometry(.09,.13,7,8),mat('#424b50',.45,.65));pole.position.set(x,baseY+3.5,z);pole.castShadow=true;scene.add(pole);let arm=new THREE.Mesh(new THREE.BoxGeometry(1.7,.12,.16),mat('#424b50',.4,.6));arm.position.set(x-s.side.x*side*.7,baseY+6.85,z-s.side.z*side*.7);scene.add(arm);let lamp=new THREE.Mesh(new THREE.BoxGeometry(.7,.13,.42),mat('#fff0c8',.25,.1));lamp.position.set(x-s.side.x*side*1.25,baseY+6.72,z-s.side.z*side*1.25);scene.add(lamp)}
+for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROAD/2+9,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;const baseY=prefs.track==='forest'?terrainHeightAt(x,z):0;let board=new THREE.Mesh(new THREE.BoxGeometry(5.8,2.1,.22),mat(i%2?'#263a49':'#9c4c2e',.5,.25));board.position.set(x,baseY+5,z);board.rotation.y=Math.atan2(s.tan.x,s.tan.z);scene.add(board);let post=new THREE.Mesh(new THREE.BoxGeometry(.18,4,.18),mat('#4c5559'));post.position.set(x,baseY+2.1,z);scene.add(post)}
 player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:-12-i*9,side:[-2.9,2.8,.1][i],v:27+(save.league||0)*2.2+i*.7,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,player.position.y+5.3,player.position.z-fz*11),lookTarget=new THREE.Vector3(player.position.x+fx*8,player.position.y+1.1,player.position.z+fz*8);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
