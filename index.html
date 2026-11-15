@@ -254,10 +254,15 @@ function update(dt){
     if(speed>0)speed=Math.max(0,speed-1.9*dt);
     else speed=Math.min(0,speed+2.8*dt);
   }
-  // Steering remains effective at low speed; reverse steering is naturally
-  // mirrored, and grip upgrades add control without making the car twitchy.
-  const turnRate=.38+Math.min(Math.abs(speed),50)*.012;
-  if(steerInput!==0)heading+=steerInput*dt*turnRate*(1+prefs.grip*.045);
+  // Arcade handling: give the front wheels more authority in tight bends.
+  // At high speed, a gentle corner-speed limiter prevents the car from
+  // understeering into the outside barrier while the player holds the throttle.
+  if(steerInput!==0&&Math.abs(speed)>36){
+    speed=Math.sign(speed)*Math.max(36,Math.abs(speed)-15*dt);
+  }
+  const turnRate=.62+Math.min(Math.abs(speed),48)*.027;
+  const gripFactor=1+Math.min(8,Number(prefs.grip)||0)*.035;
+  if(steerInput!==0)heading+=steerInput*dt*turnRate*gripFactor;
   const fx=Math.sin(heading),fz=Math.cos(heading);
   player.position.x+=fx*speed*dt;
   player.position.z+=fz*speed*dt;
