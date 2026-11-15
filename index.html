@@ -208,7 +208,7 @@ function update(dt){
   // after a finger is released.
   // Steering is derived only from currently held controls. Never retain a
   // previous steering value after a touch or key is released.
-  const steerInput=(held.left===held.right)?0:(held.left?1:-1);
+  const steerInput=(held.left===held.right)?0:(held.left?-1:1);
   steer=steerInput;
   // Gas and reverse are separate commands. Reverse first brakes to zero,
   // then engages a controlled reverse gear.
@@ -227,7 +227,7 @@ function update(dt){
   // mirrored, and grip upgrades add control without making the car twitchy.
   const travelDirection=speed<-.15?-1:1;
   const turnRate=.38+Math.min(Math.abs(speed),50)*.012;
-  if(steerInput!==0)heading+=steerInput*dt*turnRate*travelDirection*(1+prefs.grip*.045);
+  if(steerInput!==0)heading+=steerInput*dt*turnRate*(1+prefs.grip*.045);
   const fx=Math.sin(heading),fz=Math.cos(heading);
   player.position.x+=fx*speed*dt;
   player.position.z+=fz*speed*dt;
