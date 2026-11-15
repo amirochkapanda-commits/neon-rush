@@ -41,15 +41,19 @@ forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[-8,-90],[28,-74],[5
 desert:{bg:'#e5c995',fog:'#e5c995',ground:'#d9b875',points:[[-5,-88],[55,-78],[92,-25],[70,25],[88,72],[20,90],[-45,70],[-90,25],[-68,-25],[-48,-70]],trees:'#92784c'}};
 const mat=(c,r=.75,m=0)=>new THREE.MeshStandardMaterial({color:c,roughness:r,metalness:m});
 function makeGroundTexture(kind){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d'),base=kind==='desert'?'#d9b875':kind==='forest'?'#555b5d':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=1024;const ctx=canvas.getContext('2d');ctx.scale(2,2);const base=kind==='desert'?'#d9b875':kind==='forest'?'#555b5d':'#788d62';ctx.fillStyle=base;ctx.fillRect(0,0,512,512);
  let seed=kind==='desert'?771:kind==='forest'?381:519;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- if(kind==='desert'){for(let i=0;i<30000;i++){const x=rnd()*512,y=rnd()*512,a=.035+rnd()*.16;ctx.fillStyle=rnd()>.52?'rgba(255,238,190,'+a+')':'rgba(116,78,35,'+(a*.72)+')';const s=.5+rnd()*1.7;ctx.fillRect(x,y,s,s)}for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*100;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.28,y-5-rnd()*8,x+len*.68,y+4+rnd()*7,x+len,y-1);ctx.strokeStyle=i%3?'rgba(255,238,190,.19)':'rgba(128,91,45,.13)';ctx.lineWidth=.7+rnd()*1.2;ctx.stroke()}}
- else{for(let i=0;i<26000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=kind==='forest'?(rnd()>.5?'rgba(175,190,111,'+a+')':'rgba(22,47,27,'+a+')'):(rnd()>.5?'rgba(220,205,135,'+a+')':'rgba(35,65,35,'+a+')');ctx.fillRect(x,y,1+rnd()*2,1+rnd()*2)}}
+ if(kind==='desert'){for(let i=0;i<62000;i++){const x=rnd()*512,y=rnd()*512,a=.035+rnd()*.16;ctx.fillStyle=rnd()>.52?'rgba(255,238,190,'+a+')':'rgba(116,78,35,'+(a*.72)+')';const s=.5+rnd()*1.7;ctx.fillRect(x,y,s,s)}for(let i=0;i<180;i++){const x=rnd()*512,y=rnd()*512,len=18+rnd()*100;ctx.beginPath();ctx.moveTo(x,y);ctx.bezierCurveTo(x+len*.28,y-5-rnd()*8,x+len*.68,y+4+rnd()*7,x+len,y-1);ctx.strokeStyle=i%3?'rgba(255,238,190,.19)':'rgba(128,91,45,.13)';ctx.lineWidth=.7+rnd()*1.2;ctx.stroke()}}
+ else{for(let i=0;i<54000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=kind==='forest'?(rnd()>.5?'rgba(175,190,111,'+a+')':'rgba(22,47,27,'+a+')'):(rnd()>.5?'rgba(220,205,135,'+a+')':'rgba(35,65,35,'+a+')');ctx.fillRect(x,y,1+rnd()*2,1+rnd()*2)}}
  const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(kind==='desert'?18:22,kind==='desert'?18:22);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex;
 }
 function makeRoadTexture(){
- const canvas=document.createElement('canvas');canvas.width=canvas.height=512;const ctx=canvas.getContext('2d');ctx.fillStyle='#303438';ctx.fillRect(0,0,512,512);let seed=901;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
- for(let i=0;i<42000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=rnd()>.5?'rgba(190,190,180,'+a+')':'rgba(0,0,0,'+(a*.8)+')';ctx.fillRect(x,y,.5+rnd()*1.5,.5+rnd()*1.5)}
+ const canvas=document.createElement('canvas');canvas.width=canvas.height=1024;const ctx=canvas.getContext('2d');ctx.scale(2,2);ctx.fillStyle='#303438';ctx.fillRect(0,0,512,512);let seed=901;const rnd=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
+ for(let i=0;i<85000;i++){const x=rnd()*512,y=rnd()*512,a=.025+rnd()*.12;ctx.fillStyle=rnd()>.5?'rgba(190,190,180,'+a+')':'rgba(0,0,0,'+(a*.8)+')';ctx.fillRect(x,y,.5+rnd()*1.5,.5+rnd()*1.5)}
+  // Fine longitudinal rubber wear and faint repaired-asphalt patches.
+  for(const x of [112,145,356,390]){ctx.beginPath();ctx.moveTo(x,0);ctx.bezierCurveTo(x-8,130,x+7,330,x-3,512);ctx.strokeStyle='rgba(8,10,12,.12)';ctx.lineWidth=5+rnd()*7;ctx.stroke()}
+  for(let i=0;i<90;i++){const x=rnd()*512,y=rnd()*512,w=5+rnd()*28,h=2+rnd()*9;ctx.fillStyle='rgba(190,190,180,'+(.018+rnd()*.035)+')';ctx.fillRect(x,y,w,h)}
+  for(let i=0;i<55;i++){const x=rnd()*512,y=rnd()*512;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+2+rnd()*8,y+3+rnd()*14);ctx.strokeStyle='rgba(5,7,9,.12)';ctx.lineWidth=.45+rnd()*.7;ctx.stroke()}
  const tex=new THREE.CanvasTexture(canvas);tex.wrapS=tex.wrapT=THREE.RepeatWrapping;tex.repeat.set(1,1);tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return tex;
 }
 function makeDuneGeometry(){
