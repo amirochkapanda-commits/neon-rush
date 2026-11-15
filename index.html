@@ -52,11 +52,57 @@ player=car($('paint').value,true);scene.add(player);ai=[];let cols=['#d34e43','#
 function cameraUpdate(dt){let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*11,5.3,player.position.z-fz*11);camera.position.lerp(target,1-Math.pow(.001,dt));camera.lookAt(player.position.x+fx*8,1.1,player.position.z+fz*8)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
 function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);if(mode==='race'&&!paused)update(dt);renderer.render(scene,camera)}
-function update(dt){elapsed+=dt;let steerInput=(held.right?1:0)-(held.left?1:0);steer=mix(steer,steerInput,dt*8);let accel=10+prefs.engine*2.5,maxV=58+prefs.engine*7;if(held.gas)speed=Math.min(maxV,speed+accel*dt);else speed=Math.max(0,speed-7*dt);if(held.brake)speed=Math.max(0,speed-32*dt);heading+=steer*dt*(.55+speed*.025)*(1+prefs.grip*.08);let fx=Math.sin(heading),fz=Math.cos(heading);player.position.x+=fx*speed*dt;player.position.z+=fz*speed*dt;player.rotation.y=heading;
-let bestD=progress,bestDist=Infinity;for(let k=-32;k<=32;k++){let d=progress+k*.75,sample=pointAt(d),dx=player.position.x-sample.p.x,dz=player.position.z-sample.p.z,dist=dx*dx+dz*dz;if(dist<bestDist){bestDist=dist;bestD=d}}progress=bestD;let lateral=Math.sqrt(bestDist),offLimit=ROAD/2-1.0;if(lateral>offLimit){speed=Math.max(0,speed-dt*(18+prefs.grip*2));$('hint').textContent='ВНЕ ТРАССЫ · ВЕРНИСЬ НА АСФАЛЬТ'}else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';cameraUpdate(dt);collisionFlash=Math.max(0,collisionFlash-dt);
-for(let a of ai){let delta=((progress-a.d+length*1.5)%length);if(delta>length/2)delta-=length;let target=a.v;if(delta>0&&delta<18)target*=.94;a.d+=target*dt;place(a.car,a.d,a.side);let dx=player.position.x-a.car.position.x,dz=player.position.z-a.car.position.z;if(dx*dx+dz*dz<17&&a.hit<=0){speed=Math.max(0,speed-18);a.hit=.9;collisionFlash=.8;player.position.x+=dx*.22;player.position.z+=dz*.22;a.side=clamp(a.side+(dx>=0?-.45:.45),-3.8,3.8)}a.hit=Math.max(0,a.hit-dt)
-let laps=Math.floor(progress/length),placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;$('lap').textContent=Math.min(3,laps+1)+'/3';$('pos').textContent=placeNo+'/4';$('speed').textContent=Math.round(speed*3.6);$('time').textContent=fmt(elapsed);if(laps>=3)finish()}
-function finish(){mode='result';let placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;let pts=[10,7,5,3][placeNo-1],cash=[300,190,120,70][placeNo-1];save.points+=pts;save.credits+=cash;save.rep+=([30,18,10,5][placeNo-1]);save.races++;if(placeNo===1)save.wins++;save.best=save.best?Math.min(save.best,elapsed):elapsed;let seasonEnd=save.races>=3;if(seasonEnd){save.lastSeason=save.points;save.races=0;save.points=0;save.seasons++}localStorage.setItem('autosport-career',JSON.stringify(save));$('hud').style.display='none';$('result').classList.remove('hidden');$('heading').textContent=seasonEnd?'ЧЕМПИОНАТ ЗАВЕРШЁН':'ЭТАП ЗАВЕРШЁН';$('rank').textContent=placeNo+' МЕСТО';$('summary').textContent='Время '+fmt(elapsed)+'. '+(seasonEnd?'Итог сезона: '+save.lastSeason+' очков. ':'Следующий этап чемпионата ждёт тебя. ')+(placeNo===1?'Отличная победа!':'Продолжай борьбу за титул.');$('earned').textContent='+'+pts;$('reward').textContent='+'+cash;$('total').textContent=save.points;$('again').textContent=seasonEnd?'НОВЫЙ СЕЗОН →':'СЛЕДУЮЩИЙ ЭТАП →';updateMenuStats()}
+function update(dt){
+  elapsed+=dt;
+  const steerInput=(held.right?1:0)-(held.left?1:0);
+  steer=mix(steer,steerInput,dt*8);
+  const accel=10+prefs.engine*2.5,maxV=58+prefs.engine*7;
+  if(held.gas)speed=Math.min(maxV,speed+accel*dt);else speed=Math.max(0,speed-7*dt);
+  if(held.brake)speed=Math.max(0,speed-32*dt);
+  heading+=steer*dt*(.55+speed*.025)*(1+prefs.grip*.08);
+  const fx=Math.sin(heading),fz=Math.cos(heading);
+  player.position.x+=fx*speed*dt;
+  player.position.z+=fz*speed*dt;
+  player.rotation.y=heading;
+  let bestD=progress,bestDist=Infinity;
+  for(let k=-32;k<=32;k++){
+    const d=progress+k*.75,sample=pointAt(d);
+    const dx=player.position.x-sample.p.x,dz=player.position.z-sample.p.z,dist=dx*dx+dz*dz;
+    if(dist<bestDist){bestDist=dist;bestD=d}
+  }
+  progress=bestD;
+  const lateral=Math.sqrt(bestDist),offLimit=ROAD/2-1.0;
+  if(lateral>offLimit){speed=Math.max(0,speed-dt*(18+prefs.grip*2));$('hint').textContent='ВНЕ ТРАССЫ · ВЕРНИСЬ НА АСФАЛЬТ'}
+  else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
+  cameraUpdate(dt);
+  collisionFlash=Math.max(0,collisionFlash-dt);
+  for(const a of ai){
+    const delta=((progress-a.d+length*1.5)%length);
+    let target=a.v;
+    if(delta>0&&delta<18)target*=.94;
+    a.d+=target*dt;
+    place(a.car,a.d,a.side);
+    const dx=player.position.x-a.car.position.x,dz=player.position.z-a.car.position.z;
+    if(dx*dx+dz*dz<17&&a.hit<=0){
+      speed=Math.max(0,speed-18);a.hit=.9;collisionFlash=.8;
+      player.position.x+=dx*.22;player.position.z+=dz*.22;
+      a.side=clamp(a.side+(dx>=0?-.45:.45),-3.8,3.8);
+    }
+    a.hit=Math.max(0,a.hit-dt);
+  }
+  const laps=Math.floor(progress/length);
+  const placeNo=1+ai.filter(a=>{
+    let d=((a.d-progress+length*1.5)%length);
+    if(d>length/2)d-=length;
+    return d>0;
+  }).length;
+  $('lap').textContent=Math.min(3,laps+1)+'/3';
+  $('pos').textContent=placeNo+'/4';
+  $('speed').textContent=Math.round(speed*3.6);
+  $('time').textContent=fmt(elapsed);
+  if(laps>=3)finish();
+}
+function finish(){if(mode!=='race')return;mode='result';let placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;let pts=[10,7,5,3][placeNo-1],cash=[300,190,120,70][placeNo-1];save.points+=pts;save.credits+=cash;save.rep+=([30,18,10,5][placeNo-1]);save.races++;if(placeNo===1)save.wins++;save.best=save.best?Math.min(save.best,elapsed):elapsed;let seasonEnd=save.races>=3;if(seasonEnd){save.lastSeason=save.points;save.races=0;save.points=0;save.seasons++}localStorage.setItem('autosport-career',JSON.stringify(save));$('hud').style.display='none';$('result').classList.remove('hidden');$('heading').textContent=seasonEnd?'ЧЕМПИОНАТ ЗАВЕРШЁН':'ЭТАП ЗАВЕРШЁН';$('rank').textContent=placeNo+' МЕСТО';$('summary').textContent='Время '+fmt(elapsed)+'. '+(seasonEnd?'Итог сезона: '+save.lastSeason+' очков. ':'Следующий этап чемпионата ждёт тебя. ')+(placeNo===1?'Отличная победа!':'Продолжай борьбу за титул.');$('earned').textContent='+'+pts;$('reward').textContent='+'+cash;$('total').textContent=save.points;$('again').textContent=seasonEnd?'НОВЫЙ СЕЗОН →':'СЛЕДУЮЩИЙ ЭТАП →';updateMenuStats()}
 function updateMenuStats(){$('season').textContent=(save.races+1)+'/3';$('points').textContent=save.points;$('wins').textContent=save.wins;$('credits').textContent=save.credits;updateUpgradeLabels()}
 function start(){mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;ai.forEach((a,i)=>{a.d=-12-i*9;a.side=[-2.9,2.8,.1][i];a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;cameraUpdate(.1);held.gas=false}
 function hold(id,key){let el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();held[key]=true;el.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(n=>el.addEventListener(n,e=>{held[key]=false}))}
