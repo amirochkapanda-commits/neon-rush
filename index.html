@@ -312,17 +312,17 @@ function update(dt){
   const offLimit=ROAD/2-1.25;
   boundaryHit=Math.max(0,boundaryHit-dt);
   if(Math.abs(signedOffset)>offLimit){
-    // Invisible safety barrier: absorb the impact and keep the car on the asphalt.
-    const safeOffset=Math.sign(signedOffset)*offLimit;
+    // A soft rebound nudges the car slightly back onto the asphalt instead of pinning it to the rail.
+    const rebound=.28;
+    const safeOffset=Math.sign(signedOffset)*Math.max(0,offLimit-rebound);
     player.position.x=bestSample.p.x+bestSample.side.x*safeOffset;
     player.position.z=bestSample.p.z+bestSample.side.z*safeOffset;
     if(boundaryHit<=0){
-      // A barrier hit slows the car but never changes its steering direction.
-      // The player remains fully in control and can steer back onto the road.
-      speed=Math.max(speed*.78,speed-(prefs.track==='forest'?2.2:7));
+      // Keep the impact noticeable, but preserve most of the car's speed and steering control.
+      speed*=.97;
       boundaryHit=.42;collisionFlash=.55;
     }
-    $('hint').textContent='УДАР О БОРТ · СКОРОСТЬ СБРОШЕНА';
+    $('hint').textContent='ЛЁГКИЙ УДАР О БОРТ · СКОРОСТЬ НЕМНОГО СБРОШЕНА';
   }else $('hint').textContent=collisionFlash>0?'КОНТАКТ! СКОРОСТЬ СБРОШЕНА':'РУЛИ САМ · ОБГОНЯЙ СОПЕРНИКОВ';
   cameraUpdate(dt);
   collisionFlash=Math.max(0,collisionFlash-dt);
