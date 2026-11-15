@@ -172,7 +172,7 @@ function car(color,isPlayer=false){
  root.userData.body=body;return root;
 }
 function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.paint||$('paint').value);if(rimMat)rimMat.color.set(prefs.rim||$('rimPaint').value)}
-function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
+function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){if(scene.environment)scene.environment.dispose();scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
  // Cinematic atmospheric sky gradient and distant sun: decorative scene layer only.
  const skyGeo=new THREE.SphereGeometry(690,32,20);
  // Soft procedural cloud layers are rendered only on the sky sphere.
