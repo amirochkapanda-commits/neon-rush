@@ -136,11 +136,29 @@ function update(dt){
 }
 function finish(){if(mode!=='race')return;mode='result';let placeNo=1+ai.filter(a=>{let d=((a.d-progress+length*1.5)%length);if(d>length/2)d-=length;return d>0}).length;let pts=[10,7,5,3][placeNo-1],cash=[300,190,120,70][placeNo-1];save.points+=pts;save.credits+=cash;save.rep+=([30,18,10,5][placeNo-1]);save.races++;if(placeNo===1)save.wins++;save.best=save.best?Math.min(save.best,elapsed):elapsed;let seasonEnd=save.races>=3;if(seasonEnd){save.lastSeason=save.points;save.races=0;save.points=0;save.seasons++}localStorage.setItem('autosport-career',JSON.stringify(save));$('hud').style.display='none';$('result').classList.remove('hidden');$('heading').textContent=seasonEnd?'ЧЕМПИОНАТ ЗАВЕРШЁН':'ЭТАП ЗАВЕРШЁН';$('rank').textContent=placeNo+' МЕСТО';$('summary').textContent='Время '+fmt(elapsed)+'. '+(seasonEnd?'Итог сезона: '+save.lastSeason+' очков. ':'Следующий этап чемпионата ждёт тебя. ')+(placeNo===1?'Отличная победа!':'Продолжай борьбу за титул.');$('earned').textContent='+'+pts;$('reward').textContent='+'+cash;$('total').textContent=save.points;$('again').textContent=seasonEnd?'НОВЫЙ СЕЗОН →':'СЛЕДУЮЩИЙ ЭТАП →';updateMenuStats()}
 function updateMenuStats(){$('season').textContent=(save.races+1)+'/3';$('points').textContent=save.points;$('wins').textContent=save.wins;$('credits').textContent=save.credits;updateUpgradeLabels()}
-function start(){mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;Object.keys(held).forEach(k=>held[k]=false);ai.forEach((a,i)=>{a.d=-12-i*9;a.side=[-2.9,2.8,.1][i];a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;cameraUpdate(.1)}
-function hold(id,key){let el=$(id);el.addEventListener('pointerdown',e=>{e.preventDefault();held[key]=true;el.setPointerCapture(e.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(n=>el.addEventListener(n,e=>{held[key]=false}))}
+function start(){mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{a.d=-12-i*9;a.side=[-2.9,2.8,.1][i];a.hit=0});$('menu').classList.add('hidden');$('result').classList.add('hidden');$('hud').style.display='block';$('pause').textContent='Ⅱ';let s=pointAt(0);player.position.set(s.p.x,.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;cameraUpdate(.1)}
+// Robust multi-touch controls: track every active finger separately. Do not rely
+// on lostpointercapture (Safari may send it while another finger is still held).
+const activeControlPointers=new Map();
+function releaseControlPointer(e){const key=activeControlPointers.get(e.pointerId);if(!key)return;activeControlPointers.delete(e.pointerId);held[key]=[...activeControlPointers.values()].includes(key)}
+function hold(id,key){
+ const el=$(id);
+ el.addEventListener('pointerdown',e=>{
+  if(mode!=='race'||paused)return;
+  e.preventDefault();
+  activeControlPointers.set(e.pointerId,key);
+  held[key]=true;
+ },{passive:false});
+}
 hold('left','left');hold('right','right');hold('gas','gas');hold('brake','brake');
-addEventListener('keydown',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA')held.left=true;if(e.code==='ArrowRight'||e.code==='KeyD')held.right=true;if(e.code==='ArrowUp'||e.code==='KeyW')held.gas=true;if(e.code==='ArrowDown'||e.code==='KeyS')held.brake=true;if(e.code==='Escape'&&mode==='race'){paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'}});addEventListener('keyup',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA')held.left=false;if(e.code==='ArrowRight'||e.code==='KeyD')held.right=false;if(e.code==='ArrowUp'||e.code==='KeyW')held.gas=false;if(e.code==='ArrowDown'||e.code==='KeyS')held.brake=false});
-function returnToGarage(){mode='menu';paused=false;speed=0;boundaryHit=0;Object.keys(held).forEach(k=>held[k]=false);$('hud').style.display='none';$('result').classList.add('hidden');$('menu').classList.remove('hidden');$('pause').textContent='Ⅱ';updateMenuStats()}
+addEventListener('pointerup',releaseControlPointer,true);
+addEventListener('pointercancel',releaseControlPointer,true);
+addEventListener('keydown',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA')held.left=true;if(e.code==='ArrowRight'||e.code==='KeyD')held.right=true;if(e.code==='ArrowUp'||e.code==='KeyW')held.gas=true;if(e.code==='ArrowDown'||e.code==='KeyS')held.brake=true;if(e.code==='Escape'&&mode==='race'){paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'}});
+addEventListener('keyup',e=>{if(e.code==='ArrowLeft'||e.code==='KeyA')held.left=false;if(e.code==='ArrowRight'||e.code==='KeyD')held.right=false;if(e.code==='ArrowUp'||e.code==='KeyW')held.gas=false;if(e.code==='ArrowDown'||e.code==='KeyS')held.brake=false});
+function clearControls(){activeControlPointers.clear();Object.keys(held).forEach(k=>held[k]=false)}
+addEventListener('blur',clearControls);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)clearControls()});
+function returnToGarage(){mode='menu';paused=false;speed=0;boundaryHit=0;clearControls();$('hud').style.display='none';$('result').classList.add('hidden');$('menu').classList.remove('hidden');$('pause').textContent='Ⅱ';updateMenuStats()}
 $('pause').onclick=()=>{if(mode!=='race')return;paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};
 $('restart').onclick=()=>{if(mode==='race')start()};
 $('exit').onclick=returnToGarage;
