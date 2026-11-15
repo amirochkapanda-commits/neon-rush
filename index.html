@@ -175,7 +175,17 @@ function applyGarage(){if(!player||!paintMat)return;paintMat.color.set(prefs.pai
 function buildWorld(){if(raf)cancelAnimationFrame(raf);if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
  // Cinematic atmospheric sky gradient and distant sun: decorative scene layer only.
  const skyGeo=new THREE.SphereGeometry(690,32,20);
- const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{topColor:{value:new THREE.Color(prefs.track==='desert'?'#42617c':prefs.track==='forest'?'#344b62':'#397a9b')},horizonColor:{value:new THREE.Color(prefs.track==='desert'?'#e9bd83':prefs.track==='forest'?'#aab8bd':'#d6c7a5')}},vertexShader:'varying vec3 vWorld; void main(){vec4 p=modelMatrix*vec4(position,1.0);vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}',fragmentShader:'uniform vec3 topColor;uniform vec3 horizonColor;varying vec3 vWorld;void main(){float h=clamp(normalize(vWorld).y,0.0,1.0);float t=smoothstep(0.02,0.72,h);gl_FragColor=vec4(mix(horizonColor,topColor,t),1.0);}'});
+ // Soft procedural cloud layers are rendered only on the sky sphere.
+ const cloudCanvas=document.createElement('canvas');cloudCanvas.width=1024;cloudCanvas.height=512;
+ const cloudCtx=cloudCanvas.getContext('2d');
+ for(let i=0;i<115;i++){
+  const x=(i*83)%1024,y=95+((i*47)%245),w=34+(i%9)*17,h=5+(i%5)*3;
+  cloudCtx.save();cloudCtx.globalAlpha=.025+(i%6)*.009;cloudCtx.filter='blur('+(5+i%5)+'px)';
+  const grad=cloudCtx.createLinearGradient(x-w,y,x+w,y);grad.addColorStop(0,'rgba(255,255,255,0)');grad.addColorStop(.5,'rgba(255,255,255,.9)');grad.addColorStop(1,'rgba(255,255,255,0)');
+  cloudCtx.fillStyle=grad;cloudCtx.beginPath();cloudCtx.ellipse(x,y,w,h,(i%7-3)*.025,0,Math.PI*2);cloudCtx.fill();cloudCtx.restore();
+ }
+ const cloudTexture=new THREE.CanvasTexture(cloudCanvas);cloudTexture.colorSpace=THREE.SRGBColorSpace;
+ const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{topColor:{value:new THREE.Color(prefs.track==='desert'?'#42617c':prefs.track==='forest'?'#344b62':'#397a9b')},horizonColor:{value:new THREE.Color(prefs.track==='desert'?'#e9bd83':prefs.track==='forest'?'#aab8bd':'#d6c7a5')},cloudTexture:{value:cloudTexture}},vertexShader:'varying vec3 vWorld; void main(){vec4 p=modelMatrix*vec4(position,1.0);vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}',fragmentShader:'uniform vec3 topColor;uniform vec3 horizonColor;uniform sampler2D cloudTexture;varying vec3 vWorld;void main(){vec3 n=normalize(vWorld);float h=clamp(n.y,0.0,1.0);float t=smoothstep(0.02,0.72,h);vec3 sky=mix(horizonColor,topColor,t);vec2 uv=vec2(atan(n.z,n.x)/6.2831853+0.5,asin(clamp(n.y,-1.0,1.0))/3.1415926+0.5);vec4 cloud=texture2D(cloudTexture,uv);float mask=cloud.a*smoothstep(0.04,0.25,h)*(1.0-smoothstep(0.72,0.94,h));sky=mix(sky,vec3(0.91,0.94,0.96),mask*0.58);gl_FragColor=vec4(sky,1.0);}'});
  const sky=new THREE.Mesh(skyGeo,skyMat);sky.renderOrder=-10;scene.add(sky);
  const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);const mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
@@ -183,6 +193,17 @@ renderer.setPixelRatio(Math.min(devicePixelRatio,mobileQuality?1.35:1.7));render
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
+ // Procedural image-based ambient reflections for paint, glass and metal.
+ const envCanvas=document.createElement('canvas');envCanvas.width=1024;envCanvas.height=512;
+ const envCtx=envCanvas.getContext('2d'),envGrad=envCtx.createLinearGradient(0,0,0,512);
+ envGrad.addColorStop(0,'#263c55');envGrad.addColorStop(.38,'#8ea8b5');envGrad.addColorStop(.53,'#f2d7b2');envGrad.addColorStop(.67,'#4b5357');envGrad.addColorStop(1,'#111b23');
+ envCtx.fillStyle=envGrad;envCtx.fillRect(0,0,1024,512);
+ envCtx.save();envCtx.filter='blur(16px)';envCtx.globalAlpha=.48;
+ for(let i=0;i<34;i++){const x=i*31,w=12+(i%5)*9,h=24+(i*17)%100;envCtx.fillStyle=i%3?'#26343d':'#c1c6c3';envCtx.fillRect(x,260-h,w,h)}
+ envCtx.restore();
+ for(let i=0;i<160;i++){const x=(i*67)%1024,y=210+(i*29)%110;envCtx.fillStyle='rgba(255,239,205,'+(0.025+(i%4)*.012)+')';envCtx.fillRect(x,y,2+(i%5)*2,1+(i%3))}
+ const envTexture=new THREE.CanvasTexture(envCanvas);envTexture.mapping=THREE.EquirectangularReflectionMapping;envTexture.colorSpace=THREE.SRGBColorSpace;
+ scene.environment=envTexture;scene.environmentIntensity=.52;
 scene.add(new THREE.HemisphereLight('#eaf2ff',prefs.track==='desert'?'#806342':'#54483a',1.72));
 const sun=new THREE.DirectionalLight('#fff0d9',3.1);sun.position.set(-65,105,42);sun.castShadow=true;
 sun.shadow.mapSize.set(mobileQuality?1024:2048,mobileQuality?1024:2048);
