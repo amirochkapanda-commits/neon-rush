@@ -1446,8 +1446,10 @@ if(prefs.track==='coast'){
   sp.needsUpdate=true;shoreGeo.computeVertexNormals();
   const beach=new THREE.Mesh(shoreGeo,new THREE.MeshStandardMaterial({color:'#d7c397',...makeSurfaceMaps('beach',18),roughness:.98,side:THREE.DoubleSide}));beach.rotation.x=-Math.PI/2;beach.position.y=0;beach.receiveShadow=true;scene.add(beach);
  }
- const foamMat=new THREE.MeshBasicMaterial({color:'#e7f4ed',transparent:true,opacity:.24,depthWrite:false});
- for(let i=0;i<26;i++){const a=i/26*Math.PI*2,radius=281+(i%5)*2.6,arc=.38+(i%4)*.08,pts=[];for(let j=0;j<=24;j++){const t=a-arc/2+arc*j/24;pts.push(new THREE.Vector3(Math.cos(t)*radius,-.205,Math.sin(t)*radius))}const foam=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),48,.12+(i%3)*.025,5,false),foamMat);foam.renderOrder=1;scene.add(foam)}
+ if(prefs.track==='coast'){
+  const foamMat=new THREE.MeshBasicMaterial({color:'#e7f4ed',transparent:true,opacity:.24,depthWrite:false});
+  for(let i=0;i<26;i++){const a=i/26*Math.PI*2,radius=281+(i%5)*2.6,arc=.38+(i%4)*.08,pts=[];for(let j=0;j<=24;j++){const t=a-arc/2+arc*j/24;pts.push(new THREE.Vector3(Math.cos(t)*radius,-.205,Math.sin(t)*radius))}const foam=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts),48,.12+(i%3)*.025,5,false),foamMat);foam.renderOrder=1;scene.add(foam)}
+ }
  if(prefs.track==='forest'){
  // ROCKY PASS: continuous irregular rock walls and stepped mountain ridges.
  const rockMaterial=new THREE.MeshStandardMaterial({color:'#ffffff',...makeSurfaceMaps('rock',12),roughness:.97,metalness:0,vertexColors:true,side:THREE.DoubleSide});
