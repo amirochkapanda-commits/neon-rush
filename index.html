@@ -1367,7 +1367,7 @@ import { SSAOPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postproce
 import { UnrealBloomPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'https://unpkg.com/three@0.160.0/examples/jsm/postprocessing/OutputPass.js';
 const $=id=>document.getElementById(id);
-const loaderState={value:0,raf:0};
+const loaderState={value:0,raf:0};let gameErrorVisible=false;
 function setLoadProgress(value,status,stage){
  const n=Math.max(loaderState.value,Math.min(100,Math.round(value)));
  loaderState.value=n;
@@ -1379,7 +1379,7 @@ function setLoadProgress(value,status,stage){
 }
 function hideGameLoader(){
  setLoadProgress(100,'ГОТОВО К СТАРТУ','ЗАГРУЗКА ЗАВЕРШЕНА');
- setTimeout(()=>{$('game-loader')?.classList.add('loader-hidden')},220);
+ setTimeout(()=>{if(!gameErrorVisible)$('game-loader')?.classList.add('loader-hidden')},220);
 }
 function showGameLoader(){
  loaderState.value=0;
@@ -1387,6 +1387,7 @@ function showGameLoader(){
  setLoadProgress(12,'ПОДГОТОВКА ИГРЫ','ЗАПУСК ДВИЖКА');
 }
 function showGameError(error,stage='ИНИЦИАЛИЗАЦИЯ'){
+ gameErrorVisible=true;
  const message=String(error?.stack||error?.message||error||'Неизвестная ошибка').slice(0,900);
  console.error('[AUTOSPORT '+stage+']',error);
  setLoadProgress(100,'ОШИБКА ЗАПУСКА · '+stage,message);
@@ -1747,6 +1748,7 @@ garageView.addEventListener('pointermove',e=>{if(!garageDragging||e.pointerId!==
 const stopGarageDrag=e=>{if(e&&e.pointerId!==garagePointerId)return;garageDragging=false;garagePointerId=null;garageDragPoint=null};
 garageView.addEventListener('pointerup',stopGarageDrag);garageView.addEventListener('pointercancel',stopGarageDrag);garageView.addEventListener('lostpointercapture',stopGarageDrag);
 function buildWorld(){
+ gameErrorVisible=false;
  showGameLoader();
  return new Promise(resolve=>{
   requestAnimationFrame(()=>{
@@ -1756,7 +1758,7 @@ function buildWorld(){
      try{
       setLoadProgress(68,'СОЗДАНИЕ ИГРОВОГО МИРА','ТРАССА И ОКРУЖЕНИЕ');
       buildWorldCore();worldReady=true;worldTrack=prefs.track;
-      requestAnimationFrame(()=>{hideGameLoader();resolve(true)});
+      requestAnimationFrame(()=>{resolve(true)});
      }catch(error){
       worldReady=false;showGameError(error,'СОЗДАНИЕ МИРА');resolve(false);
      }
@@ -2037,7 +2039,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
  player=car($('paint').value,true);scene.add(player);buildGaragePreview();ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:12+i*9,side:[-2.9,2.8,.1][i],v:[142.24,165,185,220,255][Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague))]*.93/3.6-(2-i)*.7,currentSpeed:0,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){const portrait=innerHeight>innerWidth;const followDistance=portrait?14.2:11,cameraHeight=portrait?6.4:5.3,lookAhead=portrait?10:8;let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*followDistance,player.position.y+cameraHeight,player.position.z-fz*followDistance),lookTarget=new THREE.Vector3(player.position.x+fx*lookAhead,player.position.y+1.1,player.position.z+fz*lookAhead);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.96:.90;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}
+let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.96:.90;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);try{let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}catch(error){cancelAnimationFrame(raf);raf=0;showGameError(error,'ЦИКЛ РЕНДЕРА')}}
 function initRaceMap(){mapCanvas=$('race-map-canvas');mapCtx=mapCanvas?mapCanvas.getContext('2d'):null}function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
 function updateAtmosphereVisuals(dt){
  if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
@@ -2308,5 +2310,5 @@ function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
 addEventListener('resize',()=>{document.body.classList.toggle('portrait-mode',innerHeight>innerWidth);if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.fov=innerHeight>innerWidth?72:65;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer){composer.setPixelRatio(basePixelRatio*adaptiveScale);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}resizeWeatherCanvas()}});document.body.classList.toggle('portrait-mode',innerHeight>innerWidth);
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
-updateMenuStats();updateUpgradeLabels();buildWorld().then(ok=>{if(!ok)$('status').textContent='Не удалось загрузить игру. Обнови страницу.'})
+updateMenuStats();updateUpgradeLabels();buildWorld().then(ok=>{if(ok)hideGameLoader();else $('status').textContent='Не удалось загрузить игру. Обнови страницу.'})
 </script></body></html>
