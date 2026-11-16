@@ -1643,19 +1643,28 @@ function update(dt){
     if(speed>0)speed=Math.max(0,speed-1.9*dt);
     else speed=Math.min(0,speed+2.8*dt);
   }
-  // Arcade drift model: steering rotates the chassis while lateral momentum
-  // builds separately. Abrupt high-speed inputs therefore create a recoverable slide.
+  // Rear-drive-style oversteer: the car stays planted during ordinary
+  // low-speed/calm cornering. Rear lateral grip breaks away only above a
+  // speed threshold, then the chassis points into the corner while momentum
+  // carries the rear outward. Releasing steering lets the rear regain grip.
   const turnRate=.62+Math.min(Math.abs(speed),48)*.027;
   const gripLevel=clamp(Number(prefs.grip)||0,0,8);
-  // Deliberately stronger arcade oversteer: stock tyres slide visibly under
-  // abrupt steering, while upgraded tyres shorten and reduce the slide.
-  const slipBuild=.58-gripLevel*.04;
-  const lateralRecovery=1.65+gripLevel*.28;
-  const brakingInTurn=held.reverse&&steerInput!==0?1.42:1;
+  const absSpeed=Math.abs(speed);
+  const driftStart=24+gripLevel*1.35;
+  const driftFull=34+gripLevel*1.15;
+  const speedFactor=clamp((absSpeed-driftStart)/(driftFull-driftStart),0,1);
+  const driftFactor=speedFactor*speedFactor*(3-2*speedFactor);
+  const brakingInTurn=held.reverse&&speed>0?1.22:1;
   if(steerInput!==0)heading+=steerInput*dt*turnRate;
-  const lateralLimit=Math.max(0,Math.abs(speed)*(.46-gripLevel*.03));
-  const lateralDemand=steerInput===0?0:-steerInput*Math.abs(speed)*turnRate*slipBuild*brakingInTurn;
-  lateralSpeed=clamp(lateralSpeed+(lateralDemand-lateralSpeed*lateralRecovery)*dt,-lateralLimit,lateralLimit);
+  // Slip is an angle relative to the chassis, not a constant sideways force.
+  // The negative sign makes the rear step to the outside of the corner.
+  const maxSlipAngle=.34-gripLevel*.027;
+  const targetSlipAngle=steerInput===0?0:driftFactor*maxSlipAngle*brakingInTurn;
+  const targetLateral= -Math.sign(speed||1)*steerInput*absSpeed*Math.tan(targetSlipAngle);
+  const lateralResponse=steerInput===0?4.8:2.7+gripLevel*.22;
+  lateralSpeed+=(targetLateral-lateralSpeed)*Math.min(1,lateralResponse*dt);
+  const lateralLimit=absSpeed*Math.tan(maxSlipAngle);
+  lateralSpeed=clamp(lateralSpeed,-lateralLimit,lateralLimit);
   const fx=Math.sin(heading),fz=Math.cos(heading),rx=Math.cos(heading),rz=-Math.sin(heading);
   player.position.x+=(fx*speed+rx*lateralSpeed)*dt;
   player.position.z+=(fz*speed+rz*lateralSpeed)*dt;
