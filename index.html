@@ -1123,11 +1123,11 @@ function syncBotPosition(a){
  if(bestSample){a.d=bestD;const x=a.car.position.x-bestSample.p.x,z=a.car.position.z-bestSample.p.z;a.side=clamp(x*bestSample.side.x+z*bestSample.side.z,-4.2,4.2);place(a.car,a.d,a.side)}
 }
 function car(color,isPlayer=false){
- let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=new THREE.MeshPhysicalMaterial({color,roughness:.19,metalness:.62,clearcoat:1,clearcoatRoughness:.09,reflectivity:.9,envMapIntensity:1.35});if(isPlayer)paintMat=pm;
+ let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=new THREE.MeshPhysicalMaterial({color,roughness:.245,metalness:.48,clearcoat:1,clearcoatRoughness:.12,reflectivity:.82,envMapIntensity:1.5});if(isPlayer)paintMat=pm;
  const black=mat('#101519',.52,.18),rubber=mat('#090b0c',.94),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.82),chrome=mat('#bac3c6',.22,.86);if(isPlayer)rimMat=rim;
  const glass=new THREE.MeshPhysicalMaterial({color:'#9bbbc8',metalness:.18,roughness:.085,transparent:true,opacity:.72,clearcoat:1,clearcoatRoughness:.045,side:THREE.DoubleSide,envMapIntensity:1.25});
  const lamp=new THREE.MeshStandardMaterial({color:'#fff1c9',emissive:'#ffe5a5',emissiveIntensity:.48,roughness:.22});
- function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;body.add(o);return o}
+ function box(w,h,d,m,x,y,z){const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;body.add(o);return o}\n function softBox(w,h,d,m,x,y,z,r=.035){const rr=Math.min(r,w*.22,h*.22,d*.22),shape=new THREE.Shape();shape.moveTo(-w/2+rr,-h/2+rr);shape.lineTo(w/2-rr,-h/2+rr);shape.lineTo(w/2-rr,h/2-rr);shape.lineTo(-w/2+rr,h/2-rr);shape.closePath();const g=new THREE.ExtrudeGeometry(shape,{depth:Math.max(.01,d-2*rr),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:rr,bevelThickness:rr,curveSegments:4});g.translate(0,0,-d/2);const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;body.add(o);return o}
  // Smooth, closed longitudinal lofts replace the old block-built shell.
  // The envelope is kept within the original body/cabin dimensions.
  function smoothLoft(sections,material,segments=8,ringSteps=32,exponent=.62){
@@ -1158,7 +1158,7 @@ function car(color,isPlayer=false){
   {z:-.55,w:1.06,bottom:.54,top:1.015},{z:.45,w:1.06,bottom:.54,top:1.015},
   {z:1.25,w:1.045,bottom:.54,top:1.00},{z:1.78,w:1.00,bottom:.55,top:.96},
   {z:2.08,w:.91,bottom:.57,top:.90},{z:2.21,w:.76,bottom:.59,top:.81}
- ],pm,8,40,.58);
+ ],pm,10,56,.58);
  // Dark undertray retained at the exact original chassis position.
  box(2.04,.12,3.55,black,0,.55,-.03);
  // Curved glasshouse with sloped windscreen and rear screen.
@@ -1167,15 +1167,15 @@ function car(color,isPlayer=false){
   {z:-.82,w:.75,bottom:.97,top:1.46},{z:-.42,w:.74,bottom:.97,top:1.49},
   {z:.18,w:.74,bottom:.97,top:1.49},{z:.48,w:.72,bottom:.97,top:1.45},
   {z:.78,w:.78,bottom:.97,top:1.22},{z:1.02,w:.80,bottom:.97,top:1.04}
- ],glass,8,32,.72);
+ ],glass,10,48,.72);
  // Roof panel keeps the former roof's placement and outer dimensions.
- const roof=new THREE.Mesh(new THREE.BoxGeometry(1.48,.12,1.42),pm);roof.position.set(0,1.51,-.12);roof.castShadow=true;body.add(roof);
+ const roof=softBox(1.48,.12,1.42,pm,0,1.51,-.12,.045);
  for(const side of [-1,1]){box(.035,.28,1.25,glass,side*.885,1.22,-.12);box(.075,.52,.10,black,side*.78,1.22,.53);box(.075,.52,.10,black,side*.78,1.22,-.78);box(.035,.035,.18,black,side*1.065,.78,-.22);box(.10,.13,.32,pm,side*1.12,1.16,.48);box(.07,.07,.12,black,side*1.12,1.19,.48);box(.12,.18,2.35,black,side*1.02,.49,0);box(.025,.18,1.05,black,side*1.071,.76,-.12);box(.045,.045,.18,chrome,side*1.09,.83,-.38)}
  // Instanced wheel assemblies keep detailed rims and arches cheap on mobile GPUs.
- const tireSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.425,.425,.30,36,1),rubber,4);
- const faceSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.285,.285,.035,32),rim,4);
+ const tireSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.425,.425,.30,52,1),rubber,4);
+ const faceSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.285,.285,.035,48),rim,4);
  const hubSet=new THREE.InstancedMesh(new THREE.CylinderGeometry(.105,.105,.045,12),chrome,4);
- const archSet=new THREE.InstancedMesh(new THREE.TorusGeometry(.48,.055,9,32,Math.PI),pm,4);
+ const archSet=new THREE.InstancedMesh(new THREE.TorusGeometry(.49,.065,12,48,Math.PI),pm,4);
  const lugSet=new THREE.InstancedMesh(new THREE.SphereGeometry(.027,7,5),black,20),wheelDummy=new THREE.Object3D();
  let wi=0,li=0;
  for(const z of [-1.42,1.42])for(const x of [-1.08,1.08]){
@@ -1187,9 +1187,9 @@ function car(color,isPlayer=false){
   wi++;
  }
  tireSet.castShadow=true;archSet.castShadow=true;body.add(tireSet,faceSet,hubSet,archSet,lugSet);
- box(2.18,.16,.22,black,0,.57,2.18);box(1.0,.22,.055,black,0,.79,2.225);for(let i=0;i<4;i++)box(.82,.018,.025,chrome,0,.71+i*.045,2.26);
+ softBox(2.18,.16,.22,black,0,.57,2.18,.045);softBox(1.0,.22,.055,black,0,.79,2.225,.025);for(let i=0;i<4;i++)box(.82,.018,.025,chrome,0,.71+i*.045,2.26);
  for(const x of [-.72,.72]){box(.48,.13,.075,lamp,x,.91,2.18);box(.40,.075,.055,black,x,.76,2.19);box(.42,.13,.07,mat('#a52d28',.3,.12),x,.91,-2.19)}
- box(2.16,.15,.24,black,0,.56,-2.18);box(1.72,.10,.18,black,0,.48,-2.28);box(1.62,.10,.16,black,0,1.30,-1.92);for(const x of [-.72,.72])box(.12,.25,.14,black,x,1.19,-1.92);
+ softBox(2.16,.15,.24,black,0,.56,-2.18,.045);softBox(1.72,.10,.18,black,0,.48,-2.28,.035);box(1.62,.10,.16,black,0,1.30,-1.92);for(const x of [-.72,.72])box(.12,.25,.14,black,x,1.19,-1.92);
  for(const x of [-.52,.52]){const ex=new THREE.Mesh(new THREE.CylinderGeometry(.085,.085,.22,12),chrome);ex.rotation.x=Math.PI/2;ex.position.set(x,.55,-2.22);body.add(ex)}
  if(isPlayer){box(.075,.025,1.42,mat('#f4f0e7',.5,.1),0,1.575,-.12);box(1.84,.055,.10,pm,0,1.42,-1.91)}
  // Cosmetic-only bodywork: grille mesh, hood creases, glass trim, handles and light details.
@@ -1225,7 +1225,7 @@ function car(color,isPlayer=false){
  box(1.2,.07,.16,interior,0,1.15,.67);
  // Mirrors, door handles, window seals and panel seams.
  for(const side of [-1,1]){
-  box(.16,.12,.28,darkMetal,side*1.01,1.28,.58);box(.18,.085,.22,brightMetal,side*1.08,1.31,.58);box(.11,.045,.18,lens,side*1.09,1.32,.59);
+  softBox(.16,.12,.28,darkMetal,side*1.01,1.28,.58,.035);softBox(.18,.085,.22,brightMetal,side*1.08,1.31,.58,.03);box(.11,.045,.18,lens,side*1.09,1.32,.59);
   box(.12,.055,.23,darkMetal,side*1.035,.91,-.48);box(.025,.018,1.12,darkMetal,side*1.035,.72,-.12);
   box(.025,.018,.72,darkMetal,side*1.035,.72,1.04);box(.16,.035,.055,brightMetal,side*1.04,.94,-.32);
   box(.035,.025,.32,brightMetal,side*1.04,.79,1.48);
@@ -1293,7 +1293,7 @@ function renderGaragePreview(){
  if(w<20||h<20)return false;
  if(!garageRenderer){
   garageRenderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
-  garageRenderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
+  garageRenderer.setPixelRatio(Math.min(devicePixelRatio||1,1.8));
   garageRenderer.outputColorSpace=THREE.SRGBColorSpace;
   garageRenderer.toneMapping=THREE.ACESFilmicToneMapping;
   garageRenderer.toneMappingExposure=1.28;
@@ -1350,7 +1350,7 @@ function buildWorldCore(){setLoadProgress(72,'СОЗДАНИЕ ИГРОВОГО 
  const sky=new THREE.Mesh(skyGeo,skyMat);sky.renderOrder=-10;scene.add(sky);
  const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);camera=new THREE.PerspectiveCamera(innerHeight>innerWidth?72:65,innerWidth/innerHeight,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
 renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});
-basePixelRatio=Math.min(devicePixelRatio,mobileQuality?1.0:1.35);adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(innerWidth,innerHeight);
+basePixelRatio=Math.min(devicePixelRatio||1,mobileQuality?1.35:1.7);adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(innerWidth,innerHeight);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
@@ -1581,7 +1581,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
 player=car($('paint').value,true);scene.add(player);buildGaragePreview();ai=[];let cols=['#d34e43','#e6e9e8','#4388b9'];for(let i=0;i<3;i++){let c=car(cols[i]);scene.add(c);ai.push({car:c,d:12+i*9,side:[-2.9,2.8,.1][i],v:[142.24,165,185,220,255][Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague))]*.93/3.6-(2-i)*.7,currentSpeed:0,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function cameraUpdate(dt){const portrait=innerHeight>innerWidth;const followDistance=portrait?14.2:11,cameraHeight=portrait?6.4:5.3,lookAhead=portrait?10:8;let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*followDistance,player.position.y+cameraHeight,player.position.z-fz*followDistance),lookTarget=new THREE.Vector3(player.position.x+fx*lookAhead,player.position.y+1.1,player.position.z+fz*lookAhead);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.78:.62;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}
+let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.88:.78;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}
 function initRaceMap(){mapCanvas=$('race-map-canvas');mapCtx=mapCanvas?mapCanvas.getContext('2d'):null}function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
 function updateAtmosphereVisuals(dt){
  if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
