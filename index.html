@@ -1122,6 +1122,9 @@ function syncBotPosition(a){
  for(let k=-12;k<=12;k++){const d=a.d+k*.25,s=pointAt(d),x=a.car.position.x-s.p.x,z=a.car.position.z-s.p.z,dist=x*x+z*z;if(dist<bestDist){bestDist=dist;bestD=d;bestSample=s}}
  if(bestSample){a.d=bestD;const x=a.car.position.x-bestSample.p.x,z=a.car.position.z-bestSample.p.z;a.side=clamp(x*bestSample.side.x+z*bestSample.side.z,-4.2,4.2);place(a.car,a.d,a.side)}
 }
+// All cars keep unwrapped progress across lap boundaries. Compare absolute race distance,
+// not modulo track length, or a rival one lap behind can appear to be ahead.
+function currentRacePlace(){return 1+ai.filter(a=>a.d>progress+.05).length}
 function car(color,isPlayer=false){
  let root=new THREE.Group(),body=new THREE.Group();root.add(body);const pm=new THREE.MeshPhysicalMaterial({color,roughness:.245,metalness:.48,clearcoat:1,clearcoatRoughness:.12,reflectivity:.82,envMapIntensity:1.5});if(isPlayer)paintMat=pm;
  const black=mat('#101519',.52,.18),rubber=mat('#090b0c',.94),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.82),chrome=mat('#bac3c6',.22,.86);if(isPlayer)rimMat=rim;
@@ -1731,7 +1734,7 @@ function update(dt){
   // Update the smoothed chase camera after all collision corrections.
   cameraUpdate(dt);
   const laps=Math.floor(progress/length);
-  const placeNo=1+ai.filter(a=>{let d=(((a.d-progress)%length+length)%length);if(d>length/2)d-=length;return d>0}).length;
+  const placeNo=currentRacePlace();
   $('lap').textContent=Math.min(3,laps+1)+'/3';
   $('pos').textContent=placeNo+'/4';
   const speedKmh=Math.round(speed*3.6);$('speed').textContent=speedKmh;$('speedometer').style.setProperty('--speed-progress',Math.min(1,Math.abs(speedKmh)/220));
@@ -1741,7 +1744,7 @@ function update(dt){
 function finish(){
  if(mode!=='race')return;
  mode='result';
- let placeNo=1+ai.filter(a=>{let d=(((a.d-progress)%length+length)%length);if(d>length/2)d-=length;return d>0}).length;
+ let placeNo=currentRacePlace();
  let pts=[5,4,3,2][placeNo-1],cash=[300,240,180,130][placeNo-1];
  let seriesEnd=false,leagueUp=false,champion=false,seriesFailed=false;
  if(!activeRaceReplay){
