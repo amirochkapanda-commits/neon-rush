@@ -1211,12 +1211,75 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
   #menu .tab-icon{width:17px!important;height:17px!important}
 }
 
+
+/* AUTOSPORT route-selection finish: clear track identity and selected state. */
+#menu .brand{position:relative;text-shadow:0 5px 28px rgba(0,0,0,.28)}
+#menu .brand:after{
+ content:"MOTORSPORT SERIES  /  SEASON 01";
+ display:block;margin-top:8px;font-size:9px;font-weight:800;line-height:1.2;
+ letter-spacing:.28em;color:#9eafb9;text-shadow:none;
+}
+#menu .track-card{
+ position:relative;isolation:isolate;overflow:hidden;
+ background-size:cover!important;
+ transition:transform .22s ease,border-color .22s ease,filter .22s ease,box-shadow .22s ease;
+}
+#menu .track-card:before{
+ content:"ROUTE  /  " attr(data-route);
+ position:absolute;z-index:2;top:11px;right:11px;
+ padding:5px 8px;border:1px solid rgba(255,255,255,.28);
+ border-radius:4px;background:rgba(5,12,18,.68);
+ color:#e0e8eb;font-size:8px;font-weight:850;letter-spacing:.17em;
+ backdrop-filter:blur(5px);
+}
+#menu .track-card[aria-pressed=true]:before{
+ content:"SELECTED  /  " attr(data-route);
+ border-color:rgba(245,194,124,.7);background:rgba(17,22,24,.82);color:#ffd18a;
+}
+#menu .track-card span{
+ z-index:2;display:block;font-weight:950;
+}
+#menu .track-card:after{
+ z-index:1;
+ background:linear-gradient(180deg,rgba(3,8,12,.08) 0%,rgba(3,8,12,.02) 32%,rgba(3,8,12,.88) 100%);
+}
+#menu .track-card[aria-pressed=true]{
+ transform:translateX(3px);
+}
+#menu .track-card:focus-visible,#menu .tab:focus-visible,#menu #start:focus-visible{
+ outline:2px solid #ffd18a;outline-offset:3px;
+}
+#menu .tab-icon{transition:transform .2s ease,filter .2s ease}
+#menu .tab[aria-selected=true] .tab-icon{transform:translateY(-1px)}
+#menu #start{position:relative;overflow:hidden}
+#menu #start:before{
+ content:"";position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.23) 48%,transparent 72%);
+ transform:translateX(-110%);transition:transform .55s ease;
+}
+@media(hover:hover){
+ #menu .track-card:hover{transform:translateY(-2px);filter:brightness(1.12)}
+ #menu #start:hover:before{transform:translateX(110%)}
+ #menu .tab:hover:not([aria-selected=true]){color:#fff;background:rgba(255,255,255,.055)}
+}
+@media(max-width:680px){
+ #menu .brand:after{font-size:8px;letter-spacing:.22em;margin-top:6px}
+ #menu .track-card:before{top:6px;right:5px;padding:4px 5px;font-size:6px;letter-spacing:.1em}
+ #menu .track-card[aria-pressed=true]{transform:translateY(-2px)}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #menu .brand:after{display:none}
+ #menu .track-card:before{top:4px;right:4px;padding:3px 4px;font-size:6px}
+}
+@media(prefers-reduced-motion:reduce){
+ #menu .track-card,#menu .tab-icon,#menu #start:before{transition:none!important}
+}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
 <div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3v18M6 4h13l-3 4 3 4H6M9 4v4m4-4v4m-4 0v4m4-4v4" /></svg><span>ЗАЕЗД</span></button><button class="tab" data-tab="garage" aria-selected="false"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14.5 5 9h14l2 5.5V19h-2v-2H5v2H3zM6 9l1.5-4h9L18 9M6 13h.01M18 13h.01M7 17h10" /></svg><span>ГАРАЖ</span></button><button class="tab" data-tab="shop" aria-selected="false"><svg class="tab-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="3"/><path d="m12 3.5 0 5m8.5 3.5h-5M12 20.5v-5M3.5 12h5" /></svg><span>МАГАЗИН</span></button></div>
 <section class="panel active" id="panel-race"><div class="section-title">01 <span aria-hidden="true">/</span> ВЫБОР МАРШРУТА</div>
-<div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST · 01</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY · 02</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT · 03</span></button></div>
+<div class="track-picker"><button class="track-card" data-track="coast" data-route="01" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST · 01</span></button><button class="track-card" data-track="forest" data-route="02" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY · 02</span></button><button class="track-card" data-track="desert" data-route="03" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT · 03</span></button></div>
 <button type="button" class="league-chip" id="leagueName" aria-haspopup="dialog" aria-controls="league-modal">ЛИГА 1 · НОВИЧОК ▾</button><div class="mission" id="mission">Финишируй в топе, зарабатывай токены и открывай новые лиги.</div>
 <div class="stats menu-stats"><div><small>ЭТАП</small><b id="season">1/3</b></div><div><small>ОЧКИ</small><b id="points">0</b></div><div><small>ПОБЕДЫ</small><b id="wins">0</b></div><div><small>✦ TOKENS</small><b id="credits">0</b></div></div>
 <button id="start" class="primary">▶ СТАРТ</button><p id="status" class="tiny">Загрузка…</p></section>
