@@ -439,8 +439,8 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 #menu .brand{font-size:clamp(36px,6.5vw,64px)!important;line-height:.9!important;letter-spacing:-.085em!important}
 #menu .tag{margin:7px 0 20px!important;font-size:9px!important;letter-spacing:.38em!important;color:#9fb2bd!important}
 #menu .tabs{
-  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
-  width:min(520px,100%)!important;max-width:100%;gap:5px!important;
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  width:min(620px,100%)!important;max-width:100%;gap:5px!important;
   margin:0 0 22px!important;padding:5px!important;
   border:1px solid #ffffff20!important;border-radius:13px!important;
   background:#050c13b8!important;box-shadow:inset 0 1px #ffffff0b;
@@ -796,7 +796,7 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
-<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="garage" aria-selected="false">ГАРАЖ</button></div>
+<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="garage" aria-selected="false">ГАРАЖ</button><button class="tab" data-tab="shop" aria-selected="false">МАГАЗИН</button></div>
 <section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
 <div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST RUN</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY PASS</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT RING</span></button></div>
 <button type="button" class="league-chip" id="leagueName" aria-haspopup="dialog" aria-controls="league-modal">ЛИГА 1 · НОВИЧОК ▾</button><div class="mission" id="mission">Финишируй в топе, зарабатывай токены и открывай новые лиги.</div>
@@ -839,6 +839,7 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  </div>
 </div>
 </section>
+<section class="panel" id="panel-shop" aria-label="Магазин"></section>
 </div></div>
 <div id="league-modal" class="league-modal hidden" role="dialog" aria-modal="true" aria-labelledby="league-modal-title"><div class="league-modal-card"><div class="league-modal-head"><div><div class="section-title" id="league-modal-title">ЧЕМПИОНАТЫ</div><div class="muted">Выбери открытую лигу. Пройденные лиги доступны для повторной игры без наград.</div></div><button type="button" id="league-close" aria-label="Закрыть">✕</button></div><div id="league-list" class="league-list"></div></div></div>
 <div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause" aria-label="Пауза" title="Пауза">Ⅱ</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div id="speedometer" class="speedometer" aria-label="Спидометр"><div class="speedometer-inner"><strong id="speed">0</strong><small>КМ/Ч</small></div></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div><div id="pause-menu" class="pause-menu hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="pause-card"><div class="pause-kicker">AUTOSPORT · RACE CONTROL</div><h2 id="pause-title">ПАУЗА</h2><p>Гонка приостановлена</p><button id="resume-race" class="pause-primary">ПРОДОЛЖИТЬ ИГРУ</button><button id="restart-race">ПЕРЕЗАПУСК</button><button id="pause-home">В МЕНЮ</button></div></div></div>
