@@ -364,7 +364,7 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 #panel-garage .garage-showroom{display:flex;flex:1;flex-direction:column;min-height:0;gap:8px}
 #garage-view canvas.garage-canvas{position:absolute;inset:0;z-index:0;width:100%;height:100%;display:block;pointer-events:none}
 #garage-view{position:relative;flex:1;min-height:190px;overflow:hidden;border:1px solid #d9b77b55;border-radius:18px;background:transparent;touch-action:none;isolation:isolate}
-#garage-view:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 62%,transparent 22%,#07101930 78%),linear-gradient(0deg,#07101955,transparent 35%);z-index:1}
+#garage-view:before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 54%,transparent 48%,#07101912 100%),linear-gradient(0deg,#07101920,transparent 28%);z-index:1}
 .garage-view-title,.garage-view-hint{position:absolute;z-index:2;left:14px;pointer-events:none;text-shadow:0 2px 9px #000}
 .garage-view-title{top:12px;font-size:10px;font-weight:950;letter-spacing:.2em;color:#f4c77e}
 .garage-view-hint{bottom:10px;font-size:8px;letter-spacing:.13em;color:#d5e0e5}
@@ -745,23 +745,24 @@ function applyGarage(){
 }
 function updateGarageCamera(){
  if(!garageCamera)return;
- const radius=8.7,angle=garageCar?garageCar.rotation.y+.72:.72;
+ const portrait=innerHeight>innerWidth;const radius=portrait?7.5:6.35,angle=garageCar?garageCar.rotation.y+.82:.82;
  garageCamera.position.set(Math.sin(angle)*radius,2.1+garageOrbitElevation*4.1,Math.cos(angle)*radius);
  garageCamera.lookAt(0,.68,0);
 }
 function buildGaragePreview(){
- garageScene=new THREE.Scene();garageScene.background=new THREE.Color('#0b1822');
- garageCamera=new THREE.PerspectiveCamera(34,1,.1,80);
- const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:'#172630',roughness:.86,metalness:.12}));
+ garageScene=new THREE.Scene();garageScene.background=new THREE.Color('#263b48');garageScene.environment=scene.environment;garageScene.environmentIntensity=1.35;
+ garageCamera=new THREE.PerspectiveCamera(30,1,.1,80);
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),new THREE.MeshStandardMaterial({color:'#263943',roughness:.78,metalness:.08}));
  floor.rotation.x=-Math.PI/2;floor.position.y=-.14;garageScene.add(floor);
- const platform=new THREE.Mesh(new THREE.CylinderGeometry(3.65,3.8,.18,96),new THREE.MeshStandardMaterial({color:'#25333b',roughness:.38,metalness:.72}));
+ const platform=new THREE.Mesh(new THREE.CylinderGeometry(3.65,3.8,.18,96),new THREE.MeshStandardMaterial({color:'#394b55',roughness:.34,metalness:.62}));
  platform.position.y=-.035;platform.receiveShadow=true;garageScene.add(platform);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(3.48,.025,8,96),new THREE.MeshBasicMaterial({color:'#d6a65d'}));
  ring.rotation.x=Math.PI/2;ring.position.y=.07;garageScene.add(ring);
- garageScene.add(new THREE.HemisphereLight('#d9e8f2','#26313a',2.0));
- const key=new THREE.DirectionalLight('#fff0d8',3.1);key.position.set(-4,8,5);key.castShadow=true;garageScene.add(key);
- const fill=new THREE.DirectionalLight('#8dbfe0',1.7);fill.position.set(6,4,-5);garageScene.add(fill);
- const back=new THREE.PointLight('#d69b52',38,18);back.position.set(0,4,-5);garageScene.add(back);
+ garageScene.add(new THREE.HemisphereLight('#eaf4ff','#46535a',2.35));
+ const key=new THREE.DirectionalLight('#fff4e3',4.2);key.position.set(-3.5,8,4.5);key.castShadow=true;garageScene.add(key);
+ const fill=new THREE.DirectionalLight('#b5dfff',2.6);fill.position.set(6,4,-4);garageScene.add(fill);
+ const front=new THREE.DirectionalLight('#ffffff',1.25);front.position.set(1.5,3.5,7);garageScene.add(front);
+ const back=new THREE.PointLight('#e4ad62',52,20);back.position.set(0,4,-5);garageScene.add(back);
  garageCar=player.clone(true);const materialCopies=new Map();garagePaintMat=null;garageRimMat=null;
  garageCar.traverse(o=>{
   if(!o.isMesh)return;
@@ -771,7 +772,7 @@ function buildGaragePreview(){
   };
   o.material=Array.isArray(o.material)?o.material.map(copyMaterial):copyMaterial(o.material);
  });
- garageCar.position.set(0,.10,0);garageCar.rotation.set(0,-.55,0);garageCar.scale.setScalar(1.08);
+ garageCar.position.set(0,.10,0);garageCar.rotation.set(0,-.55,0);garageCar.scale.setScalar(1.16);
  garageScene.add(garageCar);applyGarage();updateGarageCamera();
 }
 function renderGaragePreview(){
@@ -784,7 +785,7 @@ function renderGaragePreview(){
   garageRenderer.setPixelRatio(Math.min(devicePixelRatio||1,1.5));
   garageRenderer.outputColorSpace=THREE.SRGBColorSpace;
   garageRenderer.toneMapping=THREE.ACESFilmicToneMapping;
-  garageRenderer.toneMappingExposure=1.18;
+  garageRenderer.toneMappingExposure=1.28;
   garageRenderer.shadowMap.enabled=true;
   garageRenderer.shadowMap.type=THREE.PCFSoftShadowMap;
   garageRenderer.domElement.className='garage-canvas';
