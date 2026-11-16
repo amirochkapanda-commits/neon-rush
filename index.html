@@ -1386,6 +1386,15 @@ function showGameLoader(){
  $('game-loader')?.classList.remove('loader-hidden');
  setLoadProgress(12,'ПОДГОТОВКА ИГРЫ','ЗАПУСК ДВИЖКА');
 }
+function showGameError(error,stage='ИНИЦИАЛИЗАЦИЯ'){
+ const message=String(error?.stack||error?.message||error||'Неизвестная ошибка').slice(0,900);
+ console.error('[AUTOSPORT '+stage+']',error);
+ setLoadProgress(100,'ОШИБКА ЗАПУСКА · '+stage,message);
+ $('game-loader')?.classList.remove('loader-hidden');
+ if($('status'))$('status').textContent='Ошибка запуска: '+String(error?.message||error||'неизвестно').slice(0,180);
+}
+window.addEventListener('error',event=>{if(event.error)showGameError(event.error,'RUNTIME')});
+window.addEventListener('unhandledrejection',event=>showGameError(event.reason,'ASYNC'));
 setLoadProgress(5,'ЗАГРУЗКА AUTOSPORT','ПОДКЛЮЧЕНИЕ РЕСУРСОВ');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
 const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);if(!save.championshipRulesV2){save.leaguePoints=0;save.races=0;save.points=0;save.championshipRulesV2=true;localStorage.setItem('autosport-career',JSON.stringify(save));} // One-time reset for the new championship rules; future reloads keep current progress.
@@ -1749,10 +1758,10 @@ function buildWorld(){
       buildWorldCore();
       requestAnimationFrame(()=>{hideGameLoader();resolve(true)});
      }catch(error){
-      console.error(error);setLoadProgress(100,'НЕ УДАЛОСЬ ЗАГРУЗИТЬ ИГРУ',String(error&&error.message||error||'ОШИБКА ИНИЦИАЛИЗАЦИИ').slice(0,150));resolve(false);
+      showGameError(error,'СОЗДАНИЕ МИРА');resolve(false);
      }
     });
-   }catch(error){console.error(error);resolve(false)}
+   }catch(error){showGameError(error,'ПОДГОТОВКА');resolve(false)}
   });
  });
 }
@@ -2278,7 +2287,7 @@ $('resume-race').onclick=closePause;
 $('restart-race').onclick=()=>{if(mode==='race'){paused=false;$('pause-menu').classList.add('hidden');start()}};
 $('pause-home').onclick=()=>{ $('pause-menu').classList.add('hidden'); returnToGarage(); };
 // Fullscreen button is bound in the early non-module script so it works even if the game module is delayed.
-$('start').onclick=()=>{const stage=Math.min(2,save.races);if(selectedReplayLeague===null&&championshipTracks.indexOf(prefs.track)>stage)return;replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld().then(ok=>{if(ok)start()})};$('again').onclick=()=>{if(!activeRaceReplay)prefs.track=championshipTracks[Math.min(2,save.races)];replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld().then(ok=>{if(ok)start()})};$('home').onclick=returnToGarage;
+$('start').onclick=()=>{const stage=Math.min(2,save.races);if(selectedReplayLeague===null&&championshipTracks.indexOf(prefs.track)>stage)return;replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld().then(ok=>{if(ok){try{start()}catch(error){showGameError(error,'СТАРТ ГОНКИ')}}})};$('again').onclick=()=>{if(!activeRaceReplay)prefs.track=championshipTracks[Math.min(2,save.races)];replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld().then(ok=>{if(ok)start()})};$('home').onclick=returnToGarage;
 function saveGarage(){prefs.paint=$('paint').value;prefs.rim=$('rimPaint').value;localStorage.setItem('autosport-garage',JSON.stringify(prefs));applyGarage()}
 $('paint').addEventListener('input',()=>{document.querySelectorAll('[data-paint]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paint===$('paint').value)));saveGarage()});$('rimPaint').addEventListener('input',()=>{document.querySelectorAll('[data-rim]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rim===$('rimPaint').value)));saveGarage()});document.querySelectorAll('[data-paint]').forEach(b=>b.addEventListener('click',()=>{$('paint').value=b.dataset.paint;saveGarage();document.querySelectorAll('[data-paint]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('[data-rim]').forEach(b=>b.addEventListener('click',()=>{$('rimPaint').value=b.dataset.rim;saveGarage();document.querySelectorAll('[data-rim]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{const index=championshipTracks.indexOf(b.dataset.track),stage=Math.min(2,save.races);if(index<0||(selectedReplayLeague===null&&index>stage))return;prefs.track=b.dataset.track;replayMode=selectedReplayLeague!==null||index<save.races;document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updateMenuStats()}));
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
