@@ -745,7 +745,7 @@ function applyGarage(){
 }
 function updateGarageCamera(){
  if(!garageCamera)return;
- const portrait=innerHeight>innerWidth;const radius=portrait?7.5:6.35,polar=clamp(garageOrbitElevation,.55,1.48),horizontal=radius*Math.sin(polar);
+ const portrait=innerHeight>innerWidth;const radius=portrait?7.5:6.35,polar=clamp(garageOrbitElevation,.12,1.62),horizontal=radius*Math.sin(polar);
  garageCamera.position.set(Math.sin(garageOrbitAzimuth)*horizontal,radius*Math.cos(polar)+.68,Math.cos(garageOrbitAzimuth)*horizontal);
  garageCamera.lookAt(0,.68,0);
 }
@@ -799,7 +799,7 @@ function renderGaragePreview(){
 }
 const garageView=$('garage-view');
 garageView.addEventListener('pointerdown',e=>{if(!garageCar)return;e.preventDefault();garageDragging=true;garageDragPoint={x:e.clientX,y:e.clientY};try{garageView.setPointerCapture(e.pointerId)}catch{}});
-garageView.addEventListener('pointermove',e=>{if(!garageDragging||!garageDragPoint||!garageCar)return;const dx=e.clientX-garageDragPoint.x,dy=e.clientY-garageDragPoint.y;garageDragPoint={x:e.clientX,y:e.clientY};garageCar.rotation.y+=dx*.012;garageCar.rotation.x=clamp(garageCar.rotation.x+dy*.008,-.72,.72)});
+garageView.addEventListener('pointermove',e=>{if(!garageDragging||!garageDragPoint||!garageCar)return;const dx=e.clientX-garageDragPoint.x,dy=e.clientY-garageDragPoint.y;garageDragPoint={x:e.clientX,y:e.clientY};garageOrbitAzimuth-=dx*.012;garageOrbitElevation=clamp(garageOrbitElevation+dy*.009,.12,1.62);updateGarageCamera()});
 const stopGarageDrag=()=>{garageDragging=false;garageDragPoint=null};
 garageView.addEventListener('pointerup',stopGarageDrag);garageView.addEventListener('pointercancel',stopGarageDrag);garageView.addEventListener('lostpointercapture',stopGarageDrag);
 function buildWorld(){initRaceMap();if(raf)cancelAnimationFrame(raf);if(weatherCanvas){weatherCanvas.remove();weatherCanvas=null;weatherCtx=null;weatherParticles=[]}if(ssaoPass){ssaoPass.dispose();ssaoPass=null}if(bloomPass){bloomPass.dispose();bloomPass=null}if(composer){composer.dispose();composer=null}if(pmremTarget){pmremTarget.dispose();pmremTarget=null}if(renderer){renderer.dispose();renderer.domElement.remove()}if(scene){scene.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.map)m.map.dispose();if(m.uniforms)Object.values(m.uniforms).forEach(u=>{if(u.value&&u.value.isTexture)u.value.dispose()});m.dispose()})}})}scene=new THREE.Scene();let r=routes[prefs.track]||routes.coast;scene.background=new THREE.Color(r.bg);scene.fog=new THREE.Fog(r.fog,prefs.track==='desert'?230:135,prefs.track==='desert'?590:405);
