@@ -319,6 +319,43 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #hud .pad{gap:8px}
  #hud .ctrl{width:clamp(58px,17vw,72px);height:clamp(62px,17vw,76px)}
 }
+
+/* Rebuilt race HUD: four clear zones, with no competing overlays. */
+#hud .top{position:absolute;z-index:5;top:env(safe-area-inset-top);left:0;right:0;display:flex;align-items:center;gap:6px;padding:7px max(9px,env(safe-area-inset-right)) 6px max(9px,env(safe-area-inset-left));}
+#hud .top .box{flex:1;min-width:0;padding:6px 4px;background:#101a22e8;backdrop-filter:blur(8px);border-radius:9px;}
+#hud #pause{flex:0 0 42px;width:42px;height:40px;padding:0;border-radius:11px;font-size:18px;background:linear-gradient(145deg,#344956,#14232d);border:1px solid #ffffff55;}
+#race-map{position:absolute!important;z-index:2;left:1mm!important;right:auto!important;top:calc(env(safe-area-inset-top) + 58px)!important;width:clamp(112px,22vw,166px);height:clamp(82px,17vw,120px);max-width:42vw;border-radius:12px;overflow:hidden;background:#0b151dcc;border:1px solid #ffffff38;box-shadow:0 5px 18px #0008;}
+#race-map canvas{display:block;width:100%;height:100%}
+#speedometer{position:absolute;z-index:2;right:max(10px,env(safe-area-inset-right));left:auto;top:calc(env(safe-area-inset-top) + 62px);width:clamp(82px,17vw,112px);height:clamp(82px,17vw,112px);}
+.pause-menu{position:absolute;z-index:20;inset:0;display:flex;align-items:center;justify-content:center;padding:20px;background:#03080dcc;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);pointer-events:auto}
+.pause-menu.hidden{display:none}
+.pause-card{width:min(340px,calc(100vw - 36px));padding:24px 22px 20px;border:1px solid #e9bd7955;border-radius:20px;background:linear-gradient(155deg,#263b49f5,#0b141ef7);box-shadow:0 22px 70px #000b;text-align:center;pointer-events:auto}
+.pause-kicker{font-size:9px;font-weight:900;letter-spacing:.2em;color:#d8b477}
+.pause-card h2{margin:10px 0 4px;font-size:28px;letter-spacing:.08em}
+.pause-card p{margin:0 0 18px;color:#b9c6cc;font-size:12px}
+.pause-card button{display:block;width:100%;min-height:46px;margin-top:9px;border-radius:11px;font-size:12px;letter-spacing:.04em}
+.pause-card .pause-primary{background:linear-gradient(110deg,#a9652b,#f0bd69);color:#17120d;border:0}
+@media (orientation:portrait){
+ #hud .top{gap:5px;padding:6px max(7px,env(safe-area-inset-right)) 5px max(7px,env(safe-area-inset-left))}
+ #hud .top .box{padding:7px 3px}
+ #hud .top .box small{font-size:8px;letter-spacing:.02em}
+ #hud .top .box strong{font-size:clamp(14px,4.2vw,18px)}
+ #hud #pause{flex-basis:42px;width:42px;height:40px}
+ #race-map{left:1mm!important;top:calc(env(safe-area-inset-top) + 58px)!important;width:min(38vw,148px);height:clamp(94px,27vw,116px);max-width:40vw}
+ #speedometer{top:calc(env(safe-area-inset-top) + 66px);right:max(9px,env(safe-area-inset-right));width:clamp(86px,24vw,104px);height:clamp(86px,24vw,104px)}
+ #speedometer .speedometer-inner strong{font-size:clamp(21px,6vw,27px)}
+ #speedometer .speedometer-inner small{font-size:7px}
+ #hud .controls{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px));padding-left:max(14px,env(safe-area-inset-left) + 8px);padding-right:max(14px,env(safe-area-inset-right) + 8px)}
+ #hud .pad{gap:9px}
+ #hud .ctrl{width:clamp(58px,17vw,72px);height:clamp(62px,17vw,76px);border-radius:13px}
+}
+@media (orientation:landscape) and (max-height:520px){
+ #hud .top{gap:6px;padding:6px max(9px,env(safe-area-inset-right)) 5px max(9px,env(safe-area-inset-left))}
+ #hud .top .box{flex:0 0 76px}
+ #hud #pause{flex-basis:40px;width:40px;height:38px}
+ #race-map{left:1mm!important;top:calc(env(safe-area-inset-top) + 54px)!important;width:clamp(150px,18vw,184px);height:clamp(100px,24vh,128px)}
+ #speedometer{top:calc(env(safe-area-inset-top) + 58px);width:clamp(94px,12vh,116px);height:clamp(94px,12vh,116px)}
+}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -332,7 +369,7 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 <section class="panel" id="panel-design"><div class="section-title">ВНЕШНИЙ ВИД МАШИНЫ</div><div class="design-colors"><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=520&q=85" alt="Спортивный автомобиль с окрашенным кузовом"><div class="design-name">ОКРАСКА КУЗОВА</div><div class="design-desc">Меняет основной цвет корпуса автомобиля.</div><label>СВОЙ ЦВЕТ<input id="paint" type="color" value="#dba14e"></label><div class="palette"><button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой" aria-pressed="true"></button><button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный"></button><button class="swatch" data-paint="#1768c5" style="background:#1768c5" aria-label="Синий"></button><button class="swatch" data-paint="#f1f1ed" style="background:#f1f1ed" aria-label="Белый"></button><button class="swatch" data-paint="#20252b" style="background:#20252b" aria-label="Чёрный"></button><button class="swatch" data-paint="#20a66a" style="background:#20a66a" aria-label="Зелёный"></button></div></div><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=520&q=85" alt="Колесо спортивного автомобиля"><div class="design-name">ЦВЕТ ДИСКОВ</div><div class="design-desc">Меняет цвет металлических центральных частей колёс.</div><label>СВОЙ ЦВЕТ<input id="rimPaint" type="color" value="#9da6aa"></label><div class="palette"><button class="swatch" data-rim="#9da6aa" style="background:#9da6aa" aria-label="Серебристый" aria-pressed="true"></button><button class="swatch" data-rim="#d4a43c" style="background:#d4a43c" aria-label="Золотой"></button><button class="swatch" data-rim="#d9d9d9" style="background:#d9d9d9" aria-label="Светлый"></button><button class="swatch" data-rim="#262a30" style="background:#262a30" aria-label="Чёрный"></button><button class="swatch" data-rim="#c43d36" style="background:#c43d36" aria-label="Красный"></button><button class="swatch" data-rim="#2474c9" style="background:#2474c9" aria-label="Синий"></button></div></div></div></section>
 </div></div>
 <div id="league-modal" class="league-modal hidden" role="dialog" aria-modal="true" aria-labelledby="league-modal-title"><div class="league-modal-card"><div class="league-modal-head"><div><div class="section-title" id="league-modal-title">ЧЕМПИОНАТЫ</div><div class="muted">Выбери открытую лигу. Пройденные лиги доступны для повторной игры без наград.</div></div><button type="button" id="league-close" aria-label="Закрыть">✕</button></div><div id="league-list" class="league-list"></div></div></div>
-<div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause">Ⅱ</button><button id="restart" aria-label="Перезапустить гонку">↻</button><button id="exit">ВЫХОД</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div id="speedometer" class="speedometer" aria-label="Спидометр"><div class="speedometer-inner"><strong id="speed">0</strong><small>КМ/Ч</small></div></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div></div>
+<div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause" aria-label="Пауза" title="Пауза">Ⅱ</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div id="speedometer" class="speedometer" aria-label="Спидометр"><div class="speedometer-inner"><strong id="speed">0</strong><small>КМ/Ч</small></div></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div><div id="pause-menu" class="pause-menu hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="pause-card"><div class="pause-kicker">AUTOSPORT · RACE CONTROL</div><h2 id="pause-title">ПАУЗА</h2><p>Гонка приостановлена</p><button id="resume-race" class="pause-primary">ПРОДОЛЖИТЬ ИГРУ</button><button id="restart-race">ПЕРЕЗАПУСК</button><button id="pause-home">В МЕНЮ</button></div></div></div>
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
@@ -1086,7 +1123,7 @@ document.addEventListener('touchcancel',releaseTouchPointers,{passive:true});
 addEventListener('keydown',e=>{
  const key=keyMap[e.code];
  if(key){e.preventDefault();keyboardHeld.add(key);refreshHeld()}
- if(e.code==='Escape'&&mode==='race'){paused=!paused;clearControls();$('pause').textContent=paused?'▶':'Ⅱ'}
+ if(e.code==='Escape'&&mode==='race'){if(paused)closePause();else openPause()}
 });
 addEventListener('keyup',e=>{const key=keyMap[e.code];if(key){keyboardHeld.delete(key);refreshHeld()}});
 function clearControls(){
@@ -1097,10 +1134,13 @@ function clearControls(){
 addEventListener('blur',clearControls);
 addEventListener('pagehide',clearControls);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)clearControls()});
-function returnToGarage(){mode='menu';paused=false;speed=0;boundaryHit=0;clearControls();$('hud').style.display='none';$('result').classList.add('hidden');$('menu').classList.remove('hidden');$('pause').textContent='Ⅱ';updateMenuStats()}
-$('pause').onclick=()=>{if(mode!=='race')return;paused=!paused;$('pause').textContent=paused?'▶':'Ⅱ'};
-$('restart').onclick=()=>{if(mode==='race')start()};
-$('exit').onclick=returnToGarage;
+function returnToGarage(){mode='menu';paused=false;speed=0;boundaryHit=0;clearControls();$('hud').style.display='none';$('result').classList.add('hidden');$('menu').classList.remove('hidden');$('pause').textContent='Ⅱ';$('pause-menu').classList.add('hidden');updateMenuStats()}
+function openPause(){if(mode!=='race'||paused)return;paused=true;clearControls();$('pause-menu').classList.remove('hidden');$('pause').textContent='▶';}
+function closePause(){if(mode!=='race'||!paused)return;paused=false;$('pause-menu').classList.add('hidden');$('pause').textContent='Ⅱ';}
+$('pause').onclick=()=>{if(paused)closePause();else openPause()};
+$('resume-race').onclick=closePause;
+$('restart-race').onclick=()=>{if(mode==='race'){paused=false;$('pause-menu').classList.add('hidden');start()}};
+$('pause-home').onclick=()=>{ $('pause-menu').classList.add('hidden'); returnToGarage(); };
 // Fullscreen button is bound in the early non-module script so it works even if the game module is delayed.
 $('start').onclick=()=>{const stage=Math.min(2,save.races);if(selectedReplayLeague===null&&championshipTracks.indexOf(prefs.track)>stage)return;replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld();start()};$('again').onclick=()=>{if(!activeRaceReplay)prefs.track=championshipTracks[Math.min(2,save.races)];replayMode=selectedReplayLeague!==null||championshipTracks.indexOf(prefs.track)<save.races;localStorage.setItem('autosport-garage',JSON.stringify(prefs));buildWorld();start()};$('home').onclick=returnToGarage;
 function saveGarage(){prefs.paint=$('paint').value;prefs.rim=$('rimPaint').value;localStorage.setItem('autosport-garage',JSON.stringify(prefs));if(player)applyGarage()}
