@@ -387,7 +387,7 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #panel-garage .design-photo{height:76px}
 }
 @media(orientation:landscape) and (max-height:520px){
- #panel-garage.active{height:100%;overflow:hidden}
+ #panel-garage.active{flex:1;height:auto;min-height:0;overflow:hidden}
  #panel-garage .garage-layout{height:100%;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
  #panel-garage .garage-section{min-height:0;padding:6px;overflow:hidden}
  #panel-garage .garage-section>.section-title{font-size:8px;margin-bottom:4px}
