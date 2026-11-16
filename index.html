@@ -887,15 +887,261 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
   #menu .stats small{font-size:6px!important}
 }
 
+
+/* AUTOSPORT CINEMATIC MENU — final responsive skin; gameplay logic and IDs stay intact. */
+#menu{
+  position:fixed!important;inset:0!important;z-index:20!important;
+  display:flex!important;align-items:stretch!important;justify-content:stretch!important;
+  padding:0!important;overflow:hidden!important;
+  background:
+    radial-gradient(ellipse at 76% 42%,rgba(193,128,61,.18),transparent 42%),
+    radial-gradient(ellipse at 12% 12%,rgba(61,105,132,.22),transparent 38%),
+    linear-gradient(90deg,rgba(4,10,16,.91) 0%,rgba(5,12,19,.68) 54%,rgba(4,10,16,.86) 100%)!important;
+  backdrop-filter:blur(2px)!important;-webkit-backdrop-filter:blur(2px)!important;
+}
+#menu>.card{
+  position:relative!important;isolation:isolate!important;
+  display:grid!important;grid-template-columns:minmax(0,1fr) minmax(300px,.72fr)!important;
+  grid-template-rows:auto auto minmax(0,1fr)!important;
+  grid-template-areas:"brand tabs" "tag tabs" "panel panel"!important;
+  align-content:stretch!important;align-items:center!important;
+  gap:0 clamp(18px,3vw,42px)!important;
+  width:min(1440px,100%)!important;height:100%!important;max-height:100dvh!important;
+  min-height:0!important;margin:0 auto!important;
+  padding:max(20px,env(safe-area-inset-top)) max(34px,calc(env(safe-area-inset-right) + 4vw)) max(20px,env(safe-area-inset-bottom)) max(34px,calc(env(safe-area-inset-left) + 4vw))!important;
+  overflow:hidden!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+#menu>.card:before{
+  content:"";position:absolute;z-index:-1;inset:0 0 0 auto;width:46%;
+  background:linear-gradient(90deg,transparent,rgba(6,13,20,.14) 25%,rgba(6,13,20,.3));
+  border-left:1px solid rgba(255,255,255,.07);pointer-events:none;
+}
+#menu .brand{
+  grid-area:brand!important;align-self:end!important;
+  width:max-content;max-width:100%;font-family:Impact,"Arial Narrow",system-ui,sans-serif!important;
+  font-size:clamp(42px,6.4vw,82px)!important;font-weight:1000!important;
+  letter-spacing:-.075em!important;line-height:.82!important;
+  color:#f4f2ed!important;text-shadow:0 8px 35px #000b!important;
+}
+#menu .brand span{color:#f0b45e!important}
+#menu .tag{
+  grid-area:tag!important;align-self:start!important;
+  margin:10px 0 0!important;padding-left:4px!important;
+  color:#c2cbd0!important;font-size:9px!important;font-weight:800!important;
+  letter-spacing:.36em!important;line-height:1.4!important;
+}
+#menu .tabs{
+  grid-area:tabs!important;align-self:center!important;justify-self:end!important;
+  display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  width:min(100%,460px)!important;max-width:100%!important;gap:7px!important;
+  margin:0!important;padding:5px!important;border:1px solid #ffffff24!important;
+  border-radius:13px!important;background:rgba(7,15,22,.68)!important;
+  box-shadow:0 10px 34px #0006!important;
+}
+#menu .tab{
+  min-width:0!important;min-height:43px!important;padding:9px 8px!important;
+  border:1px solid transparent!important;border-radius:9px!important;
+  background:transparent!important;color:#aebbc2!important;
+  font-family:system-ui,sans-serif!important;font-size:clamp(9px,.9vw,11px)!important;
+  font-weight:900!important;letter-spacing:.09em!important;white-space:nowrap!important;
+  box-shadow:none!important;transition:background .18s,color .18s,border-color .18s!important;
+}
+#menu .tab[aria-selected=true]{
+  color:#17120d!important;background:linear-gradient(115deg,#e7a94f,#f7d99d)!important;
+  border-color:#ffe2aa!important;box-shadow:0 5px 22px #d69b4b55!important;
+}
+#menu .panel{grid-area:panel!important;min-width:0!important;min-height:0!important;width:100%!important;max-width:100%!important}
+#menu .panel:not(.active){display:none!important}
+#panel-race.active{
+  display:grid!important;height:100%!important;min-height:0!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+  grid-template-rows:auto minmax(120px,1fr) auto auto!important;
+  grid-template-areas:"heading heading heading" "tracks tracks tracks" "league mission stats" "status status start"!important;
+  gap:clamp(10px,1.7vh,18px) clamp(10px,1.7vw,22px)!important;
+  align-content:stretch!important;align-items:stretch!important;
+  padding:clamp(10px,2vh,20px) 0 0!important;
+}
+#panel-race>.section-title{
+  grid-area:heading!important;align-self:center!important;margin:0!important;
+  color:#f2c77f!important;font-size:11px!important;font-weight:950!important;
+  letter-spacing:.24em!important;text-shadow:0 2px 15px #000!important;
+}
+#panel-race>.section-title span{color:#fff!important;opacity:.45}
+#panel-race>.track-picker{
+  grid-area:tracks!important;display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:minmax(0,1fr)!important;
+  gap:clamp(10px,1.6vw,20px)!important;min-width:0!important;min-height:0!important;
+  height:100%!important;margin:0!important;
+}
+#menu .track-card{
+  position:relative!important;width:100%!important;height:100%!important;min-height:0!important;
+  overflow:hidden!important;border:1px solid #ffffff42!important;border-radius:15px!important;
+  background-size:cover!important;background-position:center!important;
+  box-shadow:inset 0 -90px 65px #02070dcc,0 12px 30px #0008!important;
+  transition:transform .18s,border-color .18s,filter .18s!important;
+}
+#menu .track-card:after{
+  content:"";position:absolute!important;inset:0!important;
+  background:linear-gradient(180deg,rgba(3,8,13,.02) 20%,rgba(3,8,13,.18) 48%,rgba(3,8,13,.94) 100%)!important;
+}
+#menu .track-card:before{
+  content:"";position:absolute;z-index:1;left:13px;top:13px;width:26px;height:2px;
+  background:#f3c77f;box-shadow:0 0 14px #f3c77f88;
+}
+#menu .track-card span{
+  z-index:2!important;left:15px!important;bottom:14px!important;
+  font-size:clamp(11px,1.25vw,15px)!important;font-weight:950!important;
+  letter-spacing:.14em!important;text-shadow:0 3px 12px #000!important;
+}
+#menu .track-card[aria-pressed=true]{
+  border:2px solid #f4c77e!important;
+  box-shadow:0 0 0 3px #f4c77e35,0 14px 34px #000a,inset 0 -90px 65px #02070dcc!important;
+}
+#menu .track-card[aria-disabled=true]{filter:grayscale(.75) brightness(.48)!important}
+#panel-race>.league-chip{
+  grid-area:league!important;align-self:stretch!important;justify-self:stretch!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  min-width:0!important;min-height:42px!important;margin:0!important;padding:9px 12px!important;
+  border:1px solid #e9b96e66!important;border-radius:10px!important;
+  background:linear-gradient(110deg,#e7aa4b24,#e7aa4b0a)!important;
+  color:#f6d49a!important;font-size:10px!important;font-weight:950!important;
+  letter-spacing:.09em!important;white-space:normal!important;
+}
+#panel-race>.mission{
+  grid-area:mission!important;align-self:stretch!important;display:flex!important;
+  align-items:center!important;justify-content:center!important;min-width:0!important;
+  min-height:42px!important;margin:0!important;padding:8px 12px!important;
+  border:1px solid #ffffff20!important;border-radius:10px!important;
+  background:rgba(9,17,25,.68)!important;color:#c4cfd4!important;
+  font-size:10px!important;line-height:1.35!important;text-align:center!important;
+  overflow:hidden!important;
+}
+#panel-race>.menu-stats{
+  grid-area:stats!important;align-self:stretch!important;display:flex!important;
+  align-items:center!important;justify-content:space-around!important;
+  min-width:0!important;margin:0!important;padding:5px 7px!important;
+  border:1px solid #ffffff20!important;border-radius:10px!important;
+  background:rgba(9,17,25,.68)!important;
+}
+#menu .stats>div{min-width:0!important;flex:1 1 0!important;padding:3px!important}
+#menu .stats small{font-size:clamp(6px,.68vw,8px)!important;letter-spacing:.08em!important;color:#aebbc2!important}
+#menu .stats b{font-size:clamp(15px,1.7vw,21px)!important;color:#f4f1e9!important;font-weight:950!important}
+#menu .stats>div:last-child b{color:#f3c77f!important}
+#panel-race>#start{
+  grid-area:start!important;align-self:stretch!important;justify-self:stretch!important;
+  min-width:0!important;min-height:46px!important;margin:0!important;padding:10px 16px!important;
+  border:1px solid #ffe2aa!important;border-radius:11px!important;
+  background:linear-gradient(110deg,#a9652b,#f4c77e 58%,#d49345)!important;
+  color:#17120d!important;font-size:clamp(11px,1vw,13px)!important;font-weight:1000!important;
+  letter-spacing:.1em!important;box-shadow:0 8px 28px #d69b4b44,inset 0 1px #fff9!important;
+}
+#panel-race>#status{grid-area:status!important;align-self:center!important;margin:0!important;min-height:10px!important;color:#aab8bf!important;font-size:8px!important;letter-spacing:.08em!important}
+#panel-garage.active{
+  display:grid!important;grid-template-columns:minmax(0,1.25fr) minmax(280px,.75fr)!important;
+  grid-template-rows:minmax(0,1fr)!important;gap:clamp(12px,2vw,24px)!important;
+  height:100%!important;min-height:0!important;overflow:hidden!important;padding-top:12px!important;
+}
+#panel-garage .garage-showroom{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important;min-width:0!important;min-height:0!important}
+#garage-view{width:100%!important;height:100%!important;min-height:0!important;border:1px solid #ffffff28!important;border-radius:17px!important;overflow:hidden!important;background:linear-gradient(145deg,#17263288,#050b12aa)!important}
+#panel-garage .garage-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;align-content:center!important;gap:12px!important;min-width:0!important;min-height:0!important}
+#panel-garage .garage-customize,#panel-garage .garage-upgrades{min-width:0!important;padding:14px!important;border:1px solid #ffffff24!important;border-radius:13px!important;background:rgba(8,16,24,.78)!important}
+#panel-garage .garage-upgrades{display:grid!important;gap:12px!important}
+#panel-garage .garage-upgrade-item{min-width:0!important;display:grid!important;gap:7px!important}
+#panel-garage .garage-upgrade-head{display:flex!important;justify-content:space-between!important;gap:7px!important;font-size:10px!important;color:#e7edf0!important}
+#panel-garage .garage-upgrade-head span{color:#f4c77e!important}
+#panel-garage .garage-upgrade-item .upgrade-buy{min-height:34px!important;padding:7px 9px!important;font-size:9px!important}
+#panel-garage .garage-swatches{display:flex!important;flex-wrap:wrap!important;gap:8px!important}
+#panel-garage .garage-swatches .swatch{width:22px!important;height:22px!important;min-height:22px!important}
+#panel-shop.active{display:flex!important;align-items:center!important;justify-content:center!important;min-height:0!important;flex:1 1 auto!important}
+#menu button:not(.primary):not(.tab):not(.track-card):not(.swatch){box-shadow:none!important}
+#menu button:focus-visible{outline:2px solid #ffe0a5!important;outline-offset:3px!important}
+
+/* Portrait: stacked hierarchy, full-width touch targets, no sideways overflow. */
+@media (orientation:portrait),(max-width:699px){
+  #menu>.card{
+    display:flex!important;flex-direction:column!important;justify-content:flex-start!important;
+    width:100%!important;height:100dvh!important;max-height:100dvh!important;
+    padding:max(15px,env(safe-area-inset-top)) max(13px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(13px,env(safe-area-inset-left))!important;
+    gap:0!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;
+  }
+  #menu>.card:before{display:none!important}
+  #menu .brand{font-size:clamp(43px,12vw,62px)!important;align-self:flex-start!important}
+  #menu .tag{font-size:8px!important;margin:7px 0 15px!important;letter-spacing:.29em!important}
+  #menu .tabs{width:100%!important;max-width:none!important;justify-self:stretch!important;margin:0 0 15px!important;gap:4px!important}
+  #menu .tab{min-height:41px!important;padding:8px 3px!important;font-size:clamp(8px,2.5vw,10px)!important}
+  #menu .panel{width:100%!important;flex:0 0 auto!important}
+  #panel-race.active{
+    height:auto!important;min-height:0!important;
+    grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto auto auto auto auto auto!important;
+    grid-template-areas:"heading" "tracks" "league" "mission" "stats" "start" "status"!important;
+    gap:clamp(8px,1.25vh,11px)!important;padding-top:0!important;
+  }
+  #panel-race>.section-title{font-size:10px!important}
+  #panel-race>.track-picker{height:auto!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:clamp(88px,13vh,116px)!important;gap:7px!important}
+  #menu .track-card{height:100%!important;border-radius:11px!important}
+  #menu .track-card:before{left:8px;top:8px;width:19px}
+  #menu .track-card span{left:8px!important;bottom:9px!important;font-size:clamp(7px,2.2vw,10px)!important;letter-spacing:.04em!important}
+  #panel-race>.league-chip{justify-self:start!important;width:auto!important;min-height:36px!important;padding:7px 11px!important;font-size:9px!important}
+  #panel-race>.mission{min-height:40px!important;padding:7px 9px!important;font-size:9px!important;text-align:left!important}
+  #panel-race>.menu-stats{min-height:49px!important;padding:5px 3px!important}
+  #menu .stats small{font-size:7px!important}
+  #menu .stats b{font-size:17px!important}
+  #panel-race>#start{min-height:48px!important;font-size:12px!important}
+  #panel-race>#status{text-align:center!important}
+  #panel-garage.active{display:flex!important;flex-direction:column!important;height:auto!important;min-height:0!important;overflow:visible!important;padding-top:0!important;gap:10px!important}
+  #panel-garage .garage-showroom{display:flex!important;flex-direction:column!important;min-height:0!important}
+  #garage-view{height:clamp(210px,32vh,285px)!important;min-height:210px!important;flex:0 0 auto!important}
+  #panel-garage .garage-toolbar{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;gap:9px!important}
+  #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:11px!important}
+  #panel-shop.active{min-height:150px!important}
+}
+/* Short landscape phones: a single compact viewport composition, no clipped controls. */
+@media (orientation:landscape) and (max-height:520px){
+  #menu>.card{
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(250px,.78fr)!important;
+    grid-template-rows:auto auto minmax(0,1fr)!important;grid-template-areas:"brand tabs" "tag tabs" "panel panel"!important;
+    padding:max(7px,env(safe-area-inset-top)) max(18px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left))!important;
+    gap:0 18px!important;overflow:hidden!important;
+  }
+  #menu .brand{font-size:clamp(28px,7vh,42px)!important}
+  #menu .tag{font-size:7px!important;margin:4px 0 0!important;letter-spacing:.25em!important}
+  #menu .tabs{width:min(100%,370px)!important;gap:4px!important;padding:3px!important}
+  #menu .tab{min-height:33px!important;padding:6px 4px!important;font-size:8px!important}
+  #panel-race.active{
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+    grid-template-rows:auto minmax(70px,1fr) auto auto!important;
+    grid-template-areas:"heading heading heading" "tracks tracks tracks" "league mission stats" "status status start"!important;
+    gap:5px 8px!important;padding-top:5px!important;
+  }
+  #panel-race>.section-title{font-size:9px!important}
+  #panel-race>.track-picker{gap:7px!important}
+  #menu .track-card{min-height:0!important}
+  #menu .track-card span{left:7px!important;bottom:7px!important;font-size:8px!important;letter-spacing:.03em!important}
+  #panel-race>.league-chip{min-height:31px!important;padding:5px 7px!important;font-size:8px!important}
+  #panel-race>.mission{min-height:31px!important;padding:5px 7px!important;font-size:8px!important;line-height:1.2!important}
+  #panel-race>.menu-stats{min-height:31px!important;padding:3px!important}
+  #menu .stats small{font-size:6px!important}
+  #menu .stats b{font-size:13px!important}
+  #panel-race>#start{min-height:33px!important;padding:5px 8px!important;font-size:9px!important}
+  #panel-race>#status{font-size:7px!important;min-height:7px!important}
+  #panel-garage.active{grid-template-columns:minmax(0,1.15fr) minmax(240px,.85fr)!important;gap:10px!important;padding-top:5px!important}
+  #panel-garage .garage-toolbar{gap:7px!important}
+  #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:8px!important}
+  #panel-garage .garage-swatches{gap:5px!important;margin-top:5px!important}
+  #panel-garage .garage-swatches .swatch{width:17px!important;height:17px!important;min-height:17px!important}
+  #panel-shop.active{min-height:0!important}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
-<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="garage" aria-selected="false">ГАРАЖ</button><button class="tab" data-tab="shop" aria-selected="false">МАГАЗИН</button></div>
-<section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
-<div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST RUN</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY PASS</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT RING</span></button></div>
+<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">🏁 ЗАЕЗД</button><button class="tab" data-tab="garage" aria-selected="false">▣ ГАРАЖ</button><button class="tab" data-tab="shop" aria-selected="false">✦ МАГАЗИН</button></div>
+<section class="panel active" id="panel-race"><div class="section-title">01 <span aria-hidden="true">/</span> ВЫБОР МАРШРУТА</div>
+<div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST · 01</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY · 02</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT · 03</span></button></div>
 <button type="button" class="league-chip" id="leagueName" aria-haspopup="dialog" aria-controls="league-modal">ЛИГА 1 · НОВИЧОК ▾</button><div class="mission" id="mission">Финишируй в топе, зарабатывай токены и открывай новые лиги.</div>
-<div class="stats menu-stats"><div><small>ЗАЕЗД</small><b id="season">1/3</b></div><div><small>ОЧКИ ЛИГИ</small><b id="points">0</b></div><div><small>ПОБЕДЫ</small><b id="wins">0</b></div><div><small>ТОКЕНЫ</small><b id="credits">0</b></div></div>
-<button id="start" class="primary">НАЧАТЬ ГОНКУ →</button><p id="status" class="tiny">Загрузка…</p></section>
+<div class="stats menu-stats"><div><small>ЭТАП</small><b id="season">1/3</b></div><div><small>ОЧКИ</small><b id="points">0</b></div><div><small>ПОБЕДЫ</small><b id="wins">0</b></div><div><small>✦ TOKENS</small><b id="credits">0</b></div></div>
+<button id="start" class="primary">▶ СТАРТ</button><p id="status" class="tiny">Загрузка…</p></section>
 <section class="panel" id="panel-garage">
 <div class="garage-showroom">
  <div id="garage-view" class="garage-view" aria-label="3D-модель твоего автомобиля">
