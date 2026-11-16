@@ -1275,6 +1275,10 @@ function buildGaragePreview(){
  platform.position.y=-.035;platform.receiveShadow=true;garageScene.add(platform);
  const ring=new THREE.Mesh(new THREE.TorusGeometry(3.48,.025,8,96),new THREE.MeshBasicMaterial({color:'#d6a65d'}));
  ring.rotation.x=Math.PI/2;ring.position.y=.07;garageScene.add(ring);
+ // Layered motorsport presentation bay: floor inlays, a halo and vertical light blades.
+ for(const [radius,tube,color] of [[3.92,.018,'#526a76'],[4.22,.012,'#a87943']]){const inlay=new THREE.Mesh(new THREE.TorusGeometry(radius,tube,6,128),new THREE.MeshStandardMaterial({color,metalness:.72,roughness:.34,emissive:color,emissiveIntensity:.12}));inlay.rotation.x=Math.PI/2;inlay.position.y=-.035;garageScene.add(inlay)}
+ const halo=new THREE.Mesh(new THREE.TorusGeometry(2.78,.045,10,112),new THREE.MeshStandardMaterial({color:'#d6a65d',metalness:.72,roughness:.25,emissive:'#8c5927',emissiveIntensity:.32}));halo.position.set(0,2.15,-3.55);garageScene.add(halo);
+ for(const side of [-1,1]){const blade=new THREE.Mesh(new THREE.BoxGeometry(.075,4.4,.13),new THREE.MeshStandardMaterial({color:side<0?'#c5dce8':'#e5b66e',metalness:.25,roughness:.24,emissive:side<0?'#739bb3':'#b87b36',emissiveIntensity:.8}));blade.position.set(side*4.35,2.25,-2.15);garageScene.add(blade)}
  garageScene.add(new THREE.HemisphereLight('#eaf4ff','#46535a',2.35));
  const key=new THREE.DirectionalLight('#fff4e3',4.2);key.position.set(-3.5,8,4.5);key.castShadow=true;garageScene.add(key);
  const fill=new THREE.DirectionalLight('#b5dfff',2.6);fill.position.set(6,4,-4);garageScene.add(fill);
