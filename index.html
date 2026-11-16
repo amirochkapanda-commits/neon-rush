@@ -649,6 +649,106 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #panel-garage .garage-upgrade-item .upgrade-buy{min-height:26px!important;padding:4px!important;font-size:7px!important}
 }
 
+
+/* AUTOSPORT cockpit layout v3 — rebuild composition, not just colors.
+   Race logic, all IDs, button handlers, track data and garage actions remain intact. */
+@media (orientation:landscape) and (min-width:700px){
+ #menu{padding:0!important;align-items:stretch!important;justify-content:stretch!important;overflow:hidden!important;background:
+   radial-gradient(ellipse at 14% 55%,#35586a66,transparent 42%),
+   linear-gradient(115deg,#07111b 0%,#0b1823 52%,#101b24 100%)!important}
+ #menu>.card{
+   width:100%!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;
+   margin:0!important;padding:clamp(16px,3vh,30px) clamp(22px,4vw,58px)!important;
+   border:0!important;border-radius:0!important;box-shadow:none!important;
+   display:grid!important;grid-template-columns:minmax(250px,1fr) minmax(300px,.92fr);
+   grid-template-rows:auto auto minmax(0,1fr);column-gap:clamp(22px,4vw,64px);
+   align-content:stretch;overflow:hidden!important;position:relative;
+   background:transparent!important
+ }
+ #menu>.card:after{content:"";position:absolute;left:50%;top:14%;bottom:8%;width:1px;background:linear-gradient(transparent,#ffffff20 15%,#ffffff20 85%,transparent);pointer-events:none}
+ #menu .brand{grid-column:1;grid-row:1;font-size:clamp(34px,6vh,58px)!important;align-self:end}
+ #menu .tag{grid-column:1;grid-row:2;margin:5px 0 17px!important;font-size:9px!important;letter-spacing:.34em}
+ #menu .tabs{grid-column:2;grid-row:1/3;justify-self:end;align-self:center;width:min(100%,430px)!important;
+   display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important;
+   margin:0!important;padding:5px!important;border-radius:12px!important;background:#030a11a8!important}
+ #menu .tab{min-width:0!important;min-height:43px;padding:10px 14px!important;font-size:10px!important;letter-spacing:.15em!important}
+ #menu .panel{grid-column:1/-1;grid-row:3;min-width:0;min-height:0}
+ #panel-race.active{
+   height:100%;min-height:0;display:grid!important;
+   grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr);
+   grid-template-rows:auto minmax(0,1fr);grid-template-areas:"heading league" "tracks details";
+   column-gap:clamp(22px,4vw,58px);row-gap:12px;align-items:stretch
+ }
+ #panel-race>.section-title{grid-area:heading;align-self:center;margin:0!important;font-size:12px!important}
+ #panel-race>.track-picker{
+   grid-area:tracks;display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+   grid-template-rows:repeat(3,minmax(0,1fr));gap:9px!important;margin:0!important;min-height:0
+ }
+ #menu .track-card{
+   height:100%!important;min-height:0!important;width:100%;border-radius:12px!important;
+   background-position:center 52%!important;box-shadow:inset 0 -58px 50px #02080bd9,0 7px 18px #0005!important
+ }
+ #menu .track-card:after{inset:0!important;background:linear-gradient(90deg,#03080b20 0%,#03080b05 35%,#03080b9c 100%),linear-gradient(0deg,#03080bdf,transparent 70%)!important}
+ #menu .track-card span{left:16px!important;bottom:13px!important;font-size:clamp(12px,1.3vw,16px)!important;letter-spacing:.16em!important}
+ #panel-race>.league-chip{grid-area:league;justify-self:stretch;align-self:center;margin:0!important;min-height:38px;padding:9px 13px!important;text-align:left}
+ #panel-race>.mission{grid-area:details;align-self:start;min-height:72px;padding:13px 15px!important;font-size:11px!important;line-height:1.5!important}
+ #panel-race>.menu-stats{grid-area:details;align-self:center;margin:0!important;padding:13px 7px!important}
+ #panel-race>#start{grid-area:details;align-self:end;margin:0!important;min-height:49px!important;font-size:12px!important}
+ #panel-race>#status{grid-area:details;align-self:end;transform:translateY(17px);margin:0!important;font-size:8px!important}
+ /* Right column uses explicit rows; no overlap between mission, stats and launch. */
+ #panel-race.active{grid-template-rows:auto minmax(0,1fr)}
+ #panel-race>.mission{grid-area:details;align-self:start;margin-top:0!important}
+ #panel-race>.menu-stats{grid-area:details;align-self:center;transform:translateY(0)}
+ #panel-race>#start{grid-area:details;align-self:end;transform:translateY(-18px)}
+ #panel-race>#status{grid-area:details;align-self:end;transform:translateY(0)}
+ #panel-garage.active{height:100%;min-height:0;display:grid!important;grid-template-rows:minmax(0,1fr) auto;gap:12px!important;overflow:hidden!important}
+ #panel-garage .garage-showroom{min-height:0;height:100%;display:flex}
+ #garage-view{height:100%;min-height:0!important;flex:1;border-radius:16px!important}
+ #panel-garage .garage-toolbar{grid-template-columns:minmax(220px,.78fr) minmax(0,1.22fr);gap:12px!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{min-width:0;padding:11px 14px!important}
+}
+@media (orientation:landscape) and (min-width:700px) and (max-height:520px){
+ #menu>.card{padding:10px 26px!important;grid-template-rows:auto auto minmax(0,1fr);column-gap:30px}
+ #menu .brand{font-size:clamp(29px,7vh,40px)!important}
+ #menu .tag{margin:3px 0 8px!important;font-size:7px!important}
+ #menu .tabs{max-width:360px!important}
+ #menu .tab{min-height:34px!important;padding:7px 12px!important;font-size:9px!important}
+ #panel-race.active{column-gap:30px;row-gap:7px;grid-template-columns:minmax(0,1.1fr) minmax(270px,.9fr)}
+ #panel-race>.section-title{font-size:10px!important}
+ #panel-race>.track-picker{gap:6px!important}
+ #panel-race>.league-chip{min-height:31px;padding:6px 10px!important;font-size:8px!important}
+ #panel-race>.mission{min-height:52px;padding:8px 11px!important;font-size:9px!important}
+ #panel-race>.menu-stats{padding:7px 4px!important}
+ #menu .stats{margin:2px 0!important}
+ #menu .stats small{font-size:7px!important}
+ #menu .stats b{font-size:15px!important}
+ #panel-race>#start{min-height:37px!important;font-size:10px!important}
+ #panel-race>#start{transform:translateY(-13px)}
+ #panel-race>#status{font-size:7px!important}
+ #panel-garage.active{gap:7px!important}
+ #panel-garage .garage-toolbar{gap:7px!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:7px 10px!important}
+ #panel-garage .garage-swatches{margin-top:6px!important;gap:6px!important}
+ #panel-garage .garage-swatches .swatch{width:17px!important;height:17px!important;min-height:17px!important}
+ #panel-garage .garage-upgrades{gap:6px!important}
+ #panel-garage .garage-upgrade-item .upgrade-buy{min-height:29px!important;padding:5px!important;font-size:7px!important}
+}
+@media (orientation:portrait),(max-width:699px){
+ #menu>.card{display:flex!important;flex-direction:column!important;overflow-y:auto!important;overflow-x:hidden!important}
+ #panel-race.active{display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+   grid-template-areas:"heading" "tracks" "league" "mission" "stats" "start" "status"!important;
+   grid-template-rows:none!important;gap:10px!important;height:auto!important}
+ #panel-race>.track-picker{grid-area:tracks!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:none!important}
+ #panel-race>.league-chip{grid-area:league!important}
+ #panel-race>.mission{grid-area:mission!important;transform:none!important}
+ #panel-race>.menu-stats{grid-area:stats!important;transform:none!important}
+ #panel-race>#start{grid-area:start!important;transform:none!important}
+ #panel-race>#status{grid-area:status!important;transform:none!important}
+ #panel-garage.active{height:auto!important;display:flex!important;overflow:visible!important}
+ #panel-garage .garage-showroom{flex:0 0 auto}
+ #garage-view{min-height:clamp(210px,36vh,330px)!important}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
