@@ -1358,6 +1358,31 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
   <div class="loader-foot"><span>ЗАГРУЗКА РЕСУРСОВ</span><span id="loader-stage">ИНИЦИАЛИЗАЦИЯ</span></div>
  </div>
 </div>
+<script>
+/* Early boot diagnostics: this runs before the Three.js module. */
+(()=>{
+ const status=()=>document.getElementById('status');
+ const report=(label,detail)=>{
+  const el=status();
+  const message=String(detail||label||'Неизвестная ошибка').slice(0,260);
+  if(el)el.textContent='ОШИБКА ЗАПУСКА · '+label+': '+message;
+  console.error('[AUTOSPORT EARLY DIAGNOSTIC]',label,detail||'');
+ };
+ window.addEventListener('error',event=>{
+  if(event.message)report('JAVASCRIPT',event.message);
+ },true);
+ window.addEventListener('unhandledrejection',event=>{
+  const reason=event.reason;
+  report('ASYNC',reason&&(reason.stack||reason.message)||reason);
+ },true);
+ const button=document.getElementById('start');
+ if(button)button.addEventListener('click',()=>{
+  setTimeout(()=>{
+   if(typeof button.onclick!=='function')report('МОДУЛЬ НЕ ЗАПУЩЕН','Обработчик кнопки не был подключён. Проверь загрузку Three.js и ошибки инициализации.');
+  },0);
+ },true);
+})();
+</script>
 <script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js"}}</script>
 <script type="module">
 import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
