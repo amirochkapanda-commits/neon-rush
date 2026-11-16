@@ -277,6 +277,10 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 .speedometer-inner strong{font-size:clamp(24px,4vh,34px);font-weight:950;line-height:1;font-variant-numeric:tabular-nums;color:#ffd18a;text-shadow:0 0 15px #f0b45e66}
 .speedometer-inner small{font-size:8px;letter-spacing:.22em;color:#c4d0d5;margin-top:4px}
 
+
+/* Keep the navigator equally inset from the top and left edges in every orientation. */
+#race-map{--race-map-inset:max(8px,env(safe-area-inset-top),env(safe-area-inset-left));left:var(--race-map-inset)!important;top:var(--race-map-inset)!important}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -424,9 +428,6 @@ function drawRaceMap(dt=0){
   ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.9)';ctx.fill();
  }
  ctx.save();ctx.translate(cx,cy);ctx.beginPath();ctx.moveTo(0,-15);ctx.lineTo(10,10);ctx.lineTo(0,6);ctx.lineTo(-10,10);ctx.closePath();ctx.fillStyle='#55e5ff';ctx.fill();ctx.lineWidth=2.5;ctx.strokeStyle='#ffffff';ctx.stroke();ctx.restore();
- // Compact legend is contained inside the translucent navigator.
- ctx.font='bold 11px system-ui';ctx.textAlign='left';ctx.fillStyle='rgba(7,16,23,.76)';ctx.fillRect(8,8,104,20);
- ctx.fillStyle='#bdeef5';ctx.fillText('▲ ВЫ',14,22);ctx.fillStyle='#ff8874';ctx.beginPath();ctx.arc(75,17,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#e5ebee';ctx.fillText('СОПЕРНИКИ',84,21);
 }
 
 function place(obj,d,side=0){let s=pointAt(d);obj.position.set(s.p.x+s.side.x*side,s.p.y+.05,s.p.z+s.side.z*side);obj.rotation.y=Math.atan2(s.tan.x,s.tan.z);obj.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z))}
