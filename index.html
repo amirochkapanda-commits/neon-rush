@@ -1265,7 +1265,7 @@ function applyGarage(){
 }
 function updateGarageCamera(){
  if(!garageCamera)return;
- const portrait=innerHeight>innerWidth;const radius=portrait?7.5:6.35,polar=clamp(garageOrbitElevation,.12,1.62),horizontal=radius*Math.sin(polar);
+ const portrait=innerHeight>innerWidth;const radius=portrait?8.4:7.15,polar=clamp(garageOrbitElevation,.12,1.62),horizontal=radius*Math.sin(polar);
  garageCamera.position.set(Math.sin(garageOrbitAzimuth)*horizontal,radius*Math.cos(polar)+.68,Math.cos(garageOrbitAzimuth)*horizontal);
  garageCamera.lookAt(0,.68,0);
 }
