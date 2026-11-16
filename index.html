@@ -283,6 +283,42 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 /* The navigator is intentionally icon-only: no text legend or player/opponent labels. */
 #race-map .map-legend,#race-map .legend,#race-map .map-label{display:none!important}
 
+
+/* Portrait race HUD: clear, non-overlapping two-column layout. */
+@media (orientation:portrait){
+ #hud .top{
+  position:absolute;left:0;right:0;top:env(safe-area-inset-top);
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) 32px 32px 42px;
+  gap:4px;padding:4px 6px;align-items:center;
+ }
+ #hud .top .box{min-width:0;padding:5px 3px}
+ #hud .top .box small{font-size:8px;letter-spacing:.03em}
+ #hud .top .box strong{font-size:clamp(13px,4vw,16px)}
+ #hud #pause,#hud #restart,#hud #exit{width:100%;height:34px;padding:3px 1px;font-size:14px}
+ #hud #exit{font-size:8px}
+ #race-map{
+  left:1px;right:auto;
+  top:calc(env(safe-area-inset-top) + 48px);
+  width:min(144px,42vw);height:102px;max-width:44vw;
+  border-radius:11px;
+ }
+ #speedometer{
+  position:absolute;
+  right:max(8px,env(safe-area-inset-right));
+  left:auto;
+  top:calc(env(safe-area-inset-top) + 52px);
+  width:min(94px,26vw);height:min(94px,26vw);
+ }
+ #speedometer .speedometer-inner strong{font-size:clamp(21px,6vw,27px)}
+ #speedometer .speedometer-inner small{font-size:7px}
+ #hud .controls{
+  bottom:max(10px,calc(env(safe-area-inset-bottom) + 7px));
+  padding-left:max(12px,env(safe-area-inset-left) + 8px);
+  padding-right:max(12px,env(safe-area-inset-right) + 8px);
+ }
+ #hud .pad{gap:8px}
+ #hud .ctrl{width:clamp(58px,17vw,72px);height:clamp(62px,17vw,76px)}
+}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
