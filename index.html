@@ -278,8 +278,8 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 .speedometer-inner small{font-size:8px;letter-spacing:.22em;color:#c4d0d5;margin-top:4px}
 
 
-/* Keep the navigator close to the upper-left corner with identical safe-area-aware insets. */
-#race-map{--race-map-inset:max(5px,env(safe-area-inset-top),env(safe-area-inset-left));left:var(--race-map-inset)!important;top:var(--race-map-inset)!important}
+/* Minimal, identical inset from the upper-left corner. */
+#race-map{left:1mm!important;top:1mm!important}
 /* The navigator is intentionally icon-only: no text legend or player/opponent labels. */
 #race-map .map-legend,#race-map .legend,#race-map .map-label{display:none!important}
 
