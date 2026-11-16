@@ -780,60 +780,19 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 }
 
 
-#game-loader{position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-end;justify-content:center;overflow:hidden;background:#111d28;color:#fff;opacity:1;visibility:visible;transition:opacity .42s ease,visibility .42s ease}
+#game-loader{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:20px;background:#080e16;color:#fff;opacity:1;visibility:visible;transition:opacity .3s ease,visibility .3s ease}
 #game-loader.loader-hidden{opacity:0;visibility:hidden;pointer-events:none}
-.loader-scene,.loader-vignette{position:absolute;inset:0}
-.loader-scene svg{width:100%;height:100%;display:block}
-.loader-vignette{background:linear-gradient(0deg,#050b12f5 0%,#07111bce 24%,#07111b30 68%,#07111b40 100%),linear-gradient(90deg,#07111b66,transparent 60%)}
-.loader-content{position:relative;z-index:2;width:min(720px,calc(100% - 42px));padding:0 0 max(34px,env(safe-area-inset-bottom));text-shadow:0 2px 14px #000a}
-.loader-brand{font-size:clamp(32px,6vw,54px);font-weight:1000;letter-spacing:-.085em;line-height:1}
+.loader-content{position:relative;z-index:2;width:min(340px,calc(100% - 32px));padding:22px 20px;border:1px solid #ffffff20;border-radius:16px;background:linear-gradient(145deg,#172630,#0c141d);box-shadow:0 16px 50px #0008;text-align:center}
+.loader-brand{font-size:clamp(30px,8vw,42px);font-weight:1000;letter-spacing:-.085em;line-height:1}
 .loader-brand span{color:#efb764}
-.loader-kicker{margin-top:5px;font-size:9px;letter-spacing:.36em;color:#c5d1d6}
-.loader-status{margin-top:28px;font-size:11px;font-weight:900;letter-spacing:.18em;color:#f1c47e}
-.loader-percent{margin:7px 0 9px;font-size:clamp(30px,6vw,44px);font-weight:950;font-variant-numeric:tabular-nums}
-.loader-track{height:10px;width:100%;padding:2px;border:1px solid #ffffff66;border-radius:99px;background:#06101abf;box-shadow:0 5px 22px #0008,inset 0 1px #ffffff22}
-#loader-fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#c17d3e,#ffd995);box-shadow:0 0 15px #f0b65b99;transition:width .22s ease}
-.loader-foot{display:flex;justify-content:space-between;gap:10px;margin-top:9px;font-size:8px;font-weight:800;letter-spacing:.16em;color:#b9c7ce}
-@media(orientation:portrait){.loader-scene svg{width:100%;height:100%;object-fit:cover}.loader-content{width:calc(100% - 34px);padding-bottom:max(48px,env(safe-area-inset-bottom))}.loader-vignette{background:linear-gradient(0deg,#050b12 0%,#07111bd9 28%,#07111b30 75%),linear-gradient(90deg,#07111b33,transparent)}}
-@media(orientation:landscape) and (max-height:520px){.loader-content{width:min(580px,calc(100% - 48px));padding-bottom:max(14px,env(safe-area-inset-bottom));margin-left:auto;margin-right:5vw}.loader-brand{font-size:clamp(26px,7vh,40px)}.loader-kicker{font-size:7px}.loader-status{margin-top:10px;font-size:9px}.loader-percent{font-size:26px;margin:2px 0 5px}.loader-track{height:8px}.loader-foot{font-size:7px;margin-top:5px}}
-
-
-/* AUTOSPORT cinematic responsive loading scene */
-#game-loader{align-items:flex-end;justify-content:center;background:#080e16}
-.loader-scene{position:absolute;inset:0;overflow:hidden;background:#080e16}
-.loader-scene img{position:absolute;display:block}
-.loader-backdrop{inset:-5%;width:110%;height:110%;object-fit:cover;filter:blur(22px) brightness(.48) saturate(1.12);transform:scale(1.04);animation:loader-backdrop-drift 24s ease-in-out infinite alternate}
-.loader-photo{inset:0;width:100%;height:100%;object-fit:cover;object-position:center 47%;animation:loader-photo-drift 22s ease-in-out infinite alternate}
-.loader-vignette{background:linear-gradient(0deg,rgba(4,9,15,.86) 0%,rgba(4,9,15,.34) 25%,rgba(4,9,15,.04) 66%,rgba(4,9,15,.16) 100%),linear-gradient(90deg,rgba(3,8,14,.12),transparent 55%)}
-.loader-content{width:min(680px,calc(100% - 40px));margin:0 auto max(24px,env(safe-area-inset-bottom));padding:15px 20px 14px;border:1px solid rgba(255,255,255,.2);border-radius:18px;background:linear-gradient(135deg,rgba(9,17,25,.84),rgba(9,17,25,.64));box-shadow:0 16px 48px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.12);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);text-shadow:0 2px 12px #000b}
-.loader-brand,.loader-kicker{display:none}
-.loader-status{margin:0;color:#ffd28c;font-size:11px;font-weight:900;letter-spacing:.18em}
-.loader-percent{margin:4px 0 8px;font-size:clamp(27px,5vw,38px);line-height:1;font-weight:950}
-.loader-track{height:12px;width:100%;padding:2px;border:1px solid rgba(255,255,255,.38);border-radius:99px;background:rgba(0,0,0,.48);box-shadow:inset 0 2px 5px #0009,0 3px 15px #0005;overflow:hidden}
-#loader-fill{position:relative;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#ffbd38,#ff8c21 58%,#ffd56d);box-shadow:0 0 17px rgba(255,163,48,.55);transition:width .65s cubic-bezier(.22,.75,.25,1)}
-#loader-fill:after{content:"";position:absolute;inset:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.62),transparent);transform:translateX(-130%);animation:loader-fill-shine 1.7s ease-in-out infinite}
-.loader-foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:8px;font-weight:850;letter-spacing:.15em;color:#d1dce3}
+.loader-kicker{margin-top:5px;font-size:8px;letter-spacing:.3em;color:#aebdc5}
+.loader-status{margin:22px 0 0;color:#ffd28c;font-size:10px;font-weight:900;letter-spacing:.14em}
+.loader-percent{margin:7px 0 10px;font-size:30px;line-height:1;font-weight:950;font-variant-numeric:tabular-nums}
+.loader-track{height:9px;width:100%;padding:2px;border:1px solid #ffffff40;border-radius:99px;background:#06101a;overflow:hidden}
+#loader-fill{height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#c17d3e,#ffd995);box-shadow:0 0 12px #f0b65b88;transition:width .22s ease}
+.loader-foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:7px;font-weight:800;letter-spacing:.12em;color:#aebdc5}
 #loader-stage{color:#ffd28c;text-align:right}
-@keyframes loader-photo-drift{from{transform:scale(1.015)}to{transform:scale(1.065)}}
-@keyframes loader-backdrop-drift{from{transform:scale(1.04) translate3d(-.5%,0,0)}to{transform:scale(1.1) translate3d(.5%,0,0)}}
-@keyframes loader-fill-shine{0%{transform:translateX(-130%)}70%,100%{transform:translateX(340%)}}
-@media(orientation:portrait){
- .loader-photo{object-fit:contain;object-position:center center;animation:none}
- .loader-backdrop{filter:blur(25px) brightness(.43) saturate(1.16);transform:scale(1.12)}
- .loader-vignette{background:linear-gradient(0deg,rgba(4,9,15,.9) 0%,rgba(4,9,15,.34) 33%,rgba(4,9,15,.12) 72%,rgba(4,9,15,.3) 100%)}
- .loader-content{width:calc(100% - 28px);margin-bottom:max(18px,env(safe-area-inset-bottom));padding:14px 15px 13px;border-radius:16px}
- .loader-status{font-size:10px}.loader-percent{font-size:31px}
-}
-@media(orientation:landscape) and (max-height:520px){
- .loader-content{width:min(560px,calc(100% - 36px));margin-right:4vw;margin-bottom:max(10px,env(safe-area-inset-bottom));padding:9px 15px 8px;border-radius:13px}
- .loader-status{font-size:9px}.loader-percent{font-size:25px;margin:3px 0 5px}
- .loader-track{height:9px}.loader-foot{font-size:7px;margin-top:5px}
-}
-@media(prefers-reduced-motion:reduce){
- .loader-photo,.loader-backdrop,#loader-fill:after{animation:none!important}
- #loader-fill{transition:none}
-}
-
+@media(prefers-reduced-motion:reduce){#loader-fill{transition:none}}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -885,14 +844,9 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 <div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause" aria-label="Пауза" title="Пауза">Ⅱ</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div id="speedometer" class="speedometer" aria-label="Спидометр"><div class="speedometer-inner"><strong id="speed">0</strong><small>КМ/Ч</small></div></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div><div id="pause-menu" class="pause-menu hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="pause-card"><div class="pause-kicker">AUTOSPORT · RACE CONTROL</div><h2 id="pause-title">ПАУЗА</h2><p>Гонка приостановлена</p><button id="resume-race" class="pause-primary">ПРОДОЛЖИТЬ ИГРУ</button><button id="restart-race">ПЕРЕЗАПУСК</button><button id="pause-home">В МЕНЮ</button></div></div></div>
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
 <div id="game-loader" role="status" aria-live="polite">
- <div class="loader-scene" aria-hidden="true">
-  <img class="loader-backdrop" src="/assets/IMG_5889.jpeg" alt="">
-  <img class="loader-photo" src="/assets/IMG_5889.jpeg" alt="">
- </div>
- <div class="loader-vignette"></div>
- <div class="loader-content">
-  <div class="loader-brand">AUTO<span>SPORT</span></div>
-  <div class="loader-kicker">RACING CHAMPIONSHIP</div>
+  <div class="loader-content">
+   <div class="loader-brand">AUTO<span>SPORT</span></div>
+   <div class="loader-kicker">RACING CHAMPIONSHIP</div>
   <div class="loader-status" id="loader-status">ПОДГОТОВКА ИГРЫ</div>
   <div class="loader-percent" id="loader-percent">0%</div>
   <div class="loader-track"><div id="loader-fill"></div></div>
