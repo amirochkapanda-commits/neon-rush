@@ -1647,11 +1647,13 @@ function update(dt){
   // builds separately. Abrupt high-speed inputs therefore create a recoverable slide.
   const turnRate=.62+Math.min(Math.abs(speed),48)*.027;
   const gripLevel=clamp(Number(prefs.grip)||0,0,8);
-  const slipBuild=.26-gripLevel*.012;
-  const lateralRecovery=2.25+gripLevel*.28;
-  const brakingInTurn=held.reverse&&steerInput!==0?1.28:1;
+  // Deliberately stronger arcade oversteer: stock tyres slide visibly under
+  // abrupt steering, while upgraded tyres shorten and reduce the slide.
+  const slipBuild=.58-gripLevel*.04;
+  const lateralRecovery=1.65+gripLevel*.28;
+  const brakingInTurn=held.reverse&&steerInput!==0?1.42:1;
   if(steerInput!==0)heading+=steerInput*dt*turnRate;
-  const lateralLimit=Math.max(0,Math.abs(speed)*(.25-gripLevel*.012));
+  const lateralLimit=Math.max(0,Math.abs(speed)*(.46-gripLevel*.03));
   const lateralDemand=steerInput===0?0:-steerInput*Math.abs(speed)*turnRate*slipBuild*brakingInTurn;
   lateralSpeed=clamp(lateralSpeed+(lateralDemand-lateralSpeed*lateralRecovery)*dt,-lateralLimit,lateralLimit);
   const fx=Math.sin(heading),fz=Math.cos(heading),rx=Math.cos(heading),rz=-Math.sin(heading);
