@@ -356,17 +356,74 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #race-map{left:1mm!important;top:calc(env(safe-area-inset-top) + 54px)!important;width:clamp(150px,18vw,184px);height:clamp(100px,24vh,128px)}
  #speedometer{top:calc(env(safe-area-inset-top) + 58px);width:clamp(94px,12vh,116px);height:clamp(94px,12vh,116px)}
 }
+
+/* Unified garage: performance upgrades and visual customization in one tab. */
+#panel-garage.active{display:block;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:2px}
+#panel-garage .garage-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+#panel-garage .garage-section{min-width:0;padding:12px;border:1px solid #ffffff24;border-radius:15px;background:linear-gradient(145deg,#ffffff0b,#07101955)}
+#panel-garage .garage-section>.section-title{margin:0 0 10px;font-size:10px;letter-spacing:.16em}
+#panel-garage .upgrade-card{grid-template-columns:clamp(76px,10vw,116px) minmax(0,1fr);gap:10px;padding:9px;margin:8px 0;border-radius:12px}
+#panel-garage .upgrade-photo{width:100%;height:112px;object-fit:cover}
+#panel-garage .upgrade-name{font-size:11px}
+#panel-garage .upgrade-desc{font-size:9px}
+#panel-garage .upgrade-buy{min-height:34px}
+#panel-garage .design-colors{grid-template-columns:1fr 1fr;gap:9px}
+#panel-garage .design-card{padding:8px}
+#panel-garage .design-photo{height:88px}
+#panel-garage .design-name{font-size:10px}
+#panel-garage .design-desc{font-size:8px}
+#panel-garage .design-card label{font-size:9px}
+#panel-garage .design-colors input{height:32px}
+#panel-garage .palette{gap:5px}
+@media(max-width:680px){
+ #panel-garage.active{overflow-y:auto}
+ #panel-garage .garage-layout{grid-template-columns:minmax(0,1fr);gap:10px}
+ #panel-garage .garage-section{padding:9px}
+ #panel-garage .garage-section>.section-title{margin-bottom:7px}
+ #panel-garage .upgrade-card{grid-template-columns:88px minmax(0,1fr);gap:9px;padding:8px;margin:7px 0}
+ #panel-garage .upgrade-photo{height:100px}
+ #panel-garage .upgrade-name{font-size:11px}
+ #panel-garage .upgrade-desc{font-size:9px}
+ #panel-garage .design-photo{height:76px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #panel-garage.active{height:100%;overflow:hidden}
+ #panel-garage .garage-layout{height:100%;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+ #panel-garage .garage-section{min-height:0;padding:6px;overflow:hidden}
+ #panel-garage .garage-section>.section-title{font-size:8px;margin-bottom:4px}
+ #panel-garage .garage-upgrades{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto minmax(0,1fr) auto;gap:5px}
+ #panel-garage .garage-upgrades>.section-title,#panel-garage .garage-upgrades>.tiny{grid-column:1/-1}
+ #panel-garage .garage-upgrades>.upgrade-card{height:100%;min-height:0;grid-template-columns:clamp(42px,7vw,58px) minmax(0,1fr);gap:4px;padding:4px;margin:0;overflow:hidden}
+ #panel-garage .upgrade-photo{height:100%;max-height:65px}
+ #panel-garage .upgrade-name{font-size:8px}
+ #panel-garage .upgrade-desc{font-size:7px;line-height:1.1;margin:1px 0 2px}
+ #panel-garage .statline{margin:2px 0}
+ #panel-garage .stathead{font-size:6px;margin-bottom:1px}
+ #panel-garage .meter{height:5px}
+ #panel-garage .upgrade-buy{font-size:7px;min-height:0;padding:4px 2px;margin-top:2px}
+ #panel-garage .garage-upgrades>.tiny{font-size:7px;line-height:1.1;margin:0}
+ #panel-garage .garage-appearance{display:flex;flex-direction:column}
+ #panel-garage .design-colors{flex:1;min-height:0;grid-template-columns:1fr 1fr;gap:5px}
+ #panel-garage .design-card{min-height:0;padding:5px;overflow:hidden}
+ #panel-garage .design-photo{height:clamp(28px,7vh,42px);margin-bottom:2px}
+ #panel-garage .design-name{font-size:8px}
+ #panel-garage .design-desc{font-size:7px;line-height:1.08;margin:1px 0 2px}
+ #panel-garage .design-card label{font-size:7px;gap:2px;margin-top:2px}
+ #panel-garage .design-colors input{height:19px}
+ #panel-garage .palette{gap:3px;margin-top:2px}
+ #panel-garage .swatch{width:15px;height:15px;min-height:15px}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
-<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="tuning" aria-selected="false">ТЮНИНГ</button><button class="tab" data-tab="design" aria-selected="false">ДИЗАЙН</button></div>
+<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="garage" aria-selected="false">ГАРАЖ</button></div>
 <section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
 <div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST RUN</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY PASS</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT RING</span></button></div>
 <button type="button" class="league-chip" id="leagueName" aria-haspopup="dialog" aria-controls="league-modal">ЛИГА 1 · НОВИЧОК ▾</button><div class="mission" id="mission">Финишируй в топе, зарабатывай токены и открывай новые лиги.</div>
 <div class="stats menu-stats"><div><small>ЗАЕЗД</small><b id="season">1/3</b></div><div><small>ОЧКИ ЛИГИ</small><b id="points">0</b></div><div><small>ПОБЕДЫ</small><b id="wins">0</b></div><div><small>ТОКЕНЫ</small><b id="credits">0</b></div></div>
 <button id="start" class="primary">НАЧАТЬ ГОНКУ →</button><p id="status" class="tiny">Загрузка…</p></section>
-<section class="panel" id="panel-tuning"><div class="section-title">ГАРАЖ · ПРОКАЧАЙ МАШИНУ</div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=420&q=85" alt="Автомобильный двигатель"><div class="upgrade-info"><div class="upgrade-name">ТУРБО-ДВИГАТЕЛЬ</div><div class="upgrade-desc">Увеличивает разгон и максимальную скорость на прямых.</div><div class="statline"><div class="stathead"><span>МОЩНОСТЬ</span><b id="engineValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="enginePreview"></div><div class="meter-current" id="engineBar"></div></div></div><button class="upgrade-buy" id="engineUpgrade">УЛУЧШИТЬ · 260 TOK</button></div></div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?w=420&q=85" alt="Автомобильные шины"><div class="upgrade-info"><div class="upgrade-name">СПОРТИВНЫЕ ШИНЫ</div><div class="upgrade-desc">Улучшают сцепление с трассой и точность прохождения поворотов.</div><div class="statline"><div class="stathead"><span>СЦЕПЛЕНИЕ</span><b id="gripValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="gripPreview"></div><div class="meter-current" id="gripBar"></div></div></div><button class="upgrade-buy" id="gripUpgrade">УЛУЧШИТЬ · 220 TOK</button></div></div><p class="tiny">Белая полоса — текущий уровень. Зелёный участок — прирост после следующей покупки.</p></section>
-<section class="panel" id="panel-design"><div class="section-title">ВНЕШНИЙ ВИД МАШИНЫ</div><div class="design-colors"><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=520&q=85" alt="Спортивный автомобиль с окрашенным кузовом"><div class="design-name">ОКРАСКА КУЗОВА</div><div class="design-desc">Меняет основной цвет корпуса автомобиля.</div><label>СВОЙ ЦВЕТ<input id="paint" type="color" value="#dba14e"></label><div class="palette"><button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой" aria-pressed="true"></button><button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный"></button><button class="swatch" data-paint="#1768c5" style="background:#1768c5" aria-label="Синий"></button><button class="swatch" data-paint="#f1f1ed" style="background:#f1f1ed" aria-label="Белый"></button><button class="swatch" data-paint="#20252b" style="background:#20252b" aria-label="Чёрный"></button><button class="swatch" data-paint="#20a66a" style="background:#20a66a" aria-label="Зелёный"></button></div></div><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=520&q=85" alt="Колесо спортивного автомобиля"><div class="design-name">ЦВЕТ ДИСКОВ</div><div class="design-desc">Меняет цвет металлических центральных частей колёс.</div><label>СВОЙ ЦВЕТ<input id="rimPaint" type="color" value="#9da6aa"></label><div class="palette"><button class="swatch" data-rim="#9da6aa" style="background:#9da6aa" aria-label="Серебристый" aria-pressed="true"></button><button class="swatch" data-rim="#d4a43c" style="background:#d4a43c" aria-label="Золотой"></button><button class="swatch" data-rim="#d9d9d9" style="background:#d9d9d9" aria-label="Светлый"></button><button class="swatch" data-rim="#262a30" style="background:#262a30" aria-label="Чёрный"></button><button class="swatch" data-rim="#c43d36" style="background:#c43d36" aria-label="Красный"></button><button class="swatch" data-rim="#2474c9" style="background:#2474c9" aria-label="Синий"></button></div></div></div></section>
+<section class="panel" id="panel-garage"><div class="garage-layout"><div class="garage-section garage-upgrades"><div class="section-title">УЛУЧШЕНИЕ АВТОМОБИЛЯ</div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=420&q=85" alt="Автомобильный двигатель"><div class="upgrade-info"><div class="upgrade-name">ТУРБО-ДВИГАТЕЛЬ</div><div class="upgrade-desc">Увеличивает разгон и максимальную скорость на прямых.</div><div class="statline"><div class="stathead"><span>МОЩНОСТЬ</span><b id="engineValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="enginePreview"></div><div class="meter-current" id="engineBar"></div></div></div><button class="upgrade-buy" id="engineUpgrade">УЛУЧШИТЬ · 260 TOK</button></div></div><div class="upgrade-card"><img class="upgrade-photo" src="https://images.unsplash.com/photo-1517524206127-48bbd363f3d7?w=420&q=85" alt="Автомобильные шины"><div class="upgrade-info"><div class="upgrade-name">СПОРТИВНЫЕ ШИНЫ</div><div class="upgrade-desc">Улучшают сцепление с трассой и точность прохождения поворотов.</div><div class="statline"><div class="stathead"><span>СЦЕПЛЕНИЕ</span><b id="gripValue">0/8 ур.</b></div><div class="meter"><div class="meter-next" id="gripPreview"></div><div class="meter-current" id="gripBar"></div></div></div><button class="upgrade-buy" id="gripUpgrade">УЛУЧШИТЬ · 220 TOK</button></div></div><p class="tiny">Белая полоса — текущий уровень. Зелёный участок — прирост после следующей покупки.</p></div><div class="garage-section garage-appearance"><div class="section-title">ВНЕШНИЙ ВИД</div><div class="design-colors"><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=520&q=85" alt="Спортивный автомобиль с окрашенным кузовом"><div class="design-name">ОКРАСКА КУЗОВА</div><div class="design-desc">Меняет основной цвет корпуса автомобиля.</div><label>СВОЙ ЦВЕТ<input id="paint" type="color" value="#dba14e"></label><div class="palette"><button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой" aria-pressed="true"></button><button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный"></button><button class="swatch" data-paint="#1768c5" style="background:#1768c5" aria-label="Синий"></button><button class="swatch" data-paint="#f1f1ed" style="background:#f1f1ed" aria-label="Белый"></button><button class="swatch" data-paint="#20252b" style="background:#20252b" aria-label="Чёрный"></button><button class="swatch" data-paint="#20a66a" style="background:#20a66a" aria-label="Зелёный"></button></div></div><div class="design-card"><img class="design-photo" src="https://images.unsplash.com/photo-1511919884226-fd3cad34687c?w=520&q=85" alt="Колесо спортивного автомобиля"><div class="design-name">ЦВЕТ ДИСКОВ</div><div class="design-desc">Меняет цвет металлических центральных частей колёс.</div><label>СВОЙ ЦВЕТ<input id="rimPaint" type="color" value="#9da6aa"></label><div class="palette"><button class="swatch" data-rim="#9da6aa" style="background:#9da6aa" aria-label="Серебристый" aria-pressed="true"></button><button class="swatch" data-rim="#d4a43c" style="background:#d4a43c" aria-label="Золотой"></button><button class="swatch" data-rim="#d9d9d9" style="background:#d9d9d9" aria-label="Светлый"></button><button class="swatch" data-rim="#262a30" style="background:#262a30" aria-label="Чёрный"></button><button class="swatch" data-rim="#c43d36" style="background:#c43d36" aria-label="Красный"></button><button class="swatch" data-rim="#2474c9" style="background:#2474c9" aria-label="Синий"></button></div></div></div></div></div></section>
 </div></div>
 <div id="league-modal" class="league-modal hidden" role="dialog" aria-modal="true" aria-labelledby="league-modal-title"><div class="league-modal-card"><div class="league-modal-head"><div><div class="section-title" id="league-modal-title">ЧЕМПИОНАТЫ</div><div class="muted">Выбери открытую лигу. Пройденные лиги доступны для повторной игры без наград.</div></div><button type="button" id="league-close" aria-label="Закрыть">✕</button></div><div id="league-list" class="league-list"></div></div></div>
 <div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause" aria-label="Пауза" title="Пауза">Ⅱ</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div id="speedometer" class="speedometer" aria-label="Спидометр"><div class="speedometer-inner"><strong id="speed">0</strong><small>КМ/Ч</small></div></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div><div id="pause-menu" class="pause-menu hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="pause-card"><div class="pause-kicker">AUTOSPORT · RACE CONTROL</div><h2 id="pause-title">ПАУЗА</h2><p>Гонка приостановлена</p><button id="resume-race" class="pause-primary">ПРОДОЛЖИТЬ ИГРУ</button><button id="restart-race">ПЕРЕЗАПУСК</button><button id="pause-home">В МЕНЮ</button></div></div></div>
