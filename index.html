@@ -797,6 +797,43 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 @media(orientation:portrait){.loader-scene svg{width:100%;height:100%;object-fit:cover}.loader-content{width:calc(100% - 34px);padding-bottom:max(48px,env(safe-area-inset-bottom))}.loader-vignette{background:linear-gradient(0deg,#050b12 0%,#07111bd9 28%,#07111b30 75%),linear-gradient(90deg,#07111b33,transparent)}}
 @media(orientation:landscape) and (max-height:520px){.loader-content{width:min(580px,calc(100% - 48px));padding-bottom:max(14px,env(safe-area-inset-bottom));margin-left:auto;margin-right:5vw}.loader-brand{font-size:clamp(26px,7vh,40px)}.loader-kicker{font-size:7px}.loader-status{margin-top:10px;font-size:9px}.loader-percent{font-size:26px;margin:2px 0 5px}.loader-track{height:8px}.loader-foot{font-size:7px;margin-top:5px}}
 
+
+/* AUTOSPORT cinematic responsive loading scene */
+#game-loader{align-items:flex-end;justify-content:center;background:#080e16}
+.loader-scene{position:absolute;inset:0;overflow:hidden;background:#080e16}
+.loader-scene img{position:absolute;display:block}
+.loader-backdrop{inset:-5%;width:110%;height:110%;object-fit:cover;filter:blur(22px) brightness(.48) saturate(1.12);transform:scale(1.04);animation:loader-backdrop-drift 24s ease-in-out infinite alternate}
+.loader-photo{inset:0;width:100%;height:100%;object-fit:cover;object-position:center 47%;animation:loader-photo-drift 22s ease-in-out infinite alternate}
+.loader-vignette{background:linear-gradient(0deg,rgba(4,9,15,.86) 0%,rgba(4,9,15,.34) 25%,rgba(4,9,15,.04) 66%,rgba(4,9,15,.16) 100%),linear-gradient(90deg,rgba(3,8,14,.12),transparent 55%)}
+.loader-content{width:min(680px,calc(100% - 40px));margin:0 auto max(24px,env(safe-area-inset-bottom));padding:15px 20px 14px;border:1px solid rgba(255,255,255,.2);border-radius:18px;background:linear-gradient(135deg,rgba(9,17,25,.84),rgba(9,17,25,.64));box-shadow:0 16px 48px rgba(0,0,0,.34),inset 0 1px rgba(255,255,255,.12);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);text-shadow:0 2px 12px #000b}
+.loader-brand,.loader-kicker{display:none}
+.loader-status{margin:0;color:#ffd28c;font-size:11px;font-weight:900;letter-spacing:.18em}
+.loader-percent{margin:4px 0 8px;font-size:clamp(27px,5vw,38px);line-height:1;font-weight:950}
+.loader-track{height:12px;width:100%;padding:2px;border:1px solid rgba(255,255,255,.38);border-radius:99px;background:rgba(0,0,0,.48);box-shadow:inset 0 2px 5px #0009,0 3px 15px #0005;overflow:hidden}
+#loader-fill{position:relative;height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#ffbd38,#ff8c21 58%,#ffd56d);box-shadow:0 0 17px rgba(255,163,48,.55);transition:width .65s cubic-bezier(.22,.75,.25,1)}
+#loader-fill:after{content:"";position:absolute;inset:0;width:38%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.62),transparent);transform:translateX(-130%);animation:loader-fill-shine 1.7s ease-in-out infinite}
+.loader-foot{display:flex;justify-content:space-between;gap:10px;margin-top:8px;font-size:8px;font-weight:850;letter-spacing:.15em;color:#d1dce3}
+#loader-stage{color:#ffd28c;text-align:right}
+@keyframes loader-photo-drift{from{transform:scale(1.015)}to{transform:scale(1.065)}}
+@keyframes loader-backdrop-drift{from{transform:scale(1.04) translate3d(-.5%,0,0)}to{transform:scale(1.1) translate3d(.5%,0,0)}}
+@keyframes loader-fill-shine{0%{transform:translateX(-130%)}70%,100%{transform:translateX(340%)}}
+@media(orientation:portrait){
+ .loader-photo{object-fit:contain;object-position:center center;animation:none}
+ .loader-backdrop{filter:blur(25px) brightness(.43) saturate(1.16);transform:scale(1.12)}
+ .loader-vignette{background:linear-gradient(0deg,rgba(4,9,15,.9) 0%,rgba(4,9,15,.34) 33%,rgba(4,9,15,.12) 72%,rgba(4,9,15,.3) 100%)}
+ .loader-content{width:calc(100% - 28px);margin-bottom:max(18px,env(safe-area-inset-bottom));padding:14px 15px 13px;border-radius:16px}
+ .loader-status{font-size:10px}.loader-percent{font-size:31px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ .loader-content{width:min(560px,calc(100% - 36px));margin-right:4vw;margin-bottom:max(10px,env(safe-area-inset-bottom));padding:9px 15px 8px;border-radius:13px}
+ .loader-status{font-size:9px}.loader-percent{font-size:25px;margin:3px 0 5px}
+ .loader-track{height:9px}.loader-foot{font-size:7px;margin-top:5px}
+}
+@media(prefers-reduced-motion:reduce){
+ .loader-photo,.loader-backdrop,#loader-fill:after{animation:none!important}
+ #loader-fill{transition:none}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -849,32 +886,8 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
 <div id="game-loader" role="status" aria-live="polite">
  <div class="loader-scene" aria-hidden="true">
-  <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
-   <defs>
-    <linearGradient id="lsSky" x2="0" y2="1"><stop stop-color="#182d43"/><stop offset="1" stop-color="#d28b54"/></linearGradient>
-    <linearGradient id="lsRoad" x2="0" y2="1"><stop stop-color="#39434a"/><stop offset="1" stop-color="#10171e"/></linearGradient>
-    <linearGradient id="lsHill" x2="0" y2="1"><stop stop-color="#64776c"/><stop offset="1" stop-color="#192c2c"/></linearGradient>
-   </defs>
-   <rect width="1440" height="900" fill="url(#lsSky)"/>
-   <circle cx="1110" cy="230" r="94" fill="#ffd39a" opacity=".72"/>
-   <path d="M0 510 180 315 310 438 485 245 650 455 820 290 1000 460 1170 280 1440 500V900H0Z" fill="#293f4a"/>
-   <path d="m0 570 210-155 145 105 185-190 195 220 185-155 180 175 165-150 175 145v335H0Z" fill="url(#lsHill)"/>
-   <path d="M0 655Q300 570 530 625T970 630Q1200 600 1440 650V900H0Z" fill="#243b32"/>
-   <path d="M510 900 650 615Q710 570 780 615L950 900Z" fill="url(#lsRoad)"/>
-   <path d="m710 900 12-95h14l8 95m-18-180 8-45h10l8 45" stroke="#f4e4c7" stroke-width="9" stroke-dasharray="35 28" fill="none" opacity=".9"/>
-   <path d="M625 900 684 615m131 0 84 285" stroke="#e7d8bc" stroke-width="8" opacity=".8" fill="none"/>
-   <g transform="translate(705 570)">
-    <ellipse cx="0" cy="80" rx="105" ry="19" fill="#070d12" opacity=".55"/>
-    <path d="M-95 38-80 2-48-20 40-20 78 2 96 38 86 59-88 59Z" fill="#d6e0e2" stroke="#26333b" stroke-width="7"/>
-    <path d="m-45-16-17-40 27-20 66 0 27 20-12 40Z" fill="#263e4d" stroke="#d6e0e2" stroke-width="7"/>
-    <path d="M-54-74h95l15 15h-124Z" fill="#d6e0e2"/>
-    <path d="M-88 10h176" stroke="#26333b" stroke-width="8"/>
-    <path d="M-75 33h25m100 0h25" stroke="#f5c47c" stroke-width="8"/>
-    <circle cx="-61" cy="55" r="23" fill="#10151a" stroke="#aeb9bc" stroke-width="8"/>
-    <circle cx="62" cy="55" r="23" fill="#10151a" stroke="#aeb9bc" stroke-width="8"/>
-   </g>
-   <path d="M0 780Q360 730 720 770T1440 760V900H0Z" fill="#0a1118" opacity=".45"/>
-  </svg>
+  <img class="loader-backdrop" src="/assets/autosport-loading.webp" alt="">
+  <img class="loader-photo" src="/assets/autosport-loading.webp" alt="">
  </div>
  <div class="loader-vignette"></div>
  <div class="loader-content">
