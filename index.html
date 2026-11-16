@@ -408,6 +408,247 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #panel-garage .garage-upgrade-head,#panel-garage .garage-upgrade-head b{font-size:7px}
  #panel-garage .garage-upgrade-item .upgrade-buy{font-size:7px;min-height:23px;padding:4px 2px}
 }
+
+/* AUTOSPORT UI v2 — complete garage/menu presentation refresh.
+   Scope is strictly menu, garage, league picker and post-race result screens.
+   Race scene, HUD, simulation, input handlers and progression are untouched. */
+#menu{
+  align-items:stretch!important;justify-content:stretch!important;padding:0!important;
+  overflow:hidden!important;
+  background:
+    radial-gradient(ellipse at 78% 12%,#31546b66 0,transparent 38%),
+    radial-gradient(ellipse at 8% 92%,#a76d3150 0,transparent 34%),
+    linear-gradient(135deg,#050b12f5 0%,#0b1722f7 48%,#101e28f5 100%)!important;
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+#menu>.card{
+  position:relative;width:100%!important;height:100dvh!important;max-height:100dvh!important;
+  min-height:0!important;margin:0!important;padding:
+    max(18px,env(safe-area-inset-top)) max( clamp(18px,4vw,64px),env(safe-area-inset-right))
+    max(16px,env(safe-area-inset-bottom)) max(clamp(18px,4vw,64px),env(safe-area-inset-left))!important;
+  display:flex;flex-direction:column;justify-content:flex-start;gap:0;
+  overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain;
+  border:0!important;border-radius:0!important;
+  background:linear-gradient(115deg,#111f2bf2,#0a131df5 65%,#101b25f0)!important;
+  box-shadow:none!important;
+}
+#menu>.card:before{
+  content:"";position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#9b612f,#f5ca80 28%,#fff0c7 50%,#d99d54 72%,#5e8294);
+}
+#menu .brand{font-size:clamp(36px,6.5vw,64px)!important;line-height:.9!important;letter-spacing:-.085em!important}
+#menu .tag{margin:7px 0 20px!important;font-size:9px!important;letter-spacing:.38em!important;color:#9fb2bd!important}
+#menu .tabs{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  width:min(520px,100%)!important;max-width:100%;gap:5px!important;
+  margin:0 0 22px!important;padding:5px!important;
+  border:1px solid #ffffff20!important;border-radius:13px!important;
+  background:#050c13b8!important;box-shadow:inset 0 1px #ffffff0b;
+}
+#menu .tab{
+  min-width:0!important;min-height:42px;padding:10px 16px!important;
+  border:1px solid transparent!important;border-radius:9px!important;
+  background:transparent!important;color:#9eafb9!important;
+  font-size:10px!important;font-weight:950;letter-spacing:.16em!important;
+  transition:background .18s,border-color .18s,color .18s,transform .18s;
+}
+#menu .tab[aria-selected=true]{
+  color:#17130d!important;background:linear-gradient(110deg,#e9b86b,#ffdfa4)!important;
+  border-color:#ffe5b5!important;box-shadow:0 4px 18px #d99b4a35,inset 0 1px #fff9;
+}
+#menu .tab:active,#menu button:active{transform:translateY(1px);filter:brightness(1.08)}
+#menu button{cursor:pointer;touch-action:manipulation;transition:filter .16s,border-color .16s,background .16s,transform .16s}
+#menu button:focus-visible,#league-modal button:focus-visible,#result button:focus-visible{
+  outline:2px solid #ffda9b!important;outline-offset:3px;
+}
+#menu .panel{min-width:0}
+#menu .section-title{font-size:11px!important;letter-spacing:.23em!important;margin:0 0 13px!important;color:#f2c77f!important}
+#panel-race.active{
+  display:grid!important;flex:1;min-height:0;
+  grid-template-columns:minmax(0,1.25fr) minmax(270px,.75fr);
+  grid-template-areas:"heading heading" "tracks league" "tracks mission" "tracks stats" "tracks start" "tracks status";
+  column-gap:clamp(18px,3vw,42px);row-gap:12px;align-content:start;align-items:start;
+}
+#panel-race>.section-title{grid-area:heading}
+#panel-race>.track-picker{
+  grid-area:tracks;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  align-content:start;gap:12px!important;margin:0!important;min-width:0;
+}
+#menu .track-card{
+  position:relative;width:100%;height:clamp(170px,27vh,290px)!important;min-width:0;
+  border:1px solid #ffffff2c!important;border-radius:15px!important;overflow:hidden;
+  background-size:cover!important;background-position:center!important;
+  box-shadow:inset 0 -90px 65px #03080bd9,0 12px 28px #0005!important;
+}
+#menu .track-card:after{inset:25% 0 0!important;background:linear-gradient(transparent,#03080bf2)!important}
+#menu .track-card span{left:13px!important;right:8px;bottom:13px!important;font-size:clamp(10px,1.2vw,14px)!important;letter-spacing:.12em!important;text-align:left}
+#menu .track-card[aria-pressed=true]{
+  border:2px solid #ffcf83!important;box-shadow:0 0 0 3px #f4c77e30,0 14px 30px #0008,inset 0 -90px 65px #03080bd9!important;
+}
+#menu .track-card[aria-disabled=true]{filter:grayscale(.8) brightness(.48)!important;opacity:.7}
+#panel-race>.league-chip{
+  grid-area:league;justify-self:start;align-self:start;margin:0!important;
+  min-height:38px;padding:9px 13px!important;border-radius:9px!important;
+  background:#eeb96b18!important;border:1px solid #eeb96b65!important;
+  color:#f5ce91!important;font-size:10px!important;letter-spacing:.09em;
+}
+#panel-race>.mission{
+  grid-area:mission;min-height:70px;padding:14px 16px!important;
+  border:1px solid #ffffff20!important;border-left:3px solid #dba65f!important;
+  border-radius:10px!important;background:linear-gradient(100deg,#ffffff0b,#ffffff03)!important;
+  font-size:12px!important;line-height:1.55!important;color:#d3dde2!important;
+}
+#panel-race>.menu-stats{
+  grid-area:stats;margin:0!important;padding:14px 8px!important;
+  border:1px solid #ffffff20!important;border-radius:12px!important;
+  background:linear-gradient(110deg,#ffffff0b,#ffffff04)!important;
+}
+#menu .stats{display:flex;justify-content:space-around;gap:4px!important;margin:0!important}
+#menu .stats>div{flex:1;min-width:0;padding:4px 2px}
+#menu .stats small{font-size:8px!important;letter-spacing:.12em;color:#9fb0ba!important}
+#menu .stats b{display:block;margin-top:4px;font-size:clamp(17px,2vw,23px)!important;font-weight:950;color:#f4f6f7}
+#menu .stats>div:last-child b{color:#f5c77d}
+#panel-race>#start{
+  grid-area:start;min-height:54px!important;margin:0!important;padding:13px 18px!important;
+  border:1px solid #ffe1ac!important;border-radius:11px!important;
+  background:linear-gradient(105deg,#a96932,#f2c477 54%,#d29449)!important;
+  color:#17120d!important;font-size:13px!important;font-weight:1000;letter-spacing:.09em;
+  box-shadow:0 8px 26px #c88d4935,inset 0 1px #fff9!important;
+}
+#panel-race>#start:active{filter:brightness(1.08)}
+#panel-race>#status{grid-area:status;margin:0!important;text-align:center;min-height:14px;color:#8fa2ad!important;font-size:9px}
+#panel-garage.active{
+  display:flex!important;flex:1;min-height:0;overflow:visible!important;
+  flex-direction:column;gap:12px;
+}
+#panel-garage .garage-showroom{display:flex;flex:1;min-height:0;gap:12px}
+#garage-view{
+  flex:1;min-height:clamp(210px,38vh,480px)!important;
+  border:1px solid #d9b77b70!important;border-radius:16px!important;
+  background:radial-gradient(ellipse at 50% 60%,#456274 0%,#243b4b 45%,#101c27 100%)!important;
+  box-shadow:inset 0 1px #ffffff24,0 16px 42px #0005;
+}
+#garage-view:after{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+  background:linear-gradient(90deg,#07101930,transparent 24%,transparent 76%,#07101930),
+    linear-gradient(0deg,#07101966,transparent 30%,#ffffff05);
+}
+.garage-view-title{top:16px!important;left:17px!important;font-size:10px!important;letter-spacing:.24em!important;color:#f3c77f!important}
+.garage-view-hint{bottom:14px!important;left:17px!important;font-size:8px!important;letter-spacing:.16em!important;color:#d3e0e5!important}
+#panel-garage .garage-toolbar{
+  display:grid;grid-template-columns:minmax(220px,.82fr) minmax(0,1.18fr);
+  gap:12px!important;align-items:stretch;
+}
+#panel-garage .garage-customize,#panel-garage .garage-upgrades{
+  padding:13px 15px!important;border:1px solid #ffffff22!important;border-radius:12px!important;
+  background:linear-gradient(140deg,#172936,#0b151f)!important;
+  box-shadow:inset 0 1px #ffffff0b;
+}
+#panel-garage .garage-color-row label{font-size:9px!important;letter-spacing:.13em!important}
+#panel-garage .garage-color-row input{width:42px!important;height:32px!important;cursor:pointer}
+#panel-garage .garage-swatches{gap:8px!important;margin-top:12px!important}
+#panel-garage .garage-swatches .swatch{width:22px!important;height:22px!important;min-height:22px!important}
+#panel-garage .garage-upgrades{gap:13px!important}
+#panel-garage .garage-upgrade-head{display:flex;justify-content:space-between;gap:6px;font-size:9px!important;letter-spacing:.07em;color:#dce5e9}
+#panel-garage .garage-upgrade-head span{color:#f3c77f;white-space:nowrap}
+#panel-garage .garage-upgrade-item{gap:10px!important}
+#panel-garage .garage-upgrade-item .upgrade-buy{
+  min-height:39px!important;padding:9px 8px!important;border-radius:8px!important;
+  border:1px solid #ffffff24!important;background:#203442!important;
+  font-size:9px!important;letter-spacing:.05em;
+}
+#panel-garage .garage-upgrade-item .upgrade-buy:disabled{opacity:.48;cursor:default}
+#league-modal{z-index:100!important;padding:18px!important}
+#league-modal .league-modal-card{
+  width:min(560px,100%)!important;max-height:min(760px,calc(100dvh - 36px))!important;
+  padding:clamp(17px,3vw,26px)!important;border:1px solid #d8b47777!important;
+  border-radius:17px!important;background:linear-gradient(145deg,#1a2c39,#080f17)!important;
+  box-shadow:0 28px 90px #000c!important;
+}
+#league-modal .league-option{min-height:66px!important;border-radius:10px!important}
+#league-modal .league-option:not(:disabled):active{background:#f0bd6928}
+#league-modal #league-close{width:40px;height:40px;flex:0 0 40px;padding:0;border-radius:9px}
+#result{
+  align-items:center;justify-content:center;padding: max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));
+  background:radial-gradient(ellipse at 50% 10%,#38566b88,transparent 48%),#050b12ed;
+}
+#result>.card{
+  width:min(620px,100%);max-height:calc(100dvh - 28px);overflow:auto;
+  padding:clamp(20px,4vw,34px);border:1px solid #d9b77b66;border-radius:18px;
+  background:linear-gradient(145deg,#1a2c39,#09121b);
+}
+#result h2{margin:8px 0 14px;font-size:clamp(20px,4vw,30px);letter-spacing:.08em}
+#result .big{font-size:clamp(42px,9vw,64px);text-shadow:0 5px 25px #e6ad5b30}
+#result .stats{padding:14px 5px;border:1px solid #ffffff20;border-radius:12px;background:#ffffff08}
+#result button{min-height:46px;border-radius:10px;font-size:11px;letter-spacing:.07em}
+#result #home{background:#1b303e;border:1px solid #ffffff28}
+@media(max-width:720px){
+ #menu>.card{padding:max(14px,env(safe-area-inset-top)) max(13px,env(safe-area-inset-right)) max(14px,env(safe-area-inset-bottom)) max(13px,env(safe-area-inset-left))!important}
+ #menu .brand{font-size:clamp(34px,10vw,52px)!important}
+ #menu .tag{margin:5px 0 13px!important;font-size:8px!important}
+ #menu .tabs{width:100%!important;margin-bottom:15px!important}
+ #menu .tab{min-height:40px;padding:9px 5px!important;font-size:9px!important}
+ #panel-race.active{
+   grid-template-columns:minmax(0,1fr);grid-template-areas:"heading" "tracks" "league" "mission" "stats" "start" "status";
+   row-gap:10px;align-content:start;
+ }
+ #panel-race>.section-title{margin-bottom:0!important}
+ #panel-race>.track-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ #menu .track-card{height:clamp(104px,17vh,156px)!important;border-radius:11px!important}
+ #menu .track-card span{left:7px!important;bottom:8px!important;font-size:clamp(8px,2.5vw,11px)!important;letter-spacing:.04em!important}
+ #panel-race>.league-chip{min-height:35px;padding:8px 10px!important;font-size:9px!important}
+ #panel-race>.mission{min-height:0;padding:10px 11px!important;font-size:10px!important}
+ #panel-race>.menu-stats{padding:9px 3px!important}
+ #menu .stats small{font-size:7px!important}
+ #menu .stats b{font-size:clamp(15px,4.5vw,19px)!important}
+ #panel-race>#start{min-height:47px!important;font-size:11px!important}
+ #panel-garage .garage-showroom{flex:0 0 auto}
+ #garage-view{min-height:clamp(210px,36vh,330px)!important}
+ #panel-garage .garage-toolbar{grid-template-columns:minmax(0,1fr);gap:8px!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:10px!important}
+ #panel-garage .garage-upgrades{gap:9px!important}
+ #panel-garage .garage-upgrade-item .upgrade-buy{min-height:36px!important;font-size:8px!important}
+}
+@media(max-width:390px){
+ #menu .track-card{height:100px!important}
+ #menu .stats small{font-size:6px!important;letter-spacing:.05em}
+ #panel-garage .garage-swatches{gap:6px!important}
+ #panel-garage .garage-swatches .swatch{width:20px!important;height:20px!important;min-height:20px!important}
+}
+@media(orientation:landscape) and (max-height:520px){
+ #menu>.card{
+   padding:max(7px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))!important;
+   overflow:hidden!important;
+ }
+ #menu .brand{font-size:clamp(26px,6vh,38px)!important}
+ #menu .tag{margin:3px 0 7px!important;font-size:7px!important}
+ #menu .tabs{width:min(420px,100%)!important;margin-bottom:8px!important}
+ #menu .tab{min-height:31px;padding:5px 10px!important;font-size:8px!important}
+ #panel-race.active{
+   grid-template-columns:minmax(0,1.25fr) minmax(220px,.75fr);
+   grid-template-areas:"heading heading" "tracks league" "tracks mission" "tracks stats" "tracks start" "tracks status";
+   column-gap:16px;row-gap:6px;
+ }
+ #panel-race>.section-title{font-size:9px!important;margin-bottom:0!important}
+ #panel-race>.track-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
+ #menu .track-card{height:clamp(70px,18vh,112px)!important}
+ #menu .track-card span{font-size:8px!important}
+ #panel-race>.mission{min-height:0;padding:7px 9px!important;font-size:9px!important}
+ #panel-race>.menu-stats{padding:6px 3px!important}
+ #menu .stats small{font-size:7px!important}
+ #menu .stats b{font-size:15px!important}
+ #panel-race>#start{min-height:36px!important;padding:7px!important;font-size:10px!important}
+ #panel-garage.active{gap:6px!important}
+ #panel-garage .garage-showroom{flex:1;min-height:0}
+ #garage-view{min-height:100px!important}
+ #panel-garage .garage-toolbar{grid-template-columns:minmax(175px,.8fr) minmax(0,1.2fr);gap:7px!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:6px 8px!important}
+ #panel-garage .garage-swatches{margin-top:5px!important;gap:5px!important}
+ #panel-garage .garage-swatches .swatch{width:16px!important;height:16px!important;min-height:16px!important}
+ #panel-garage .garage-upgrades{gap:6px!important}
+ #panel-garage .garage-upgrade-item .upgrade-buy{min-height:26px!important;padding:4px!important;font-size:7px!important}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
