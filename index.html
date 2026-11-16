@@ -887,16 +887,200 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
   #menu .stats small{font-size:6px!important}
 }
 
+
+/* AUTOSPORT MENU — complete visual rebuild. Only the menu shell and its panels are styled here. */
+#menu{
+ position:fixed!important;inset:0!important;z-index:20!important;
+ display:flex!important;align-items:stretch!important;justify-content:stretch!important;
+ padding:0!important;overflow:hidden!important;
+ background:
+  radial-gradient(ellipse at 78% 18%,#c18a4a20,transparent 34%),
+  radial-gradient(ellipse at 12% 82%,#3c6a7a26,transparent 38%),
+  linear-gradient(125deg,#050b12 0%,#0a1721 52%,#111d25 100%)!important;
+ backdrop-filter:none!important
+}
+#menu>.menu-shell{
+ position:relative!important;isolation:isolate!important;
+ display:grid!important;grid-template-rows:auto minmax(0,1fr)!important;
+ gap:clamp(12px,2vh,22px)!important;
+ width:100%!important;height:100dvh!important;max-height:100dvh!important;min-height:0!important;
+ margin:0!important;padding:clamp(14px,2.4vh,26px) clamp(18px,4vw,58px)!important;
+ overflow:hidden!important;border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important
+}
+#menu>.menu-shell:before{
+ content:"";position:absolute;z-index:-1;inset:10px 0 auto;height:1px;
+ background:linear-gradient(90deg,transparent,#e5b86d88 18%,#fff0c488 50%,#e5b86d88 82%,transparent)
+}
+#menu>.menu-shell:after{
+ content:"";position:absolute;z-index:-1;right:-8vw;top:16%;width:44vw;height:44vw;
+ border:1px solid #ffffff08;border-radius:50%;
+ box-shadow:0 0 0 42px #ffffff04,0 0 0 84px #ffffff03;pointer-events:none
+}
+#menu .menu-topbar{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:24px!important;min-width:0!important;padding:0 0 13px!important;
+ border-bottom:1px solid #ffffff20!important
+}
+#menu .menu-brandblock{min-width:0}
+#menu .brand{font-size:clamp(34px,5.8vh,58px)!important;line-height:.86!important;letter-spacing:-.09em!important;text-shadow:0 6px 28px #0009}
+#menu .tag{margin:8px 0 0!important;color:#aebdc7!important;font-size:8px!important;letter-spacing:.34em!important}
+#menu .tabs{
+ display:grid!important;grid-template-columns:repeat(3,minmax(90px,1fr))!important;
+ width:min(48%,500px)!important;gap:6px!important;margin:0!important;padding:5px!important;
+ border:1px solid #ffffff1c!important;border-radius:13px!important;background:#030a11a8!important
+}
+#menu .tab{
+ min-width:0!important;min-height:42px!important;padding:9px 12px!important;
+ border:1px solid transparent!important;border-radius:9px!important;
+ background:transparent!important;color:#aebbc4!important;
+ font-size:9px!important;font-weight:900!important;letter-spacing:.12em!important;
+ box-shadow:none!important;transition:background .18s,color .18s,border-color .18s
+}
+#menu .tab[aria-selected=true]{
+ color:#17120d!important;background:linear-gradient(115deg,#d99b4c,#f4d394)!important;
+ border-color:#ffe2a9!important;box-shadow:0 5px 18px #d99b4c33!important
+}
+#menu .menu-content{display:flex!important;flex-direction:column!important;min-width:0!important;min-height:0!important;overflow:hidden!important}
+#menu .panel{display:none!important;min-width:0!important;min-height:0!important;max-width:100%!important}
+#menu .panel.active{display:flex!important;flex-direction:column!important;min-height:0!important}
+#menu .section-title{margin:0!important;color:#f3c77e!important;font-size:10px!important;letter-spacing:.2em!important}
+#panel-race.active{
+ display:grid!important;flex:1 1 auto!important;
+ grid-template-columns:minmax(0,1.12fr) minmax(270px,.88fr)!important;
+ grid-template-rows:auto minmax(0,1fr) auto auto auto!important;
+ grid-template-areas:"heading league" "tracks mission" "tracks stats" "tracks start" "tracks status"!important;
+ column-gap:clamp(18px,3.6vw,54px)!important;row-gap:clamp(7px,1.4vh,13px)!important;
+ align-content:stretch!important;align-items:stretch!important;overflow:hidden!important
+}
+#panel-race>.section-title{grid-area:heading!important;align-self:center!important}
+#panel-race>.track-picker{
+ grid-area:tracks!important;display:grid!important;grid-template-columns:1fr!important;
+ grid-template-rows:repeat(3,minmax(0,1fr))!important;gap:9px!important;
+ min-width:0!important;min-height:0!important;margin:0!important
+}
+#menu .track-card{
+ position:relative!important;width:100%!important;height:100%!important;min-height:0!important;
+ overflow:hidden!important;border:1px solid #ffffff32!important;border-radius:13px!important;
+ background-size:cover!important;background-position:center 52%!important;
+ box-shadow:inset 0 -64px 52px #02070bd9,0 8px 22px #0006!important;
+ transition:border-color .18s,filter .18s,transform .18s!important
+}
+#menu .track-card:after{content:"";position:absolute!important;inset:0!important;background:linear-gradient(90deg,#03080b08,#03080b25 48%,#03080b9c),linear-gradient(0deg,#03080be8,transparent 76%)!important}
+#menu .track-card span{z-index:2!important;left:15px!important;bottom:12px!important;font-size:clamp(11px,1.2vw,15px)!important;letter-spacing:.15em!important;text-shadow:0 2px 8px #000!important}
+#menu .track-card[aria-pressed=true]{border:2px solid #f6c979!important;box-shadow:0 0 0 2px #f6c97935,0 8px 24px #0008,inset 0 -64px 52px #02070bd9!important}
+#menu .track-card[aria-disabled=true]{filter:grayscale(.75) brightness(.48)!important}
+#panel-race>.league-chip{
+ grid-area:league!important;justify-self:stretch!important;align-self:center!important;
+ min-height:36px!important;margin:0!important;padding:8px 12px!important;
+ border:1px solid #e9bd7355!important;border-radius:9px!important;
+ background:#e9bd7314!important;color:#f5ce8c!important;
+ font-size:9px!important;letter-spacing:.1em!important;text-align:left!important
+}
+#panel-race>.mission{
+ grid-area:mission!important;align-self:stretch!important;min-height:0!important;
+ display:flex!important;align-items:center!important;padding:12px 14px!important;
+ border:1px solid #ffffff20!important;border-radius:11px!important;
+ background:linear-gradient(110deg,#ffffff0c,#ffffff04)!important;
+ color:#c6d2d8!important;font-size:10px!important;line-height:1.5!important
+}
+#panel-race>.menu-stats{
+ grid-area:stats!important;align-self:stretch!important;display:grid!important;
+ grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:3px!important;
+ margin:0!important;padding:10px 5px!important;border:1px solid #ffffff1c!important;
+ border-radius:11px!important;background:#ffffff08!important
+}
+#menu .stats>div{min-width:0!important;padding:3px!important}
+#menu .stats small{font-size:7px!important;letter-spacing:.06em!important;color:#aebdc7!important}
+#menu .stats b{font-size:clamp(15px,2.2vw,21px)!important;color:#f2f5f6!important}
+#menu .stats>div:last-child b{color:#f2c477!important}
+#panel-race>#start{
+ grid-area:start!important;align-self:stretch!important;min-height:46px!important;
+ margin:0!important;padding:10px 16px!important;border:0!important;border-radius:10px!important;
+ background:linear-gradient(110deg,#bd7c37,#f3cf8a 58%,#d79a4d)!important;
+ color:#17120d!important;font-size:11px!important;letter-spacing:.13em!important;
+ box-shadow:0 8px 25px #c28a4540,inset 0 1px #fff9!important
+}
+#panel-race>#status{grid-area:status!important;align-self:center!important;margin:0!important;color:#9eabb3!important;font-size:8px!important;text-align:center!important}
+#menu button:not(.primary):not(.tab):not(.track-card):not(.swatch){box-shadow:none!important}
+#panel-garage.active{flex:1 1 auto!important;display:grid!important;grid-template-rows:minmax(0,1fr) auto!important;gap:12px!important;overflow:hidden!important}
+#panel-garage .garage-showroom{display:flex!important;flex:1 1 auto!important;min-width:0!important;min-height:0!important}
+#garage-view{flex:1 1 auto!important;width:100%!important;height:100%!important;min-height:0!important;border:1px solid #ffffff22!important;border-radius:15px!important;background:radial-gradient(ellipse at 50% 65%,#52606a44,transparent 56%),linear-gradient(145deg,#162631,#08111a)!important}
+#panel-garage .garage-toolbar{display:grid!important;grid-template-columns:minmax(190px,.8fr) minmax(0,1.2fr)!important;gap:12px!important;min-width:0!important}
+#panel-garage .garage-customize,#panel-garage .garage-upgrades{min-width:0!important;padding:12px!important;border:1px solid #ffffff20!important;border-radius:12px!important;background:#ffffff08!important}
+#panel-shop.active{flex:1 1 auto!important;min-height:0!important}
+#menu button{touch-action:manipulation!important}
+#menu button:active{filter:brightness(1.13)}
+@media (orientation:portrait),(max-width:699px){
+ #menu>.menu-shell{padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;gap:12px!important;overflow-y:auto!important;overscroll-behavior:contain!important}
+ #menu .menu-topbar{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:13px!important;padding-bottom:11px!important}
+ #menu .brand{font-size:clamp(34px,8vw,48px)!important}
+ #menu .tag{margin-top:6px!important;font-size:7px!important}
+ #menu .tabs{width:100%!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #menu .tab{min-height:38px!important;padding:8px 4px!important;font-size:clamp(8px,2.4vw,10px)!important;letter-spacing:.06em!important}
+ #menu .menu-content{overflow:visible!important;flex:0 0 auto!important}
+ #menu .panel.active{overflow:visible!important}
+ #panel-race.active{
+  flex:0 0 auto!important;grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:auto auto auto auto auto auto auto!important;
+  grid-template-areas:"heading" "tracks" "league" "mission" "stats" "start" "status"!important;
+  gap:9px!important;overflow:visible!important
+ }
+ #panel-race>.track-picker{grid-template-columns:repeat(3,minmax(0,1fr))!important;grid-template-rows:none!important;gap:7px!important}
+ #menu .track-card{height:clamp(88px,13vh,116px)!important;border-radius:10px!important}
+ #menu .track-card span{left:7px!important;bottom:7px!important;font-size:clamp(8px,2.4vw,10px)!important;letter-spacing:.02em!important}
+ #panel-race>.league-chip{justify-self:start!important;min-height:32px!important;padding:7px 10px!important}
+ #panel-race>.mission{min-height:42px!important;padding:9px 11px!important;font-size:9px!important}
+ #panel-race>.menu-stats{padding:8px 3px!important}
+ #menu .stats small{font-size:clamp(6px,1.8vw,8px)!important}
+ #menu .stats b{font-size:clamp(15px,4vw,19px)!important}
+ #panel-race>#start{min-height:43px!important}
+ #panel-garage.active{display:flex!important;flex-direction:column!important;flex:0 0 auto!important;overflow:visible!important}
+ #panel-garage .garage-showroom{flex:0 0 auto!important}
+ #garage-view{height:clamp(210px,34vh,290px)!important;min-height:210px!important;flex:none!important}
+ #panel-garage .garage-toolbar{grid-template-columns:minmax(0,1fr)!important;gap:9px!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:10px!important}
+ #panel-shop.active{min-height:150px!important}
+}
+@media (orientation:landscape) and (max-height:520px){
+ #menu>.menu-shell{padding:8px 22px!important;gap:7px!important}
+ #menu .menu-topbar{padding-bottom:7px!important}
+ #menu .brand{font-size:clamp(27px,7vh,39px)!important}
+ #menu .tag{margin-top:4px!important;font-size:6px!important}
+ #menu .tabs{width:min(47%,420px)!important;padding:3px!important}
+ #menu .tab{min-height:31px!important;padding:6px 8px!important;font-size:8px!important}
+ #panel-race.active{row-gap:5px!important;grid-template-rows:auto minmax(0,1fr) auto auto auto!important}
+ #menu .track-picker{gap:6px!important}
+ #menu .track-card span{font-size:10px!important;left:9px!important;bottom:7px!important}
+ #panel-race>.mission{padding:7px 10px!important;font-size:8px!important}
+ #panel-race>.menu-stats{padding:5px 3px!important}
+ #panel-race>#start{min-height:34px!important;font-size:9px!important;padding:6px 10px!important}
+ #panel-garage .garage-toolbar{gap:7px!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:7px 9px!important}
+}
+@media (prefers-reduced-motion:reduce){#menu *{transition:none!important}}
+
 </style></head><body><div id="stage"></div>
-<div id="menu" class="screen"><div class="card">
-<div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
-<div class="tabs" role="tablist"><button class="tab" data-tab="race" aria-selected="true">ГОНКА</button><button class="tab" data-tab="garage" aria-selected="false">ГАРАЖ</button><button class="tab" data-tab="shop" aria-selected="false">МАГАЗИН</button></div>
-<section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
+<div id="menu" class="screen">
+ <div class="card menu-shell">
+  <header class="menu-topbar">
+   <div class="menu-brandblock">
+    <div class="brand">AUTO<span>SPORT</span></div>
+    <div class="tag">MOTORSPORT · RACING CAREER</div>
+   </div>
+   <nav class="tabs" role="tablist" aria-label="Разделы игры">
+    <button class="tab" data-tab="race" aria-selected="true">ЗАЕЗД</button>
+    <button class="tab" data-tab="garage" aria-selected="false">АВТОМОБИЛЬ</button>
+    <button class="tab" data-tab="shop" aria-selected="false">МАГАЗИН</button>
+   </nav>
+  </header>
+  <main class="menu-content">
+   <section class="panel active" id="panel-race"><div class="section-title">ВЫБЕРИ ТРАССУ</div>
 <div class="track-picker"><button class="track-card" data-track="coast" aria-pressed="true" style="background-image:url('https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=500&q=80')"><span>COAST RUN</span></button><button class="track-card" data-track="forest" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1470770841072-f978cf4d019e?w=500&q=80')"><span>ROCKY PASS</span></button><button class="track-card" data-track="desert" aria-pressed="false" style="background-image:url('https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=500&q=80')"><span>DESERT RING</span></button></div>
 <button type="button" class="league-chip" id="leagueName" aria-haspopup="dialog" aria-controls="league-modal">ЛИГА 1 · НОВИЧОК ▾</button><div class="mission" id="mission">Финишируй в топе, зарабатывай токены и открывай новые лиги.</div>
 <div class="stats menu-stats"><div><small>ЗАЕЗД</small><b id="season">1/3</b></div><div><small>ОЧКИ ЛИГИ</small><b id="points">0</b></div><div><small>ПОБЕДЫ</small><b id="wins">0</b></div><div><small>ТОКЕНЫ</small><b id="credits">0</b></div></div>
 <button id="start" class="primary">НАЧАТЬ ГОНКУ →</button><p id="status" class="tiny">Загрузка…</p></section>
-<section class="panel" id="panel-garage">
+   <section class="panel" id="panel-garage">
 <div class="garage-showroom">
  <div id="garage-view" class="garage-view" aria-label="3D-модель твоего автомобиля">
   <div class="garage-view-title">ТВОЙ АВТОМОБИЛЬ</div>
@@ -933,8 +1117,10 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  </div>
 </div>
 </section>
-<section class="panel" id="panel-shop" aria-label="Магазин"></section>
-</div></div>
+   <section class="panel" id="panel-shop" aria-label="Магазин"></section>
+  </main>
+ </div>
+</div>
 <div id="league-modal" class="league-modal hidden" role="dialog" aria-modal="true" aria-labelledby="league-modal-title"><div class="league-modal-card"><div class="league-modal-head"><div><div class="section-title" id="league-modal-title">ЧЕМПИОНАТЫ</div><div class="muted">Выбери открытую лигу. Пройденные лиги доступны для повторной игры без наград.</div></div><button type="button" id="league-close" aria-label="Закрыть">✕</button></div><div id="league-list" class="league-list"></div></div></div>
 <div id="hud"><div class="top"><div class="box"><small>КРУГ</small><strong id="lap">1/3</strong></div><div class="box"><small>ПОЗИЦИЯ</small><strong id="pos">4/4</strong></div><div class="box"><small>ВРЕМЯ</small><strong id="time">0:00</strong></div><button id="pause" aria-label="Пауза" title="Пауза">Ⅱ</button></div><div id="race-map" aria-label="Мини-карта трассы"><canvas id="race-map-canvas" width="360" height="260"></canvas></div><div id="speedometer" class="speedometer" aria-label="Спидометр"><div class="speedometer-inner"><strong id="speed">0</strong><small>КМ/Ч</small></div></div><div class="controls"><div class="pad"><button class="ctrl steer" id="left">◀</button><button class="ctrl steer" id="right">▶</button></div><div class="pad"><button class="ctrl brake" id="brake">R</button><button class="ctrl gas" id="gas">▲</button></div></div><div id="pause-menu" class="pause-menu hidden" role="dialog" aria-modal="true" aria-labelledby="pause-title"><div class="pause-card"><div class="pause-kicker">AUTOSPORT · RACE CONTROL</div><h2 id="pause-title">ПАУЗА</h2><p>Гонка приостановлена</p><button id="resume-race" class="pause-primary">ПРОДОЛЖИТЬ ИГРУ</button><button id="restart-race">ПЕРЕЗАПУСК</button><button id="pause-home">В МЕНЮ</button></div></div></div>
 <div id="result" class="screen hidden"><div class="card result"><div class="tag">AUTOSPORT · CHAMPIONSHIP</div><h2 id="heading">ФИНИШ</h2><div class="big" id="rank">1 МЕСТО</div><p class="muted" id="summary"></p><div class="stats"><div><small>ОЧКИ ЭТАПА</small><b id="earned">+10</b></div><div><small>КРЕДИТЫ</small><b id="reward">+300</b></div><div><small>ОЧКИ СЕЗОНА</small><b id="total">10</b></div></div><button id="again" class="primary">СЛЕДУЮЩИЙ ЭТАП →</button><button id="home" style="width:100%;margin-top:8px">В ГАРАЖ</button></div></div>
