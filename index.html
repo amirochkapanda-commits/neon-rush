@@ -1298,17 +1298,26 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #menu .track-card span{left:6px!important;bottom:7px!important;font-size:clamp(7px,2.35vw,10px)!important;letter-spacing:.04em!important}
 }
 
-/* Compact grid-only color palettes: no spectrum or hue sliders. */
-#panel-garage .garage-palette-block{display:flex!important;flex-direction:column!important;gap:7px!important;min-width:0!important}
-#panel-garage .garage-color-caption{font-size:9px!important;font-weight:950!important;letter-spacing:.12em!important;color:#f0bd69!important}
-#panel-garage .garage-color-grid{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:7px!important;min-width:0!important}
-#panel-garage .rim-caption{margin-top:3px!important}
-#panel-garage .rim-palette{grid-template-columns:repeat(6,minmax(0,1fr))!important}
-#panel-garage .palette-swatch{display:block!important;appearance:none!important;width:100%!important;aspect-ratio:1.45!important;min-width:0!important;min-height:22px!important;padding:0!important;border:2px solid #aab6bf88!important;border-radius:7px!important;background:var(--swatch)!important;box-shadow:inset 0 0 0 1px #0003,0 2px 5px #0005!important;cursor:pointer!important;transition:transform .12s,border-color .12s,box-shadow .12s!important}
-#panel-garage .palette-swatch[aria-pressed=true]{border:3px solid #f3bd70!important;box-shadow:0 0 0 2px #f3bd7044,0 0 12px #eeb96b55!important;transform:scale(1.06)!important}
-#panel-garage .palette-swatch:focus-visible{outline:2px solid white!important;outline-offset:2px!important}
-#panel-garage .garage-palette-block input[type=hidden]{display:none!important}
-@media(max-width:520px){#panel-garage .garage-color-grid{gap:5px!important}#panel-garage .palette-swatch{min-height:18px!important;border-radius:5px!important}}
+/* Compact garage color buttons; palettes open only on demand. */
+#panel-garage .garage-color-controls{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;min-width:0!important}
+#panel-garage .garage-color-open{display:flex!important;align-items:center!important;gap:8px!important;min-width:0!important;padding:9px!important;border:1px solid #eeb96b80!important;border-radius:9px!important;background:linear-gradient(135deg,#263944,#14212b)!important;color:#fff!important;text-align:left!important}
+#panel-garage .garage-color-open>i{display:block!important;flex:0 0 27px!important;width:27px!important;height:27px!important;border:2px solid #ffffffb0!important;border-radius:7px!important}
+#panel-garage .garage-color-open>span{display:flex!important;flex:1!important;flex-direction:column!important;gap:3px!important;min-width:0!important}
+#panel-garage .garage-color-open b{font-size:9px!important;letter-spacing:.08em!important}
+#panel-garage .garage-color-open small{font-size:8px!important;color:#c4d0d5!important}
+#panel-garage .garage-color-open strong{font-size:15px!important;color:#f0bd69!important}
+#panel-garage .garage-palette-modal[hidden]{display:none!important}
+#panel-garage .garage-palette-modal{position:fixed!important;inset:0!important;z-index:10000!important;display:flex!important;align-items:center!important;justify-content:center!important;padding:16px!important}
+#panel-garage .garage-palette-backdrop{position:absolute!important;inset:0!important;background:#02070bd9!important;backdrop-filter:blur(5px)!important}
+#panel-garage .garage-palette-dialog{position:relative!important;z-index:1!important;width:min(420px,92vw)!important;max-height:85vh!important;overflow:auto!important;padding:16px!important;border:1px solid #dba14e88!important;border-radius:15px!important;background:linear-gradient(145deg,#182a36,#08121b)!important;box-shadow:0 18px 60px #000b!important}
+#panel-garage .garage-palette-dialog-head{display:flex!important;align-items:center!important;justify-content:space-between!important;margin-bottom:12px!important;color:#f2c276!important;font-size:12px!important;letter-spacing:.13em!important}
+#panel-garage .garage-palette-dialog-head button{width:30px!important;height:30px!important;border:1px solid #ffffff44!important;border-radius:8px!important;background:#ffffff12!important;color:white!important}
+#panel-garage .garage-palette-dialog .garage-color-caption{margin-bottom:10px!important;font-size:9px!important;font-weight:950!important;letter-spacing:.12em!important;color:#f0bd69!important}
+#panel-garage .garage-color-grid{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:9px!important;min-width:0!important}
+#panel-garage .palette-swatch{display:block!important;appearance:none!important;width:100%!important;aspect-ratio:1.45!important;min-width:0!important;min-height:32px!important;padding:0!important;border:2px solid #aab6bf88!important;border-radius:8px!important;background:var(--swatch)!important;box-shadow:inset 0 0 0 1px #0003,0 2px 5px #0005!important;cursor:pointer!important}
+#panel-garage .palette-swatch[aria-pressed=true]{border:3px solid #f3bd70!important;box-shadow:0 0 0 2px #f3bd7044,0 0 12px #eeb96b55!important}
+#panel-garage #rimPaletteGrid[hidden],#panel-garage #bodyPaletteGrid[hidden]{display:none!important}
+@media(max-width:520px){#panel-garage .garage-color-open{padding:7px!important;gap:6px!important}#panel-garage .garage-palette-dialog{padding:13px!important}#panel-garage .palette-swatch{min-height:27px!important}}
 
 
 /* Landscape garage correction: occupy the full viewport and give the showroom real height. */
@@ -1345,9 +1354,16 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  </div>
  <div class="garage-toolbar">
   <div class="garage-customize">
-   <div class="garage-palette-block">
-    <div class="garage-color-caption">ЦВЕТ КУЗОВА</div>
-    <div class="garage-color-grid body-palette" aria-label="Палитра цвета кузова">
+   <div class="garage-color-controls">
+    <button type="button" class="garage-color-open" id="openBodyPalette"><i id="paintPreview" style="background:#dba14e"></i><span><b>ЦВЕТ КУЗОВА</b><small>Изменить цвет</small></span><strong>✎</strong></button>
+    <button type="button" class="garage-color-open" id="openRimPalette"><i id="rimPreview" style="background:#9da6aa"></i><span><b>ЦВЕТ ДИСКОВ</b><small>Изменить цвет</small></span><strong>✎</strong></button>
+   </div>
+   <div class="garage-palette-modal" id="garagePaletteModal" hidden>
+    <div class="garage-palette-backdrop" id="closePaletteBackdrop"></div>
+    <div class="garage-palette-dialog" role="dialog" aria-modal="true" aria-labelledby="garagePaletteTitle">
+     <div class="garage-palette-dialog-head"><b id="garagePaletteTitle">ВЫБЕРИ ЦВЕТ</b><button type="button" id="closeGaragePalette">✕</button></div>
+     <div class="garage-color-caption" id="garagePaletteSubtitle">ЦВЕТ КУЗОВА</div>
+     <div class="garage-color-grid body-palette" id="bodyPaletteGrid" aria-label="Палитра цвета кузова">
      <button type="button" class="palette-swatch" data-paint="#171b20" style="--swatch:#171b20" aria-label="Цвет кузова 1"></button>
      <button type="button" class="palette-swatch" data-paint="#343b43" style="--swatch:#343b43" aria-label="Цвет кузова 2"></button>
      <button type="button" class="palette-swatch" data-paint="#59636d" style="--swatch:#59636d" aria-label="Цвет кузова 3"></button>
@@ -1373,8 +1389,7 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
      <button type="button" class="palette-swatch" data-paint="#4b8ed1" style="--swatch:#4b8ed1" aria-label="Цвет кузова 23"></button>
      <button type="button" class="palette-swatch" data-paint="#78c7d7" style="--swatch:#78c7d7" aria-label="Цвет кузова 24"></button>
     </div>
-    <div class="garage-color-caption rim-caption">ЦВЕТ ДИСКОВ</div>
-    <div class="garage-color-grid rim-palette" aria-label="Палитра цвета дисков">
+     <div class="garage-color-grid rim-palette" id="rimPaletteGrid" aria-label="Палитра цвета дисков">
      <button type="button" class="palette-swatch" data-rim="#171b20" style="--swatch:#171b20" aria-label="Цвет дисков 1"></button>
      <button type="button" class="palette-swatch" data-rim="#343b43" style="--swatch:#343b43" aria-label="Цвет дисков 2"></button>
      <button type="button" class="palette-swatch" data-rim="#59636d" style="--swatch:#59636d" aria-label="Цвет дисков 3"></button>
@@ -1388,7 +1403,8 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
      <button type="button" class="palette-swatch" data-rim="#1768c5" style="--swatch:#1768c5" aria-label="Цвет дисков 11"></button>
      <button type="button" class="palette-swatch" data-rim="#18765c" style="--swatch:#18765c" aria-label="Цвет дисков 12"></button>
     </div>
-    <input id="paint" type="hidden" value="#dba14e"><input id="rimPaint" type="hidden" value="#9da6aa">
+     <input id="paint" type="hidden" value="#dba14e"><input id="rimPaint" type="hidden" value="#9da6aa">
+    </div>
    </div>
   </div>
   <div class="garage-upgrades">
@@ -2415,7 +2431,7 @@ $('again').onclick=async()=>{
 };
 $('home').onclick=returnToGarage;
 function saveGarage(){prefs.paint=$('paint').value;prefs.rim=$('rimPaint').value;localStorage.setItem('autosport-garage',JSON.stringify(prefs));applyGarage()}
-function selectGarageColor(kind,button){const input=$(kind==='paint'?'paint':'rimPaint');input.value=button.dataset[kind];document.querySelectorAll('[data-'+kind+']').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));saveGarage()}document.querySelectorAll('[data-paint]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.paint===$('paint').value));b.addEventListener('click',()=>selectGarageColor('paint',b))});document.querySelectorAll('[data-rim]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.rim===$('rimPaint').value));b.addEventListener('click',()=>selectGarageColor('rim',b))});document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{const index=championshipTracks.indexOf(b.dataset.track),stage=Math.min(2,save.races);if(index<0||(selectedReplayLeague===null&&index>stage))return;prefs.track=b.dataset.track;replayMode=selectedReplayLeague!==null||index<save.races;document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updateMenuStats()}));
+function openGaragePalette(kind){const modal=$('garagePaletteModal');modal.hidden=false;$('bodyPaletteGrid').hidden=kind!=='paint';$('rimPaletteGrid').hidden=kind!=='rim';$('garagePaletteSubtitle').textContent=kind==='paint'?'ЦВЕТ КУЗОВА':'ЦВЕТ ДИСКОВ';$('garagePaletteTitle').textContent=kind==='paint'?'ВЫБЕРИ ЦВЕТ КУЗОВА':'ВЫБЕРИ ЦВЕТ ДИСКОВ'}function closeGaragePalette(){$('garagePaletteModal').hidden=true}$('openBodyPalette').addEventListener('click',()=>openGaragePalette('paint'));$('openRimPalette').addEventListener('click',()=>openGaragePalette('rim'));$('closeGaragePalette').addEventListener('click',closeGaragePalette);$('closePaletteBackdrop').addEventListener('click',closeGaragePalette);function selectGarageColor(kind,button){const input=$(kind==='paint'?'paint':'rimPaint');input.value=button.dataset[kind];$(kind==='paint'?'paintPreview':'rimPreview').style.background=input.value;document.querySelectorAll('[data-'+kind+']').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));saveGarage();closeGaragePalette()}document.querySelectorAll('[data-paint]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.paint===$('paint').value));b.addEventListener('click',()=>selectGarageColor('paint',b))});document.querySelectorAll('[data-rim]').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.rim===$('rimPaint').value));b.addEventListener('click',()=>selectGarageColor('rim',b))});document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{const index=championshipTracks.indexOf(b.dataset.track),stage=Math.min(2,save.races);if(index<0||(selectedReplayLeague===null&&index>stage))return;prefs.track=b.dataset.track;replayMode=selectedReplayLeague!==null||index<save.races;document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updateMenuStats()}));
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
 function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150;if(level>=8){$('mission').textContent='Максимальный уровень этой детали уже установлен.';return}if(save.credits<cost){$('mission').textContent='Не хватает '+(cost-save.credits)+' токенов. Займи место выше и заработай больше.';return}save.credits-=cost;prefs[key]=level+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'!';updateUpgradeLabels()}
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
