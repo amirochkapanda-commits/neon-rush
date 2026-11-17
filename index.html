@@ -2082,8 +2082,13 @@ if(prefs.track==='coast'){
  const terrainHeightAt=(x,z)=>{
   let nearest=terrainSamples[0],best=Infinity;
   for(const sample of terrainSamples){const dx=x-sample.p.x,dz=z-sample.p.z,d=dx*dx+dz*dz;if(d<best){best=d;nearest=sample}}
-  const dist=Math.sqrt(best),t=clamp((dist-8)/78,0,1),blend=1-t*t*(3-2*t);
-  const base=prefs.track==='forest'?mix(-.18,nearest.p.y,blend):-.18;
+  const dist=Math.sqrt(best);
+  // On Rocky Pass keep the soil mesh clearly below the asphalt corridor.
+  // The road is its own continuous surface; terrain must never z-fight or show through it.
+  const roadClearance=ROAD/2+3;
+  const t=prefs.track==='forest'?clamp((dist-roadClearance)/24,0,1):clamp((dist-8)/78,0,1);
+  const blend=1-t*t*(3-2*t);
+  const base=prefs.track==='forest'?mix(-1.25,nearest.p.y,blend):-.18;
   const fadeT=clamp((dist-(ROAD/2+7))/78,0,1),fade=fadeT*fadeT*(3-2*fadeT);
   const amp=prefs.track==='forest'?4.2:prefs.track==='coast'?2.4:1.15;
   const rolling=amp*(.52*Math.sin(x*.021+Math.sin(z*.013)*1.7)*Math.cos(z*.018-x*.009)+.28*Math.sin((x+z)*.047)+.2*Math.cos(x*.038-z*.029));
