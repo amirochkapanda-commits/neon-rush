@@ -1319,6 +1319,25 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  #panel-garage .garage-swatches-heading{font-size:7px!important}
 }
 
+
+
+/* Landscape garage correction: occupy the full viewport and give the showroom real height. */
+@media (orientation:landscape){
+ #menu:has(#panel-garage.active){align-items:stretch!important;justify-content:stretch!important;width:100vw!important;max-width:none!important}
+ #menu:has(#panel-garage.active)>.card{width:100vw!important;max-width:none!important;min-width:0!important}
+ #menu>.card>#panel-garage.active{grid-column:1/-1!important;grid-row:3!important;width:100%!important;max-width:none!important;min-width:0!important;justify-self:stretch!important;align-self:stretch!important}
+ #panel-garage.active{min-width:0!important;width:100%!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr) auto!important}
+ #panel-garage .garage-showroom{width:100%!important;min-width:0!important}
+ #garage-view{width:100%!important;min-width:0!important;height:clamp(220px,40vh,420px)!important;min-height:220px!important;flex:1 1 auto!important}
+ #panel-garage .garage-toolbar{width:100%!important;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important}
+}
+@media (orientation:landscape) and (max-height:520px){
+ #menu>.card>#panel-garage.active{grid-column:1/-1!important;grid-row:3!important}
+ #garage-view{height:clamp(190px,38vh,300px)!important;min-height:190px!important}
+ #panel-garage .garage-toolbar{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important}
+}
+/* The two full-spectrum pickers are the only color controls. */
+#panel-garage .garage-swatches,#panel-garage .garage-swatches-heading{display:none!important}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -1339,18 +1358,6 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
    <div class="garage-color-row garage-color-actions">
     <label class="garage-color-picker"><span class="garage-color-caption">ЦВЕТ КУЗОВА</span><span class="garage-color-face"><i id="paintPreview" style="background:#dba14e"></i><span><b>ВЫБРАТЬ ЛЮБОЙ ЦВЕТ</b><small>Полная палитра оттенков</small></span><strong>✎</strong></span><input id="paint" type="color" value="#dba14e" aria-label="Выбрать любой цвет кузова"></label>
     <label class="garage-color-picker"><span class="garage-color-caption">ЦВЕТ ДИСКОВ</span><span class="garage-color-face"><i id="rimPreview" style="background:#9da6aa"></i><span><b>ВЫБРАТЬ ЛЮБОЙ ЦВЕТ</b><small>Полная палитра оттенков</small></span><strong>✎</strong></span><input id="rimPaint" type="color" value="#9da6aa" aria-label="Выбрать любой цвет дисков"></label>
-   </div>
-   <div class="garage-swatches-heading">БЫСТРЫЕ ГОТОВЫЕ ОТТЕНКИ</div>
-   <div class="garage-swatches" aria-label="Быстрые цвета">
-    <button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой кузов" aria-pressed="true"></button>
-    <button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный кузов"></button>
-    <button class="swatch" data-paint="#1768c5" style="background:#1768c5" aria-label="Синий кузов"></button>
-    <button class="swatch" data-paint="#f1f1ed" style="background:#f1f1ed" aria-label="Белый кузов"></button>
-    <button class="swatch" data-paint="#20252b" style="background:#20252b" aria-label="Чёрный кузов"></button>
-    <span class="garage-swatch-divider"></span>
-    <button class="swatch" data-rim="#9da6aa" style="background:#9da6aa" aria-label="Серебристые диски" aria-pressed="true"></button>
-    <button class="swatch" data-rim="#d4a43c" style="background:#d4a43c" aria-label="Золотые диски"></button>
-    <button class="swatch" data-rim="#262a30" style="background:#262a30" aria-label="Чёрные диски"></button>
    </div>
   </div>
   <div class="garage-upgrades">
@@ -1790,6 +1797,10 @@ function renderGaragePreview(){
  return true;
 }
 const garageView=$('garage-view');
+if(typeof ResizeObserver!=='undefined'){
+ const garageResizeObserver=new ResizeObserver(()=>{if(garageScene&&garageCamera)renderGaragePreview()});
+ garageResizeObserver.observe(garageView);
+}
 const garageDragSensitivity=.012;
 garageView.addEventListener('pointerdown',e=>{if(!garageCar||garageDragging)return;e.preventDefault();garageDragging=true;garagePointerId=e.pointerId;garageDragPoint={x:e.clientX,y:e.clientY};try{garageView.setPointerCapture(e.pointerId)}catch{}});
 garageView.addEventListener('pointermove',e=>{if(!garageDragging||e.pointerId!==garagePointerId||!garageDragPoint||!garageCar)return;const dx=e.clientX-garageDragPoint.x,dy=e.clientY-garageDragPoint.y;garageDragPoint={x:e.clientX,y:e.clientY};garageOrbitAzimuth-=dx*garageDragSensitivity;garageOrbitElevation=clamp(garageOrbitElevation+dy*garageDragSensitivity,.12,1.62);updateGarageCamera()});
