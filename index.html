@@ -1735,7 +1735,7 @@ function car(color,isPlayer=false){
  function softBox(w,h,d,material,x,y,z,r=.04){
   const rr=Math.max(.008,Math.min(r,w*.22,h*.22,d*.22)),s=new THREE.Shape();
   s.moveTo(-w/2+rr,-h/2+rr);s.lineTo(w/2-rr,-h/2+rr);s.lineTo(w/2-rr,h/2-rr);s.lineTo(-w/2+rr,h/2-rr);s.closePath();
-  const g=new THREE.ExtrudeGeometry(s,{depth:Math.max(.01,d-2*rr),bevelEnabled:true,bevelSegments:3,steps:1,bevelSize:rr,bevelThickness:rr,curveSegments:6});g.translate(0,0,-(d-2*rr)/2);
+  const g=new THREE.ExtrudeGeometry(s,{depth:Math.max(.01,d-2*rr),bevelEnabled:true,bevelSegments:5,steps:1,bevelSize:rr,bevelThickness:rr,curveSegments:8});g.translate(0,0,-(d-2*rr)/2);
   return add(g,material,x,y,z);
  }
  function tube(points,radius,material,segments=28,radial=7){
@@ -1783,7 +1783,7 @@ function car(color,isPlayer=false){
   {z:.35,w:1.015,bottom:.54,top:.965},{z:1.03,w:1.055,bottom:.54,top:1.005},
   {z:1.49,w:1.07,bottom:.54,top:1.015},{z:1.91,w:.99,bottom:.55,top:.96},
   {z:2.18,w:.88,bottom:.57,top:.89},{z:2.27,w:.70,bottom:.59,top:.77}
- ],pm,.48,12,56);
+ ],pm,.72,14,72);
  // Structural floor and sculpted front/rear bumper volumes.
  softBox(1.94,.12,3.72,black,0,.56,-.02,.06);
  softBox(2.02,.17,.26,pm,0,.68,2.15,.075);
@@ -2221,15 +2221,51 @@ if(prefs.track==='coast'){
   }
   dunes.instanceMatrix.needsUpdate=true;dunes.castShadow=true;dunes.receiveShadow=true;scene.add(dunes);
   // Sparse desert scrub and weathered stones break up the open sand without crowding the route.
-  const scrubGeo=new THREE.IcosahedronGeometry(.55,1),scrubMat=new THREE.MeshStandardMaterial({color:'#8b8050',roughness:1}),scrubCount=54,scrub=new THREE.InstancedMesh(scrubGeo,scrubMat,scrubCount),scrubDummy=new THREE.Object3D();
+  const scrubGeo=new THREE.IcosahedronGeometry(.55,2),scrubMat=new THREE.MeshStandardMaterial({color:'#8b8050',roughness:1}),scrubCount=54,scrub=new THREE.InstancedMesh(scrubGeo,scrubMat,scrubCount),scrubDummy=new THREE.Object3D();
   for(let i=0;i<scrubCount;i++){const s=pointAt(((i*17)%scrubCount)/scrubCount*length),side=i%2?1:-1,dist=49+(i%7)*9,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,h=.35+(i%4)*.13;scrubDummy.position.set(x,-.08+h,z);scrubDummy.rotation.set(i*.31,i*1.7,i*.19);scrubDummy.scale.set(1.1,h,1.25);scrubDummy.updateMatrix();scrub.setMatrixAt(i,scrubDummy.matrix)}
   scrub.instanceMatrix.needsUpdate=true;scrub.castShadow=true;scene.add(scrub);
 }else{
- // Coastal cliffs, palms and a visible blue ocean horizon.
- for(let i=0;i<36;i++){const s=pointAt(i/36*length),side=i%2?1:-1,dist=ROAD/2+20+(i%4)*12,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side;
-  const rock=new THREE.Mesh(makeRockGeometry(),new THREE.MeshStandardMaterial({color:i%3?'#8b806c':'#a0957c',roughness:.98}));rock.position.set(x,1.4,z);rock.scale.set(5+(i%4)*2,3.8+(i%3)*1.3,4.5+(i%4)*1.7);rock.rotation.y=i*1.73;rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);
-  const trunk=new THREE.Mesh(new THREE.CylinderGeometry(.13,.2,4.5,7),mat('#82603c'));trunk.position.set(x+4,2.2,z+3);trunk.rotation.z=.12;scene.add(trunk);
-  for(let j=0;j<5;j++){const leaf=new THREE.Mesh(new THREE.ConeGeometry(.45,4,5),mat('#32734b'));leaf.position.set(x+4+Math.cos(j*1.25)*1.5,4.2,z+3+Math.sin(j*1.25)*1.5);leaf.rotation.z=Math.PI/2;leaf.rotation.y=j*1.25;scene.add(leaf)}
+ // Coastal cliffs and palms: smooth rock shoulders with instanced, feathered fronds.
+ const palmCount=42,frondsPerPalm=9,rocks=[];
+ const trunkGeo=new THREE.CylinderGeometry(.17,.27,5.4,14,8);
+ const trunkMat=mat('#76563a',.92,0),ringMat=mat('#9b7950',.9,0);
+ const trunks=new THREE.InstancedMesh(trunkGeo,trunkMat,palmCount);
+ const rings=new THREE.InstancedMesh(new THREE.TorusGeometry(.235,.025,7,20),ringMat,palmCount*7);
+ const frondPositions=[],frondIndices=[];
+ const addFrondVertex=(x,y,z)=>{frondPositions.push(x,y,z);return frondPositions.length/3-1};
+ // One feathered palm leaflet mesh, instanced around every crown.
+ for(let k=0;k<22;k++){
+  const t=.08+k*.038,cx=5.25*t,cy=.15-1.2*t*t,width=.13+.30*Math.sin(Math.PI*t);
+  for(const side of [-1,1]){
+   const a=addFrondVertex(cx,cy,0),b=addFrondVertex(cx+.30,cy-.075,side*width*.55);
+   const c=addFrondVertex(cx+.68,cy-.24,side*width),d=addFrondVertex(cx+.82,cy-.30,side*width*.82);
+   frondIndices.push(a,b,c,a,c,d);
+  }
+ }
+ const frondGeo=new THREE.BufferGeometry();frondGeo.setAttribute('position',new THREE.Float32BufferAttribute(frondPositions,3));frondGeo.setIndex(frondIndices);frondGeo.computeVertexNormals();
+ const frondMat=new THREE.MeshStandardMaterial({color:'#ffffff',roughness:.94,side:THREE.DoubleSide});
+ const fronds=new THREE.InstancedMesh(frondGeo,frondMat,palmCount*frondsPerPalm),palmDummy=new THREE.Object3D();
+ const greens=['#285d39','#397747','#4b8750','#5b9255'];
+ let ringIndex=0,frondIndex=0;
+ for(let i=0;i<palmCount;i++){
+  const sample=pointAt((i+.2)/palmCount*length),side=i%2?1:-1,dist=ROAD/2+25+(i%6)*8.2;
+  const x=sample.p.x+sample.side.x*dist*side,z=sample.p.z+sample.side.z*dist*side,yaw=(i*2.399)%6.283,h=5.4+(i%5)*.3;
+  palmDummy.position.set(x,h/2-.12,z);palmDummy.rotation.set(0,yaw,0);palmDummy.scale.set(1,h/5.4,1);palmDummy.updateMatrix();trunks.setMatrixAt(i,palmDummy.matrix);
+  for(let j=0;j<7;j++){
+   palmDummy.position.set(x,.25+j*.73,z);palmDummy.rotation.set(Math.PI/2,0,0);palmDummy.scale.set(1-j*.025,1-j*.025,1-j*.025);palmDummy.updateMatrix();rings.setMatrixAt(ringIndex++,palmDummy.matrix);
+  }
+  for(let j=0;j<frondsPerPalm;j++){
+   const angle=j*Math.PI*2/frondsPerPalm+(i%5)*.17;
+   palmDummy.position.set(x,h-.05,z);palmDummy.rotation.set(.06*Math.sin(j),yaw+angle,0);palmDummy.scale.set(1,1+(j%3)*.035,1);palmDummy.updateMatrix();fronds.setMatrixAt(frondIndex,palmDummy.matrix);fronds.setColorAt(frondIndex,new THREE.Color(greens[(i+j)%greens.length]));frondIndex++;
+  }
+ }
+ trunks.instanceMatrix.needsUpdate=true;rings.instanceMatrix.needsUpdate=true;fronds.instanceMatrix.needsUpdate=true;if(fronds.instanceColor)fronds.instanceColor.needsUpdate=true;
+ trunks.castShadow=true;fronds.castShadow=false;scene.add(trunks,rings,fronds);
+ for(let i=0;i<48;i++){
+  const sample=pointAt(i/48*length),side=i%2?1:-1,dist=ROAD/2+18+(i%5)*11;
+  const x=sample.p.x+sample.side.x*dist*side,z=sample.p.z+sample.side.z*dist*side;
+  const rock=new THREE.Mesh(makeRockGeometry(),new THREE.MeshStandardMaterial({color:i%3?'#938873':'#aaa08a',roughness:.96}));
+  rock.position.set(x,1.2+(i%3)*.16,z);rock.scale.set(5+(i%4)*2.2,3.2+(i%3)*1.1,4.2+(i%4)*1.8);rock.rotation.y=i*1.73;rock.castShadow=true;rock.receiveShadow=true;scene.add(rock);
  }
 }
 let v=[],idx=[],uv=[];const seg=900;
