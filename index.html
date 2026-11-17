@@ -2083,14 +2083,23 @@ if(prefs.track==='coast'){
   let nearest=terrainSamples[0],best=Infinity;
   for(const sample of terrainSamples){const dx=x-sample.p.x,dz=z-sample.p.z,d=dx*dx+dz*dz;if(d<best){best=d;nearest=sample}}
   const dist=Math.sqrt(best);
-  // On Rocky Pass keep the soil mesh clearly below the asphalt corridor.
-  // The road is its own continuous surface; terrain must never z-fight or show through it.
-  const roadClearance=ROAD/2+21;
-  const t=prefs.track==='forest'?clamp((dist-roadClearance)/48,0,1):clamp((dist-8)/78,0,1);
-  const blend=1-t*t*(3-2*t);
-  const base=prefs.track==='forest'?mix(-18,nearest.p.y,blend):-.18;
-  const fadeT=clamp((dist-(ROAD/2+7))/78,0,1),fade=fadeT*fadeT*(3-2*fadeT);
-  const amp=prefs.track==='forest'?4.2:prefs.track==='coast'?2.4:1.15;
+  // Rocky Pass: keep the ground just below the asphalt at the road edge,
+  // then let it fall away gradually into the alpine shoulders. This gives the
+  // raised road a continuous terrain foundation without letting ground triangles
+  // poke through the asphalt.
+  let base;
+  if(prefs.track==='forest'){
+   const roadEdge=ROAD/2+1.1;
+   const slopeT=clamp((dist-roadEdge)/38,0,1);
+   const slope=slopeT*slopeT*(3-2*slopeT);
+   base=nearest.p.y-.42-5.5*slope;
+  }else{
+   base=-.18;
+  }
+  const fadeStart=prefs.track==='forest'?ROAD/2+1.1:ROAD/2+7;
+  const fadeRange=prefs.track==='forest'?58:78;
+  const fadeT=clamp((dist-fadeStart)/fadeRange,0,1),fade=fadeT*fadeT*(3-2*fadeT);
+  const amp=prefs.track==='forest'?3.2:prefs.track==='coast'?2.4:1.15;
   const rolling=amp*(.52*Math.sin(x*.021+Math.sin(z*.013)*1.7)*Math.cos(z*.018-x*.009)+.28*Math.sin((x+z)*.047)+.2*Math.cos(x*.038-z*.029));
   return base+rolling*fade;
  };
@@ -2106,7 +2115,7 @@ if(prefs.track==='coast'){
   }
   p.needsUpdate=true;terrainGeo.computeVertexNormals();
  }
- const groundMaps=makeSurfaceMaps(prefs.track==='desert'?'sand':prefs.track==='forest'?'soil':'vegetation',prefs.track==='desert'?11:13);const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,normalMap:groundMaps.normalMap,roughnessMap:groundMaps.roughnessMap,roughness:.97}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=false;ground.castShadow=false;ground.visible=prefs.track!=='forest';scene.add(ground);
+ const groundMaps=makeSurfaceMaps(prefs.track==='desert'?'sand':prefs.track==='forest'?'soil':'vegetation',prefs.track==='desert'?11:13);const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,normalMap:groundMaps.normalMap,roughnessMap:groundMaps.roughnessMap,roughness:.97}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=false;ground.castShadow=false;ground.visible=true;scene.add(ground);
  if(prefs.track==='coast'){
   const shoreGeo=new THREE.PlaneGeometry(1000,1000,190,190),sp=shoreGeo.attributes.position;
   for(let i=0;i<sp.count;i++){const x=sp.getX(i),z=-sp.getY(i),r=Math.hypot(x,z),a=Math.atan2(z,x),shoreR=280+17*Math.sin(a*3+.4)+11*Math.sin(a*7-1.1),inner=shoreR-38,t=clamp((r-inner)/38,0,1),beach=t*t*(3-2*t),outer=clamp((r-shoreR)/25,0,1),drop=outer*outer*(3-2*outer);sp.setZ(i,mix(-.27,-.095,beach)-.34*drop)}
