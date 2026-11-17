@@ -1297,6 +1297,28 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 @media(max-width:680px){
  #menu .track-card span{left:6px!important;bottom:7px!important;font-size:clamp(7px,2.35vw,10px)!important;letter-spacing:.04em!important}
 }
+
+/* Clear full-spectrum color controls in the garage */
+#panel-garage .garage-color-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important}
+#panel-garage .garage-color-picker{position:relative!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;justify-content:flex-start!important;gap:5px!important;min-width:0!important;padding:0!important;cursor:pointer!important}
+#panel-garage .garage-color-caption{font-size:9px!important;font-weight:950!important;letter-spacing:.12em!important;color:#f0bd69!important}
+#panel-garage .garage-color-face{display:flex!important;align-items:center!important;gap:7px!important;min-width:0!important;min-height:45px!important;padding:7px!important;border:1px solid #eeb96b80!important;border-radius:9px!important;background:linear-gradient(135deg,#263944,#14212b)!important}
+#panel-garage .garage-color-face>i{display:block!important;flex:0 0 25px!important;width:25px!important;height:25px!important;border:2px solid #ffffffb0!important;border-radius:7px!important;box-shadow:0 1px 8px #0008!important}
+#panel-garage .garage-color-face>span{display:flex!important;flex:1!important;flex-direction:column!important;gap:2px!important;min-width:0!important}
+#panel-garage .garage-color-face b{font-size:clamp(7px,1.8vw,10px)!important;line-height:1.15!important;color:#fff!important;letter-spacing:.025em!important}
+#panel-garage .garage-color-face small{font-size:8px!important;line-height:1.1!important;color:#c4d0d5!important}
+#panel-garage .garage-color-face>strong{font-size:15px!important;color:#f0bd69!important}
+#panel-garage .garage-color-picker input[type=color]{position:absolute!important;inset:15px 0 0!important;width:100%!important;height:45px!important;opacity:0!important;cursor:pointer!important;z-index:2!important}
+#panel-garage .garage-swatches-heading{margin-top:9px!important;font-size:8px!important;font-weight:900!important;letter-spacing:.12em!important;color:#aebdc3!important}
+#panel-garage .garage-swatches{margin-top:6px!important}
+@media(max-width:520px){
+ #panel-garage .garage-color-face{gap:5px!important;padding:6px!important;min-height:42px!important}
+ #panel-garage .garage-color-face>i{flex-basis:21px!important;width:21px!important;height:21px!important}
+ #panel-garage .garage-color-face b{font-size:7px!important}
+ #panel-garage .garage-color-face small{font-size:7px!important}
+ #panel-garage .garage-swatches-heading{font-size:7px!important}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -1314,10 +1336,11 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
  </div>
  <div class="garage-toolbar">
   <div class="garage-customize">
-   <div class="garage-color-row">
-    <label>КУЗОВ <input id="paint" type="color" value="#dba14e"></label>
-    <label>ДИСКИ <input id="rimPaint" type="color" value="#9da6aa"></label>
+   <div class="garage-color-row garage-color-actions">
+    <label class="garage-color-picker"><span class="garage-color-caption">ЦВЕТ КУЗОВА</span><span class="garage-color-face"><i id="paintPreview" style="background:#dba14e"></i><span><b>ВЫБРАТЬ ЛЮБОЙ ЦВЕТ</b><small>Полная палитра оттенков</small></span><strong>✎</strong></span><input id="paint" type="color" value="#dba14e" aria-label="Выбрать любой цвет кузова"></label>
+    <label class="garage-color-picker"><span class="garage-color-caption">ЦВЕТ ДИСКОВ</span><span class="garage-color-face"><i id="rimPreview" style="background:#9da6aa"></i><span><b>ВЫБРАТЬ ЛЮБОЙ ЦВЕТ</b><small>Полная палитра оттенков</small></span><strong>✎</strong></span><input id="rimPaint" type="color" value="#9da6aa" aria-label="Выбрать любой цвет дисков"></label>
    </div>
+   <div class="garage-swatches-heading">БЫСТРЫЕ ГОТОВЫЕ ОТТЕНКИ</div>
    <div class="garage-swatches" aria-label="Быстрые цвета">
     <button class="swatch" data-paint="#dba14e" style="background:#dba14e" aria-label="Золотой кузов" aria-pressed="true"></button>
     <button class="swatch" data-paint="#d83232" style="background:#d83232" aria-label="Красный кузов"></button>
@@ -2350,7 +2373,7 @@ $('again').onclick=async()=>{
 };
 $('home').onclick=returnToGarage;
 function saveGarage(){prefs.paint=$('paint').value;prefs.rim=$('rimPaint').value;localStorage.setItem('autosport-garage',JSON.stringify(prefs));applyGarage()}
-$('paint').addEventListener('input',()=>{document.querySelectorAll('[data-paint]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paint===$('paint').value)));saveGarage()});$('rimPaint').addEventListener('input',()=>{document.querySelectorAll('[data-rim]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rim===$('rimPaint').value)));saveGarage()});document.querySelectorAll('[data-paint]').forEach(b=>b.addEventListener('click',()=>{$('paint').value=b.dataset.paint;saveGarage();document.querySelectorAll('[data-paint]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('[data-rim]').forEach(b=>b.addEventListener('click',()=>{$('rimPaint').value=b.dataset.rim;saveGarage();document.querySelectorAll('[data-rim]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{const index=championshipTracks.indexOf(b.dataset.track),stage=Math.min(2,save.races);if(index<0||(selectedReplayLeague===null&&index>stage))return;prefs.track=b.dataset.track;replayMode=selectedReplayLeague!==null||index<save.races;document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updateMenuStats()}));
+$('paint').addEventListener('input',()=>{$('paintPreview').style.background=$('paint').value;document.querySelectorAll('[data-paint]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.paint===$('paint').value)));saveGarage()});$('rimPaint').addEventListener('input',()=>{$('rimPreview').style.background=$('rimPaint').value;document.querySelectorAll('[data-rim]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.rim===$('rimPaint').value)));saveGarage()});document.querySelectorAll('[data-paint]').forEach(b=>b.addEventListener('click',()=>{$('paint').value=b.dataset.paint;saveGarage();document.querySelectorAll('[data-paint]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('[data-rim]').forEach(b=>b.addEventListener('click',()=>{$('rimPaint').value=b.dataset.rim;saveGarage();document.querySelectorAll('[data-rim]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))}));document.querySelectorAll('.track-card').forEach(b=>b.addEventListener('click',()=>{const index=championshipTracks.indexOf(b.dataset.track),stage=Math.min(2,save.races);if(index<0||(selectedReplayLeague===null&&index>stage))return;prefs.track=b.dataset.track;replayMode=selectedReplayLeague!==null||index<save.races;document.querySelectorAll('.track-card').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));updateMenuStats()}));
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
 function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150;if(level>=8){$('mission').textContent='Максимальный уровень этой детали уже установлен.';return}if(save.credits<cost){$('mission').textContent='Не хватает '+(cost-save.credits)+' токенов. Займи место выше и заработай больше.';return}save.credits-=cost;prefs[key]=level+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'!';updateUpgradeLabels()}
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
