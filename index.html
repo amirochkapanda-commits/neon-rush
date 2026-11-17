@@ -2100,7 +2100,11 @@ function update(dt){
   // over time instead of snapping to a constant sideways velocity.
   const gripLevel=clamp(Number(prefs.grip)||0,0,8);
   const absSpeed=Math.abs(speed);
-  const turnRate=.62+Math.min(absSpeed,48)*.016;
+  // Steering response is part of the tyre upgrade: stock tyres feel calmer,
+  // while each sports-tyre level makes the front end respond more eagerly.
+  const stockTurnRate=.58+Math.min(absSpeed,48)*.014;
+  const tyreSteeringBonus=1+gripLevel*.035;
+  const turnRate=stockTurnRate*tyreSteeringBonus;
   const driftStart=24+gripLevel*1.35;
   const driftFull=34+gripLevel*1.15;
   const speedFactor=clamp((absSpeed-driftStart)/(driftFull-driftStart),0,1);
