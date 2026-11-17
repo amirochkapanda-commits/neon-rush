@@ -2106,7 +2106,7 @@ if(prefs.track==='coast'){
   }
   p.needsUpdate=true;terrainGeo.computeVertexNormals();
  }
- const groundMaps=makeSurfaceMaps(prefs.track==='desert'?'sand':prefs.track==='forest'?'soil':'vegetation',prefs.track==='desert'?11:13);const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,normalMap:groundMaps.normalMap,roughnessMap:groundMaps.roughnessMap,roughness:.97}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=prefs.track!=='forest';ground.castShadow=false;scene.add(ground);
+ const groundMaps=makeSurfaceMaps(prefs.track==='desert'?'sand':prefs.track==='forest'?'soil':'vegetation',prefs.track==='desert'?11:13);const ground=new THREE.Mesh(terrainGeo,new THREE.MeshStandardMaterial({color:'#ffffff',map:terrainTex,normalMap:groundMaps.normalMap,roughnessMap:groundMaps.roughnessMap,roughness:.97}));ground.rotation.x=-Math.PI/2;ground.position.y=0;ground.receiveShadow=false;ground.castShadow=false;ground.visible=prefs.track!=='forest';scene.add(ground);
  if(prefs.track==='coast'){
   const shoreGeo=new THREE.PlaneGeometry(1000,1000,190,190),sp=shoreGeo.attributes.position;
   for(let i=0;i<sp.count;i++){const x=sp.getX(i),z=-sp.getY(i),r=Math.hypot(x,z),a=Math.atan2(z,x),shoreR=280+17*Math.sin(a*3+.4)+11*Math.sin(a*7-1.1),inner=shoreR-38,t=clamp((r-inner)/38,0,1),beach=t*t*(3-2*t),outer=clamp((r-shoreR)/25,0,1),drop=outer*outer*(3-2*outer);sp.setZ(i,mix(-.27,-.095,beach)-.34*drop)}
