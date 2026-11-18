@@ -2531,7 +2531,7 @@ function update(dt){
   steer=steerInput;
   // Gas and reverse are separate commands. Reverse first brakes to zero,
   // then engages a controlled reverse gear.
-  const accel=9.5+prefs.engine*1.15,maxV=42+(10/3.6)+prefs.engine*3.8,reverseMax=13;
+  const accel=9.5+prefs.engine*1.15,maxV=42+(15/3.6)+prefs.engine*3.8,reverseMax=13;
   if(held.gas){
     if(speed<0)speed=Math.min(0,speed+22*dt);
     else speed=Math.min(maxV,speed+accel*dt);
