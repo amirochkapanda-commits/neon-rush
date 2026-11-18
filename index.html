@@ -1338,6 +1338,72 @@ body.portrait-mode .ctrl{width:clamp(60px,17vw,78px);height:clamp(64px,17vw,82px
 }
 /* The two full-spectrum pickers are the only color controls. */
 #panel-garage .garage-swatches,#panel-garage .garage-swatches-heading{display:none!important}
+
+/* iOS Home Screen / PWA viewport stabilizer.
+   The visual viewport may settle after the first orientation change. */
+:root{--app-width:100vw;--app-height:100dvh}
+html,body{width:100%!important;height:var(--app-height)!important;min-height:var(--app-height)!important}
+#stage,#hud,.screen,#menu,#result,#game-loader,#league-modal{width:var(--app-width)!important;height:var(--app-height)!important;min-height:0!important}
+#stage{inset:0!important}
+#menu{inset:0!important;overflow:hidden!important}
+#menu>.card{max-height:var(--app-height)!important}
+#result{
+ inset:0!important;overflow-y:auto!important;overscroll-behavior:contain;
+ padding-top:max(8px,env(safe-area-inset-top))!important;
+ padding-bottom:max(8px,env(safe-area-inset-bottom))!important
+}
+#result>.card{
+ flex:0 1 auto!important;max-height:calc(var(--app-height) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px)!important;
+ overflow-y:auto!important;overscroll-behavior:contain
+}
+#league-modal{inset:0!important;overflow-y:auto!important}
+#league-modal .league-modal-card{max-height:calc(var(--app-height) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 24px)!important}
+#hud{inset:0!important;overflow:hidden!important}
+@media (orientation:landscape) and (max-height:560px){
+ #menu{align-items:stretch!important;justify-content:stretch!important}
+ #menu>.card{
+  width:100%!important;height:var(--app-height)!important;max-height:var(--app-height)!important;min-height:0!important;
+  grid-template-rows:min-content min-content minmax(0,1fr)!important;
+  padding:max(7px,env(safe-area-inset-top)) max(15px,env(safe-area-inset-right)) max(7px,env(safe-area-inset-bottom)) max(15px,env(safe-area-inset-left))!important;
+  overflow:hidden!important
+ }
+ #menu .brand{font-size:clamp(24px,6vh,37px)!important}
+ #menu .tag{margin:2px 0 6px!important;font-size:7px!important}
+ #menu .tabs{margin:0!important;gap:3px!important}
+ #menu .tab{min-height:34px!important;padding:4px 7px!important}
+ #menu .panel{min-height:0!important;max-height:100%!important}
+ #panel-race.active{
+  height:100%!important;min-height:0!important;
+  grid-template-columns:minmax(0,1.1fr) minmax(250px,.9fr)!important;
+  grid-template-rows:min-content minmax(0,1fr) min-content min-content min-content!important;
+  grid-template-areas:"heading league" "tracks mission" "tracks stats" "tracks start" "tracks status"!important;
+  column-gap:clamp(12px,2.3vw,28px)!important;row-gap:clamp(3px,.8vh,6px)!important;
+  align-content:stretch!important;align-items:stretch!important;overflow:visible!important
+ }
+ #panel-race>.section-title{grid-area:heading!important;align-self:center!important;margin:0!important;font-size:9px!important}
+ #panel-race>.track-picker{
+  grid-area:tracks!important;grid-row:2/6!important;grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:repeat(3,minmax(0,1fr))!important;gap:5px!important;height:100%!important;min-height:0!important
+ }
+ #menu .track-card{height:100%!important;min-height:0!important}
+ #panel-race>.league-chip{grid-area:league!important;align-self:center!important;min-height:29px!important;padding:5px 8px!important;font-size:8px!important}
+ #panel-race>.mission{grid-area:mission!important;align-self:stretch!important;min-height:0!important;padding:5px 8px!important;font-size:8px!important;line-height:1.3!important}
+ #panel-race>.menu-stats{grid-area:stats!important;align-self:stretch!important;padding:4px 3px!important}
+ #panel-race>#start{grid-area:start!important;align-self:stretch!important;min-height:31px!important;padding:5px 7px!important;font-size:9px!important}
+ #panel-race>#status{grid-area:status!important;align-self:center!important;min-height:8px!important;font-size:7px!important}
+ #panel-garage.active{height:100%!important;min-height:0!important;overflow:hidden!important;grid-template-rows:minmax(0,1fr) auto!important;gap:6px!important}
+ #panel-garage .garage-showroom{height:100%!important;min-height:0!important;flex:1 1 auto!important}
+ #garage-view{height:100%!important;min-height:0!important;flex:1 1 auto!important}
+ #panel-garage .garage-toolbar{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)!important;gap:6px!important;min-height:0!important}
+ #panel-garage .garage-customize,#panel-garage .garage-upgrades{padding:5px 7px!important}
+ #panel-garage .garage-color-open{padding:5px 6px!important;gap:5px!important}
+ #panel-garage .garage-color-open>i{width:21px!important;height:21px!important;flex-basis:21px!important}
+ #panel-garage .garage-color-open b,#panel-garage .garage-color-open small{font-size:7px!important}
+ #panel-garage .garage-upgrades{gap:5px!important}
+ #panel-garage .garage-upgrade-head,#panel-garage .garage-upgrade-head b{font-size:7px!important}
+ #panel-garage .garage-upgrade-item .upgrade-buy{min-height:24px!important;padding:3px!important;font-size:7px!important}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -1909,7 +1975,7 @@ function applyGarage(){
 }
 function updateGarageCamera(){
  if(!garageCamera)return;
- const portrait=innerHeight>innerWidth;const radius=portrait?8.4:7.15,polar=clamp(garageOrbitElevation,.12,1.62),horizontal=radius*Math.sin(polar);
+ const portrait=isPortraitViewport();const radius=portrait?8.4:7.15,polar=clamp(garageOrbitElevation,.12,1.62),horizontal=radius*Math.sin(polar);
  garageCamera.position.set(Math.sin(garageOrbitAzimuth)*horizontal,radius*Math.cos(polar)+.68,Math.cos(garageOrbitAzimuth)*horizontal);
  garageCamera.lookAt(0,.68,0);
 }
@@ -2010,8 +2076,8 @@ function buildWorldCore(){setLoadProgress(72,'СОЗДАНИЕ ИГРОВОГО 
  const cloudTexture=new THREE.CanvasTexture(cloudCanvas);cloudTexture.colorSpace=THREE.SRGBColorSpace;
  const skyMat=new THREE.ShaderMaterial({side:THREE.BackSide,depthWrite:false,uniforms:{topColor:{value:new THREE.Color(prefs.track==='desert'?'#42617c':prefs.track==='forest'?'#344b62':'#397a9b')},horizonColor:{value:new THREE.Color(prefs.track==='desert'?'#e9bd83':prefs.track==='forest'?'#aab8bd':'#d6c7a5')},cloudTexture:{value:cloudTexture}},vertexShader:'varying vec3 vWorld; void main(){vec4 p=modelMatrix*vec4(position,1.0);vWorld=p.xyz;gl_Position=projectionMatrix*viewMatrix*p;}',fragmentShader:'uniform vec3 topColor;uniform vec3 horizonColor;uniform sampler2D cloudTexture;varying vec3 vWorld;void main(){vec3 n=normalize(vWorld);float h=clamp(n.y,0.0,1.0);float t=smoothstep(0.02,0.72,h);vec3 sky=mix(horizonColor,topColor,t);vec2 uv=vec2(atan(n.z,n.x)/6.2831853+0.5,asin(clamp(n.y,-1.0,1.0))/3.1415926+0.5);vec4 cloud=texture2D(cloudTexture,uv);float mask=cloud.a*smoothstep(0.04,0.25,h)*(1.0-smoothstep(0.72,0.94,h));sky=mix(sky,vec3(0.91,0.94,0.96),mask*0.58);gl_FragColor=vec4(sky,1.0);}'});
  const sky=new THREE.Mesh(skyGeo,skyMat);sky.renderOrder=-10;scene.add(sky);
- const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);camera=new THREE.PerspectiveCamera(innerHeight>innerWidth?72:65,innerWidth/innerHeight,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
-renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});basePixelRatio=Math.min(devicePixelRatio||1,mobileQuality?1.85:2.0);adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(innerWidth,innerHeight);
+ const sunDisc=new THREE.Mesh(new THREE.SphereGeometry(7,24,16),new THREE.MeshBasicMaterial({color:prefs.track==='desert'?'#ffe0a0':'#fff0c8'}));sunDisc.position.set(-155,118,-250);scene.add(sunDisc);const viewport=getAppViewport();camera=new THREE.PerspectiveCamera(viewport.height>viewport.width?72:65,viewport.width/viewport.height,.1,800);cameraAim=new THREE.PerspectiveCamera(65,1,.1,800);mobileQuality=matchMedia('(max-width: 760px), (pointer: coarse)').matches;
+renderer=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance',stencil:false,depth:true});basePixelRatio=Math.min(devicePixelRatio||1,mobileQuality?1.85:2.0);adaptiveScale=1;renderer.setPixelRatio(basePixelRatio);renderer.setSize(viewport.width,viewport.height);
 renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.info.autoReset=true;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.22;renderer.outputColorSpace=THREE.SRGBColorSpace;
 $('stage').replaceChildren(renderer.domElement);
@@ -2054,12 +2120,12 @@ const fill=new THREE.DirectionalLight(prefs.track==='desert'?'#f5d8a5':'#a9c9e8'
  atmosphereLights={sun,fill,hemi,skyMat,sunDisc,roadMaterial:null,baseFogNear:prefs.track==='desert'?250:prefs.track==='forest'?155:145,baseFogFar:prefs.track==='desert'?640:prefs.track==='forest'?470:430,track:prefs.track};
  // Screen-space ambient occlusion and restrained cinematic bloom.
  try{
- const renderTarget=new THREE.WebGLRenderTarget(innerWidth,innerHeight,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false});
- composer=new EffectComposer(renderer,renderTarget);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(innerWidth,innerHeight);
+ const renderTarget=new THREE.WebGLRenderTarget(viewport.width,viewport.height,{type:THREE.HalfFloatType,depthBuffer:true,stencilBuffer:false});
+ composer=new EffectComposer(renderer,renderTarget);composer.setPixelRatio(renderer.getPixelRatio());composer.setSize(viewport.width,viewport.height);
  composer.addPass(new RenderPass(scene,camera));
- ssaoPass=new SSAOPass(scene,camera,innerWidth,innerHeight);ssaoPass.kernelRadius=mobileQuality?3:6;ssaoPass.minDistance=.004;ssaoPass.maxDistance=.12;ssaoPass.enabled=!mobileQuality;composer.addPass(ssaoPass);
+ ssaoPass=new SSAOPass(scene,camera,viewport.width,viewport.height);ssaoPass.kernelRadius=mobileQuality?3:6;ssaoPass.minDistance=.004;ssaoPass.maxDistance=.12;ssaoPass.enabled=!mobileQuality;composer.addPass(ssaoPass);
  ssaoPass.output=SSAOPass.OUTPUT.Default;
- bloomPass=new UnrealBloomPass(new THREE.Vector2(innerWidth,innerHeight),mobileQuality?.2:.3,.32,.88);composer.addPass(bloomPass);
+ bloomPass=new UnrealBloomPass(new THREE.Vector2(viewport.width,viewport.height),mobileQuality?.2:.3,.32,.88);composer.addPass(bloomPass);
  composer.addPass(new OutputPass());
 }catch(postError){
  console.warn('AUTOSPORT: post-processing disabled; using direct renderer',postError);
@@ -2342,10 +2408,60 @@ function updateRaceShadowAnchor(){
  light.target.updateMatrixWorld(true);
  light.updateMatrixWorld(true);
 }
-function cameraUpdate(dt){const portrait=innerHeight>innerWidth;const followDistance=portrait?14.2:11,cameraHeight=portrait?6.4:5.3,lookAhead=portrait?10:8;let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*followDistance,player.position.y+cameraHeight,player.position.z-fz*followDistance),lookTarget=new THREE.Vector3(player.position.x+fx*lookAhead,player.position.y+1.1,player.position.z+fz*lookAhead);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
+function cameraUpdate(dt){const portrait=isPortraitViewport();const followDistance=portrait?14.2:11,cameraHeight=portrait?6.4:5.3,lookAhead=portrait?10:8;let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*followDistance,player.position.y+cameraHeight,player.position.z-fz*followDistance),lookTarget=new THREE.Vector3(player.position.x+fx*lookAhead,player.position.y+1.1,player.position.z+fz*lookAhead);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
-let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.96:.90;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale;renderer.setPixelRatio(ratio);renderer.setSize(innerWidth,innerHeight);composer.setPixelRatio(ratio);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);try{let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}catch(error){cancelAnimationFrame(raf);raf=0;showGameError(error,'ЦИКЛ РЕНДЕРА')}}
-function initRaceMap(){mapCanvas=$('race-map-canvas');mapCtx=mapCanvas?mapCanvas.getContext('2d'):null}function resizeWeatherCanvas(){if(!weatherCanvas)return;weatherCanvas.width=innerWidth;weatherCanvas.height=innerHeight}
+let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.96:.90;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale,view=getAppViewport();renderer.setPixelRatio(ratio);renderer.setSize(view.width,view.height);composer.setPixelRatio(ratio);composer.setSize(view.width,view.height);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);try{let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}catch(error){cancelAnimationFrame(raf);raf=0;showGameError(error,'ЦИКЛ РЕНДЕРА')}}
+function initRaceMap(){mapCanvas=$('race-map-canvas');mapCtx=mapCanvas?mapCanvas.getContext('2d'):null}function getAppViewport(){
+ const vv=window.visualViewport,root=document.documentElement;
+ const width=Math.max(1,Math.round(vv&&vv.width>0?vv.width:(root.clientWidth||window.innerWidth||1)));
+ const height=Math.max(1,Math.round(vv&&vv.height>0?vv.height:(root.clientHeight||window.innerHeight||1)));
+ return {width,height};
+}
+function isPortraitViewport(){const v=getAppViewport();return v.height>v.width}
+function resizeWeatherCanvas(width,height){
+ if(!weatherCanvas)return;
+ const v=width&&height?{width,height}:getAppViewport();
+ if(weatherCanvas.width!==v.width)weatherCanvas.width=v.width;
+ if(weatherCanvas.height!==v.height)weatherCanvas.height=v.height;
+}
+function syncAppViewport(){
+ const v=getAppViewport(),root=document.documentElement;
+ root.style.setProperty('--app-width',v.width+'px');
+ root.style.setProperty('--app-height',v.height+'px');
+ document.body.classList.toggle('portrait-mode',v.height>v.width);
+ if(camera&&renderer){
+  camera.aspect=v.width/v.height;
+  camera.fov=v.height>v.width?72:65;
+  camera.updateProjectionMatrix();
+  renderer.setSize(v.width,v.height);
+  if(composer){
+   composer.setPixelRatio(basePixelRatio*adaptiveScale);
+   composer.setSize(v.width,v.height);
+   composer.__adaptiveScale=adaptiveScale;
+  }
+ }
+ resizeWeatherCanvas(v.width,v.height);
+ if(garageRenderer&&garageScene&&garageCamera)renderGaragePreview();
+}
+let appViewportTimerA=0,appViewportTimerB=0;
+function scheduleAppViewportSync(){
+ requestAnimationFrame(syncAppViewport);
+ clearTimeout(appViewportTimerA);clearTimeout(appViewportTimerB);
+ appViewportTimerA=setTimeout(syncAppViewport,120);
+ appViewportTimerB=setTimeout(syncAppViewport,360);
+}
+window.addEventListener('resize',scheduleAppViewportSync,{passive:true});
+window.addEventListener('orientationchange',scheduleAppViewportSync,{passive:true});
+window.addEventListener('pageshow',scheduleAppViewportSync,{passive:true});
+window.addEventListener('focus',scheduleAppViewportSync,{passive:true});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)scheduleAppViewportSync()});
+if(window.visualViewport){
+ window.visualViewport.addEventListener('resize',scheduleAppViewportSync,{passive:true});
+ window.visualViewport.addEventListener('scroll',scheduleAppViewportSync,{passive:true});
+}
+syncAppViewport();
+requestAnimationFrame(syncAppViewport);
+scheduleAppViewportSync();
 function updateAtmosphereVisuals(dt){
  if(!atmosphereLights||!weatherCtx||!weatherCanvas)return;
  const a=atmosphereLights;
@@ -2656,7 +2772,7 @@ const garagePaletteModal=$('garagePaletteModal');document.body.appendChild(garag
 $('engineUpgrade').onclick=()=>buyUpgrade('engine');$('gripUpgrade').onclick=()=>buyUpgrade('grip');
 function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150;if(level>=8){$('mission').textContent='Максимальный уровень этой детали уже установлен.';return}if(save.credits<cost){$('mission').textContent='Не хватает '+(cost-save.credits)+' токенов. Займи место выше и заработай больше.';return}save.credits-=cost;prefs[key]=level+1;localStorage.setItem('autosport-career',JSON.stringify(save));localStorage.setItem('autosport-garage',JSON.stringify(prefs));updateMenuStats();$('mission').textContent=(key==='engine'?'Двигатель':'Шины')+' улучшены до уровня '+prefs[key]+'!';updateUpgradeLabels()}
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
-addEventListener('resize',()=>{document.body.classList.toggle('portrait-mode',innerHeight>innerWidth);if(camera&&renderer){camera.aspect=innerWidth/innerHeight;camera.fov=innerHeight>innerWidth?72:65;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);if(composer){composer.setPixelRatio(basePixelRatio*adaptiveScale);composer.setSize(innerWidth,innerHeight);composer.__adaptiveScale=adaptiveScale}resizeWeatherCanvas()}});document.body.classList.toggle('portrait-mode',innerHeight>innerWidth);
+syncAppViewport();
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
 updateMenuStats();updateUpgradeLabels();buildWorld().then(ok=>{if(ok)hideGameLoader();else $('status').textContent='Не удалось загрузить игру. Обнови страницу.'})
 </script></body></html>
