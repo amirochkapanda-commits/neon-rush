@@ -1575,7 +1575,9 @@ const currentStage=Math.min(2,save.races);if(!championshipTracks.includes(prefs.
 let scene,camera,cameraAim,renderer,garageRenderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,garageScene,garageCamera,garageCar,garagePaintMat,garageRimMat,garageDragging=false,garageDragPoint=null,garagePointerId=null,garageOrbitAzimuth=.82,garageOrbitElevation=1.05,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,lateralSpeed=0,driftAmount=0,collisionFlash=0,boundaryHit=0,basePixelRatio=1,adaptiveScale=1,mobileQuality=false,mapCanvas=null,mapCtx=null,mapClock=0;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=22.5;
 const BOT_STARTS=[{d:11,side:-6.3},{d:11,side:0},{d:11,side:6.3},{d:20,side:-6.3},{d:20,side:0},{d:20,side:6.3},{d:29,side:0}];
 const BOT_COLORS=['#d34e43','#e6e9e8','#4388b9','#e0a34f','#71a9a0','#b5a7dc','#d978a0'];
-const BOT_SPEED_OFFSETS=[-1.4,-.7,.7,-1.1,-.3,.3,1.0];
+const BOT_LANES=[-7.5,-2.5,2.5,7.5];
+const BOT_LEAGUE_SPEED_KMH=[162,186,212,240,270];
+const BOT_SPEED_SPREAD=.075;
  const routes={
 coast:{bg:'#a6c7d2',fog:'#a6c7d2',ground:'#668b61',points:[[94.5,4.2],[82.7,40.8],[51.4,67.7],[15.2,71.3],[-23.6,75.9],[-62,59.6],[-92.80,34.75],[-85.3,-4.2],[-75.4,-40.8],[-53.6,-67.7],[-16.1,-79.3],[25.2,-75.9],[57.1,-59.6],[77.8,-31.8]],trees:'#39764b'},
 forest:{bg:'#8d9ba2',fog:'#8d9ba2',ground:'#555b5d',points:[[96.5,17.7],[78.5,49.8],[49.6,72.7],[17.1,83],[-17.6,81.1],[-52,68.7],[-87.35,54.50],[-91.4,16.7],[-83.8,-17.7],[-74.1,-49.8],[-52,-72.7],[-18.1,-83],[19,-81.1],[50.8,-68.7],[70.9,-46.8],[89.2,-16.7]],trees:'#28533a'},
@@ -1784,10 +1786,36 @@ function carContact(a,b){
 function syncBotPosition(a){
  let bestD=a.d,bestDist=Infinity,bestSample=null;
  for(let k=-12;k<=12;k++){const d=a.d+k*.25,s=pointAt(d),x=a.car.position.x-s.p.x,z=a.car.position.z-s.p.z,dist=x*x+z*z;if(dist<bestDist){bestDist=dist;bestD=d;bestSample=s}}
- if(bestSample){a.d=bestD;const x=a.car.position.x-bestSample.p.x,z=a.car.position.z-bestSample.p.z;a.side=clamp(x*bestSample.side.x+z*bestSample.side.z,-4.2,4.2);place(a.car,a.d,a.side)}
+ if(bestSample){a.d=bestD;const x=a.car.position.x-bestSample.p.x,z=a.car.position.z-bestSample.p.z;a.side=clamp(x*bestSample.side.x+z*bestSample.side.z,-9.1,9.1);place(a.car,a.d,a.side)}
 }
 // All cars keep unwrapped progress across lap boundaries. Compare absolute race distance,
 // not modulo track length, or a rival one lap behind can appear to be ahead.
+function botRandom(a){
+ a.seed=(Math.imul(a.seed,1664525)+1013904223)>>>0;
+ return a.seed/4294967296;
+}
+function planBotLane(a){
+ const route=pointAt(progress),px=player.position.x-route.p.x,pz=player.position.z-route.p.z;
+ const playerSide=px*route.side.x+pz*route.side.z;
+ let bestLane=a.side,bestScore=Infinity;
+ for(const lane of BOT_LANES){
+  let score=Math.abs(lane-a.preferredLane)*.075+Math.abs(lane-a.side)*.13+botRandom(a)*1.8;
+  const considerTraffic=(otherD,otherSide)=>{
+   const gap=otherD-a.d;
+   if(gap<=-11||gap>=34||Math.abs(otherSide-lane)>=3.5)return;
+   const closeness=1-Math.abs(otherSide-lane)/3.5;
+   const danger=gap>=0?(34-gap)/34:(11+gap)/11;
+   score+=(gap>=0?31:14)*Math.max(0,danger)*closeness;
+  };
+  considerTraffic(progress,playerSide);
+  for(const other of ai)if(other!==a)considerTraffic(other.d,other.side);
+  if(score<bestScore){bestScore=score;bestLane=lane}
+ }
+ const changed=Math.abs(bestLane-a.side)>1.25;
+ a.laneTarget=clamp(bestLane+(botRandom(a)-.5)*.42,-8.1,8.1);
+ a.planTimer=1.05+botRandom(a)*1.8;
+ if(changed)a.attackTimer=1.1+a.aggression*.55;
+}
 function currentRacePlace(){return 1+ai.filter(a=>a.d>progress+.05).length}
 function car(color,isPlayer=false){
  const root=new THREE.Group(),body=new THREE.Group();root.name=isPlayer?'player-subaru-impreza':'bot-subaru-impreza';root.add(body);
@@ -2402,7 +2430,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
  const markerCount=44,markerPost=new THREE.InstancedMesh(new THREE.CylinderGeometry(.055,.075,1.12,9),mat('#d8d9d4',.55,.18),markerCount*2),markerReflector=new THREE.InstancedMesh(new THREE.BoxGeometry(.19,.17,.045),mat('#d94a3f',.38,.22),markerCount*2),markerDummy=new THREE.Object3D();
  for(let i=0;i<markerCount;i++)for(const side of [-1,1]){const s=pointAt((i+.35)/markerCount*length),dist=ROAD/2+2.45,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,baseY=terrainHeightAt(x,z),index=i*2+(side>0?1:0),yaw=Math.atan2(s.tan.x,s.tan.z);markerDummy.position.set(x,baseY+.56,z);markerDummy.rotation.set(0,yaw,0);markerDummy.scale.set(1,1,1);markerDummy.updateMatrix();markerPost.setMatrixAt(index,markerDummy.matrix);markerDummy.position.set(x,baseY+.83,z);markerDummy.updateMatrix();markerReflector.setMatrixAt(index,markerDummy.matrix);if(markerReflector.setColorAt)markerReflector.setColorAt(index,new THREE.Color((i+Math.round(side))%3===0?'#f1c36f':'#e9e9df'))}
  markerPost.instanceMatrix.needsUpdate=true;markerReflector.instanceMatrix.needsUpdate=true;if(markerReflector.instanceColor)markerReflector.instanceColor.needsUpdate=true;markerPost.castShadow=true;scene.add(markerPost,markerReflector);
- player=car($('paint').value,true);scene.add(player);buildGaragePreview();ai=[];const botLeague=Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague));const botBaseSpeed=[142.24,165,185,220,255][botLeague]*.93/3.6;for(let i=0;i<BOT_STARTS.length;i++){const slot=BOT_STARTS[i],c=car(BOT_COLORS[i]);scene.add(c);ai.push({car:c,d:slot.d,side:slot.side,v:botBaseSpeed+BOT_SPEED_OFFSETS[i],currentSpeed:0,hit:0})}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
+ player=car($('paint').value,true);scene.add(player);buildGaragePreview();ai=[];const botLeague=Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague));const botBaseSpeed=BOT_LEAGUE_SPEED_KMH[botLeague]/3.6;for(let i=0;i<BOT_STARTS.length;i++){const slot=BOT_STARTS[i],c=car(BOT_COLORS[i]),seed=(0x51f15e+i*0x9e3779b9)>>>0;const bot={car:c,d:slot.d,side:slot.side,startSide:slot.side,v:botBaseSpeed*(1-BOT_SPEED_SPREAD/2+((seed>>>8)%1000)/1000*BOT_SPEED_SPREAD),currentSpeed:0,hit:0,seed,skill:.72+((seed>>>19)%1000)/1000*.26,aggression:.62+((seed>>>5)%1000)/1000*.38,preferredLane:BOT_LANES[i%BOT_LANES.length],laneTarget:slot.side,planTimer:.25+i*.19,paceTimer:1+i*.23,paceMood:.98+((seed>>>12)%100)/1000,attackTimer:0};bot.acceleration=11.4+bot.skill*2.7;bot.braking=17+bot.skill*7;scene.add(c);ai.push(bot)}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function updateRaceShadowAnchor(){
  if(!player||!atmosphereLights?.sun)return;
  const light=atmosphereLights.sun,x=player.position.x,y=player.position.y,z=player.position.z;
@@ -2590,16 +2618,40 @@ function update(dt){
 
   }
   collisionFlash=Math.max(0,collisionFlash-dt);
-  // Move every rival first, then resolve full-car footprint collisions.
-  // The rectangular collider covers the complete chassis and cabin/glass footprint.
+  // Every rival has an independent pace, lane choice and passing plan.
+  // Lane changes are smooth; traffic is considered ahead and behind, including the player.
   for(const a of ai){
-    const delta=((progress-a.d)%length+length)%length;
-    let target=a.v;
-    if(delta>0&&delta<18)target*=.94;
-    // Rivals launch from rest instead of instantly moving at full speed.
-    // Their launch acceleration is deliberately below the player's so they
-    // cannot rear-end the player while the player is building speed.
-    a.currentSpeed=Math.min(target,(a.currentSpeed||0)+accel*1.1*dt);
+    a.planTimer-=dt;
+    if(a.planTimer<=0)planBotLane(a);
+    const laneRate=2.15+a.aggression*1.45;
+    a.side+=clamp(a.laneTarget-a.side,-laneRate*dt,laneRate*dt);
+    a.side=clamp(a.side,-8.2,8.2);
+
+    // Small individual pace surges and dips keep the field from behaving like a train.
+    a.paceTimer-=dt;
+    if(a.paceTimer<=0){
+      a.paceMood=.975+botRandom(a)*.065;
+      a.paceTimer=1.7+botRandom(a)*2.7;
+    }
+    a.attackTimer=Math.max(0,a.attackTimer-dt);
+
+    // Read the road curvature ahead and lift slightly for tighter bends.
+    const near=pointAt(a.d+2).tan,far=pointAt(a.d+11).tan;
+    const nearLen=Math.hypot(near.x,near.z)||1,farLen=Math.hypot(far.x,far.z)||1;
+    const directionDot=clamp((near.x*far.x+near.z*far.z)/(nearLen*farLen),-1,1);
+    const bendAngle=Math.acos(directionDot);
+    const bendLoad=clamp((bendAngle-.035)/.62,0,1);
+    const cornerFactor=1-bendLoad*(.075+(1-a.skill)*.045);
+
+    let target=a.v*a.paceMood*cornerFactor;
+    if(a.attackTimer>0)target*=1.025+a.aggression*.018;
+    // Drafting gives a rival a short boost when following closely in the same lane.
+    const aheadBot=ai.some(other=>other!==a&&other.d>a.d&&other.d-a.d<17&&Math.abs(other.side-a.side)<3.1);
+    const aheadPlayer=progress>a.d&&progress-a.d<17&&Math.abs(a.side-(function(){const p=pointAt(progress),dx=player.position.x-p.p.x,dz=player.position.z-p.p.z;return dx*p.side.x+dz*p.side.z})())<3.1;
+    if(aheadBot||aheadPlayer)target*=1.028;
+
+    if(a.currentSpeed<target)a.currentSpeed=Math.min(target,a.currentSpeed+a.acceleration*dt);
+    else a.currentSpeed=Math.max(target,a.currentSpeed-a.braking*dt);
     a.d+=a.currentSpeed*dt;
     place(a.car,a.d,a.side);
     a.hit=Math.max(0,a.hit-dt);
@@ -2676,7 +2728,7 @@ function renderLeagueOptions(){const names=['НОВИЧОК','КЛУБНЫЙ','�
 function openLeaguePicker(){$('league-modal').classList.remove('hidden');renderLeagueOptions()}
 $('leagueName').addEventListener('click',openLeaguePicker);$('league-close').addEventListener('click',()=>$('league-modal').classList.add('hidden'));$('league-modal').addEventListener('click',e=>{if(e.target===$('league-modal'))$('league-modal').classList.add('hidden')});document.addEventListener('keydown',e=>{if(e.key==='Escape')$('league-modal').classList.add('hidden')});
 function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const pastLeague=selectedReplayLeague!==null,leagueIndex=pastLeague?selectedReplayLeague:save.league,stage=pastLeague?0:Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||(!pastLeague&&championshipTracks.indexOf(prefs.track)>stage))prefs.track=championshipTracks[stage];replayMode=pastLeague||championshipTracks.indexOf(prefs.track)<save.races;$('season').textContent=(stage+1)+'/3';$('points').textContent=pastLeague?'—':save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;$('leagueName').textContent='ЛИГА '+(leagueIndex+1)+' · '+names[leagueIndex]+' ▾';$('mission').textContent=pastLeague?'ПОВТОР ЛИГИ: '+names[leagueIndex]+'. Все три трассы доступны. Награды и основной прогресс не начисляются.':replayMode?'Повторный заезд: '+trackNames[championshipTracks.indexOf(prefs.track)]+'. Награды и прогресс не начисляются.':'Текущий этап '+(stage+1)+'/3: '+trackNames[stage]+'. Пройденные этапы можно повторять без наград.';document.querySelectorAll('.track-card').forEach(b=>{const index=championshipTracks.indexOf(b.dataset.track),active=b.dataset.track===prefs.track,available=pastLeague||index<=stage;b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-disabled',String(!available));b.dataset.replay=String(available&&(pastLeague||index<save.races))});$('start').textContent=replayMode?'ПОВТОРИТЬ ЗАЕЗД · БЕЗ НАГРАД ↻':'НАЧАТЬ ГОНКУ →';updateUpgradeLabels();renderLeagueOptions()}
-function start(){activeRaceReplay=replayMode;mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;lateralSpeed=0;driftAmount=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{const slot=BOT_STARTS[i];a.d=slot.d;a.side=slot.side;a.currentSpeed=0;a.hit=0;place(a.car,a.d,a.side)});const menu=$('menu'),hud=$('hud');menu.classList.add('hidden');menu.style.setProperty('display','none','important');$('result').classList.add('hidden');hud.style.setProperty('display','block','important');$('pause').textContent='Ⅱ';let s=pointAt(0);if(mapCtx)drawRaceMap(.1);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));updateRaceShadowAnchor();cameraUpdate(.1);console.info('[AUTOSPORT] race screen activated', {mode,menuDisplay:getComputedStyle(menu).display,hudDisplay:getComputedStyle(hud).display,canvas:!!renderer?.domElement?.isConnected})}
+function start(){activeRaceReplay=replayMode;mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;lateralSpeed=0;driftAmount=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{const slot=BOT_STARTS[i];a.d=slot.d;a.side=slot.side;a.laneTarget=slot.side;a.planTimer=.3+i*.2;a.paceTimer=1+i*.17;a.paceMood=.98;a.attackTimer=0;a.currentSpeed=0;a.hit=0;place(a.car,a.d,a.side)});const menu=$('menu'),hud=$('hud');menu.classList.add('hidden');menu.style.setProperty('display','none','important');$('result').classList.add('hidden');hud.style.setProperty('display','block','important');$('pause').textContent='Ⅱ';let s=pointAt(0);if(mapCtx)drawRaceMap(.1);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));updateRaceShadowAnchor();cameraUpdate(.1);console.info('[AUTOSPORT] race screen activated', {mode,menuDisplay:getComputedStyle(menu).display,hudDisplay:getComputedStyle(hud).display,canvas:!!renderer?.domElement?.isConnected})}
 // Reliable multi-touch input: pointer capture keeps a press alive when a
 // finger drifts outside its button. Keyboard and touch states are independent.
 const activeControlPointers=new Map();
