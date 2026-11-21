@@ -1555,6 +1555,98 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
  #panel-shop .case-car-meta strong{font-size:8px}
 }
 
+
+/* CAR CASE visual refresh — compact photographic collection */
+#panel-shop .car-case-shop{width:min(1320px,100%);gap:9px}
+#panel-shop .car-case-hero{
+ grid-template-columns:100px minmax(0,1fr);gap:14px;padding:12px 15px;border-radius:13px;
+ background:radial-gradient(ellipse at 12% 50%,rgba(229,166,91,.16),transparent 38%),linear-gradient(112deg,#202f38,#101a22 72%);
+ box-shadow:inset 0 1px rgba(255,255,255,.06),0 8px 22px #0003
+}
+#panel-shop .car-case-crate{min-height:86px;border-radius:9px}
+#panel-shop .car-case-crate:before{inset:6px}
+#panel-shop .car-case-crate-mark{top:8px;left:9px;width:21px;height:21px;font-size:8px}
+#panel-shop .car-case-crate-name{font-size:25px}
+#panel-shop .car-case-crate-sub{font-size:5px;margin-top:8px;letter-spacing:.16em}
+#panel-shop .car-case-kicker{font-size:7px}
+#panel-shop .car-case-copy h2{font-size:25px;margin:3px 0 4px}
+#panel-shop .car-case-copy>p{font-size:9px;line-height:1.35}
+#panel-shop .car-case-actions{gap:10px;margin-top:7px}
+#panel-shop .car-case-price{min-width:78px}
+#panel-shop .car-case-price strong{font-size:20px}
+#panel-shop .car-case-open{min-height:32px;padding:7px 11px!important;font-size:8px!important}
+#panel-shop .car-case-wallet{margin-top:6px;font-size:8px}
+#panel-shop .car-case-message{font-size:7px!important;min-height:10px!important;margin-top:3px!important}
+#panel-shop .car-case-section-head{align-items:center}
+#panel-shop .car-case-section-head h3{font-size:13px;margin-top:2px}
+#panel-shop .car-case-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+#panel-shop .car-case-card{
+ display:grid;grid-template-columns:minmax(78px,42%) minmax(0,1fr);grid-template-rows:1fr;
+ align-items:center;gap:7px;padding:6px;min-height:76px;border-radius:9px
+}
+#panel-shop .car-case-card:before{height:2px}
+#panel-shop .case-car-visual{
+ height:62px;min-width:0;border-radius:6px;
+ background:linear-gradient(180deg,#1a2932,#101820)
+}
+#panel-shop .case-car-visual img{
+ display:block;width:100%;height:100%;object-fit:cover;object-position:center;
+ border-radius:6px;filter:saturate(.92) contrast(1.04)
+}
+#panel-shop .case-car-chance{top:4px;right:4px;padding:2px 4px;border-radius:4px;background:#071019c9;font-size:8px}
+#panel-shop .case-car-level{top:4px;left:4px;padding:2px 3px;border-radius:3px;background:#071019bd;font-size:6px}
+#panel-shop .case-car-owned{left:4px;bottom:4px;padding:2px 4px;font-size:5px}
+#panel-shop .case-car-meta{grid-template-columns:minmax(0,1fr) 25px;gap:4px}
+#panel-shop .case-car-meta>div{gap:2px}
+#panel-shop .case-car-meta small{font-size:5px;letter-spacing:.06em}
+#panel-shop .case-car-meta strong{font-size:8px;line-height:1.15}
+#panel-shop .case-car-meta em{font-size:7px}
+#panel-shop .car-case-info-btn{width:24px;height:24px;min-height:24px;border-radius:6px;font-size:11px}
+.car-case-detail-art img,.car-case-result-art img{display:block;width:100%;height:100%;object-fit:cover;border-radius:9px}
+.car-case-detail-art{overflow:hidden}
+.car-case-result-art{overflow:hidden}
+@media(max-width:760px){
+ #panel-shop .car-case-shop{gap:8px}
+ #panel-shop .car-case-hero{grid-template-columns:78px minmax(0,1fr);gap:9px;padding:9px}
+ #panel-shop .car-case-crate{min-height:76px}
+ #panel-shop .car-case-crate-name{font-size:21px}
+ #panel-shop .car-case-copy h2{font-size:21px}
+ #panel-shop .car-case-copy>p{font-size:8px}
+ #panel-shop .car-case-actions{gap:7px;margin-top:6px}
+ #panel-shop .car-case-price{min-width:65px}
+ #panel-shop .car-case-price strong{font-size:17px}
+ #panel-shop .car-case-open{font-size:7px!important;padding:6px 8px!important;min-height:29px}
+ #panel-shop .car-case-wallet{font-size:7px}
+ #panel-shop .car-case-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+ #panel-shop .car-case-card{grid-template-columns:minmax(66px,40%) minmax(0,1fr);min-height:67px;padding:5px;gap:5px}
+ #panel-shop .case-car-visual{height:55px}
+ #panel-shop .case-car-meta{grid-template-columns:minmax(0,1fr) 22px;gap:3px}
+ #panel-shop .case-car-meta strong{font-size:7px}
+ #panel-shop .case-car-meta small{font-size:5px}
+ #panel-shop .case-car-meta em{font-size:6px}
+ #panel-shop .car-case-info-btn{width:21px;height:21px;min-height:21px}
+}
+@media(max-width:390px){
+ #panel-shop .car-case-hero{grid-template-columns:65px minmax(0,1fr);gap:7px;padding:7px}
+ #panel-shop .car-case-crate{min-height:70px}
+ #panel-shop .car-case-crate-name{font-size:18px}
+ #panel-shop .car-case-crate-sub{font-size:4px}
+ #panel-shop .car-case-copy h2{font-size:19px}
+ #panel-shop .car-case-kicker{font-size:5px}
+ #panel-shop .car-case-copy>p{font-size:7px}
+ #panel-shop .car-case-open{font-size:6px!important;padding:5px 6px!important}
+ #panel-shop .car-case-price strong{font-size:15px}
+ #panel-shop .car-case-wallet{font-size:6px}
+ #panel-shop .car-case-card{grid-template-columns:minmax(58px,38%) minmax(0,1fr);min-height:62px}
+ #panel-shop .case-car-visual{height:50px}
+}
+@media(orientation:landscape) and (max-height:560px){
+ #panel-shop .car-case-hero{grid-template-columns:78px minmax(0,1fr);padding:7px}
+ #panel-shop .car-case-crate{min-height:65px}
+ #panel-shop .car-case-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+ #panel-shop .car-case-card{min-height:58px}
+ #panel-shop .case-car-visual{height:48px}
+}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -3023,32 +3115,20 @@ function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
 
 const carCaseVehicles = [
- {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0},
- {id:'sport-suv',name:'Спортивный внедорожник',inspiration:'Вдохновение: Kia Sportage',speed:15,handling:5,handlingLabel:'+5% к управлению',rarity:'ОБЫЧНАЯ+',chance:23,duplicate:1000,shape:1},
- {id:'japanese-sedan',name:'Японский седан',inspiration:'Вдохновение: Toyota Mark II',speed:20,handling:10,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2},
- {id:'large-suv',name:'Большой внедорожник',inspiration:'Вдохновение: Land Cruiser 300',speed:20,handling:5,handlingLabel:'+5% к управлению',rarity:'РЕДКАЯ',chance:11,duplicate:2200,shape:3},
- {id:'rally-truck',name:'Ралли-грузовик',inspiration:'Вдохновение: КАМАЗ-мастер Dakar',speed:-10,handling:25,handlingLabel:'+25% к устойчивости и контролю',rarity:'ОСОБАЯ',chance:7,duplicate:3000,shape:4},
- {id:'sport-coupe',name:'Спортивное купе',inspiration:'Вдохновение: Toyota Supra',speed:30,handling:15,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5},
- {id:'business-sedan',name:'Спортивный бизнес-седан',inspiration:'Вдохновение: BMW M5 F90 Competition',speed:35,handling:18,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6},
- {id:'supercar',name:'Суперкар',inspiration:'Вдохновение: Ferrari',speed:50,handling:22,handlingLabel:'+22% к управлению',rarity:'ЛЕГЕНДАРНАЯ',chance:1,duplicate:12000,shape:7}
+ {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0,image:"https://content.homenetiol.com/2002155/2152865/600x400/790ab9d6f1804edb9e7733e9f44b5be5.jpg"},
+ {id:'sport-suv',name:'Спортивный внедорожник',inspiration:'Вдохновение: Kia Sportage',speed:15,handling:5,handlingLabel:'+5% к управлению',rarity:'ОБЫЧНАЯ+',chance:23,duplicate:1000,shape:1,image:"https://www.mycarcheck.com/assets/images/720/vehicles/tier-aj/553aa4ae729c24d591504cc73c7d85cc.jpg?v=cadd0a80a2b6e96358279061ee8ffce5"},
+ {id:'japanese-sedan',name:'Японский седан',inspiration:'Вдохновение: Toyota Mark II',speed:20,handling:10,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2,image:"https://trademe.tmcdn.co.nz/photoserver/full/2291647438.jpg"},
+ {id:'large-suv',name:'Большой внедорожник',inspiration:'Вдохновение: Land Cruiser 300',speed:20,handling:5,handlingLabel:'+5% к управлению',rarity:'РЕДКАЯ',chance:11,duplicate:2200,shape:3,image:"https://portal.toyota-body.co.jp/dakar/en/news/2024/img/14/001.jpg"},
+ {id:'rally-truck',name:'Ралли-грузовик',inspiration:'Вдохновение: КАМАЗ-мастер Dakar',speed:-10,handling:25,handlingLabel:'+25% к устойчивости и контролю',rarity:'ОСОБАЯ',chance:7,duplicate:3000,shape:4,image:"https://img.championat.com/s/1280x850/news/big/j/k/kamaz-master-otpravilsja-na-ralli-marafon-dakar_15773548651543643465.jpg"},
+ {id:'sport-coupe',name:'Спортивное купе',inspiration:'Вдохновение: Toyota Supra',speed:30,handling:15,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5,image:"https://media.safarilounge.jp/online/thegear/content/theme/img/org/article/18204/main.jpg"},
+ {id:'business-sedan',name:'Спортивный бизнес-седан',inspiration:'Вдохновение: BMW M5 F90 Competition',speed:35,handling:18,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6,image:"https://spots.ag/2025/10/13/bmw-m5-f90-competition-2021-bb185-c714613102025130610_1.jpg"},
+ {id:'supercar',name:'Суперкар',inspiration:'Вдохновение: Ferrari',speed:50,handling:22,handlingLabel:'+22% к управлению',rarity:'ЛЕГЕНДАРНАЯ',chance:1,duplicate:12000,shape:7,image:"https://www.europeanprestige.co.uk/blobs/stock/245/images/45248c99-edb3-4a94-9d32-f8b371e59431/1j6a1011-edit.jpg?height=2376&width=3168"}
 ];
 const CAR_CASE_COST = 3000;
 const carCaseRarityColors = ['#aeb9c0','#75bf8e','#75b8e7','#9c8be9','#e9b36b','#eb806e','#d18bea','#ffd17f'];
 function carCaseArtwork(index){
- const shells = [
-  ['M16 60 L23 48 L56 43 L76 27 L142 27 L163 43 L204 48 L220 59 L215 69 L25 69 Z','M65 43 L83 30 L138 30 L154 43 Z','M87 33 L135 33 L147 42 L75 42 Z'],
-  ['M15 60 L21 47 L54 42 L73 20 L151 20 L171 42 L205 47 L221 59 L216 70 L24 70 Z','M62 42 L78 23 L146 23 L164 42 Z','M83 26 L143 26 L157 41 L70 41 Z'],
-  ['M16 60 L23 49 L57 44 L79 29 L144 29 L164 44 L204 49 L219 59 L214 69 L25 69 Z','M63 44 L82 31 L139 31 L156 44 Z','M88 34 L136 34 L149 43 L76 43 Z'],
-  ['M12 60 L19 47 L52 42 L66 19 L157 19 L177 42 L207 47 L224 59 L218 70 L20 70 Z','M56 42 L72 22 L150 22 L169 42 Z','M79 26 L147 26 L160 41 L68 41 Z'],
-  ['M13 62 L19 48 L43 43 L43 19 L106 19 L124 31 L191 35 L218 50 L226 68 L17 70 Z','M50 42 L50 23 L100 23 L116 42 Z','M56 27 L96 27 L108 41 L56 41 Z'],
-  ['M12 62 L28 50 L61 44 L85 34 L147 34 L167 45 L207 50 L223 60 L217 68 L21 68 Z','M70 44 L88 36 L144 36 L159 44 Z','M93 38 L140 38 L151 43 L79 43 Z'],
-  ['M13 60 L22 48 L58 43 L78 27 L145 27 L164 43 L205 48 L220 59 L215 69 L23 69 Z','M65 43 L83 30 L141 30 L157 43 Z','M87 33 L138 33 L150 42 L75 42 Z'],
-  ['M10 62 L27 52 L63 47 L86 37 L148 37 L170 47 L209 52 L229 62 L221 69 L18 69 Z','M72 47 L91 39 L144 39 L162 47 Z','M96 41 L143 41 L154 46 L82 46 Z']
- ];
- const [body,cabin,glass] = shells[index];
- const color = carCaseRarityColors[index];
- const bodyGradient = 'casePaint'+index;
- return '<svg viewBox="0 0 240 92" role="img" aria-label="Силуэт автомобиля '+(index+1)+'" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="'+bodyGradient+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+color+'"/><stop offset="1" stop-color="#667782"/></linearGradient></defs><ellipse cx="119" cy="74" rx="101" ry="8" fill="#000" opacity=".35"/><path d="'+body+'" fill="url(#'+bodyGradient+')" stroke="#f0f2f2" stroke-opacity=".58" stroke-width="1.2"/><path d="'+cabin+'" fill="#b9c8ce" fill-opacity=".2" stroke="#d7e0e4" stroke-opacity=".72" stroke-width="1.1"/><path d="'+glass+'" fill="#152631" stroke="#c7d6dd" stroke-opacity=".55" stroke-width=".8"/><path d="M22 57 L48 55 M165 54 L211 57" stroke="#fff" stroke-opacity=".25" stroke-width="1.2"/><path d="M174 48 L199 51" stroke="'+color+'" stroke-width="2.2" stroke-linecap="round"/><path d="M29 55 L39 55 M207 56 L217 58" stroke="#f6dba8" stroke-width="2.2" stroke-linecap="round"/><circle cx="62" cy="68" r="13" fill="#0a1015" stroke="#b7c3c9" stroke-width="2"/><circle cx="62" cy="68" r="6.7" fill="#56636b" stroke="#d5dde0" stroke-width="1.4"/><circle cx="62" cy="68" r="2" fill="#d5dde0"/><circle cx="181" cy="68" r="13" fill="#0a1015" stroke="#b7c3c9" stroke-width="2"/><circle cx="181" cy="68" r="6.7" fill="#56636b" stroke="#d5dde0" stroke-width="1.4"/><circle cx="181" cy="68" r="2" fill="#d5dde0"/></svg>';
+ const v=carCaseVehicles[index]; if(!v)return '';
+ return '<img src="'+v.image+'" alt="'+v.name+'" loading="lazy" decoding="async">';
 }
 function renderCarCaseShop(){
  const grid=$('carCaseCars'); if(!grid)return;
