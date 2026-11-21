@@ -1509,6 +1509,9 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
 .car-case-result-text{margin:9px 0 14px;color:#c1cdd2;font-size:10px;line-height:1.5}
 .car-case-result-payout{display:inline-flex;align-items:baseline;gap:5px;padding:8px 12px;border:1px solid #e8b87755;border-radius:8px;background:#e8b87712;color:#ffd18f;font-weight:950;font-size:17px}
 .car-case-result-payout small{font-size:8px}
+.car-case-result-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0 12px}
+.car-case-result-stats span{padding:8px 5px;border:1px solid #ffffff20;border-radius:8px;background:#ffffff08;color:#9eafb8;font-size:7px;font-weight:900;letter-spacing:.08em}
+.car-case-result-stats b{display:block;margin-top:4px;color:#ffd08a;font-size:13px;letter-spacing:0}
 .car-case-result-ok{width:100%;margin-top:15px;min-height:39px}
 @media(max-width:760px){
  #panel-shop .car-case-hero{grid-template-columns:112px minmax(0,1fr);gap:12px;padding:12px}
@@ -1601,6 +1604,7 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
 #panel-shop .case-car-meta small{font-size:5px;letter-spacing:.06em}
 #panel-shop .case-car-meta strong{font-size:8px;line-height:1.15}
 #panel-shop .case-car-meta em{font-size:7px}
+#panel-shop .case-car-handling{display:block;color:#c4d2d8;font-size:6.5px;font-weight:800;line-height:1.1;white-space:nowrap}
 #panel-shop .car-case-info-btn{width:24px;height:24px;min-height:24px;border-radius:6px;font-size:11px}
 .car-case-detail-art img,.car-case-result-art img{display:block;width:100%;height:100%;object-fit:cover;border-radius:9px}
 .car-case-detail-art{overflow:hidden}
@@ -1624,6 +1628,7 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
  #panel-shop .case-car-meta strong{font-size:7px}
  #panel-shop .case-car-meta small{font-size:5px}
  #panel-shop .case-car-meta em{font-size:6px}
+ #panel-shop .case-car-handling{font-size:5.5px}
  #panel-shop .car-case-info-btn{width:21px;height:21px;min-height:21px}
 }
 @media(max-width:390px){
@@ -3115,29 +3120,30 @@ function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
 
 const carCaseVehicles = [
- {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0,image:"https://content.homenetiol.com/2002155/2152865/600x400/790ab9d6f1804edb9e7733e9f44b5be5.jpg"},
+ {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0,image:"https://images.pexels.com/photos/33987626/pexels-photo-33987626/free-photo-of-silver-luxury-sedan-in-parking-lot.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://ymimg1.b8cdn.com/resized/car_model/6916/pictures/6212626/webp_listing_main_trumpchi_ga4_9.webp"},
  {id:'sport-suv',name:'Спортивный внедорожник',inspiration:'Вдохновение: Kia Sportage',speed:15,handling:5,handlingLabel:'+5% к управлению',rarity:'ОБЫЧНАЯ+',chance:23,duplicate:1000,shape:1,image:"https://www.mycarcheck.com/assets/images/720/vehicles/tier-aj/553aa4ae729c24d591504cc73c7d85cc.jpg?v=cadd0a80a2b6e96358279061ee8ffce5"},
  {id:'japanese-sedan',name:'Японский седан',inspiration:'Вдохновение: Toyota Mark II',speed:20,handling:10,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2,image:"https://trademe.tmcdn.co.nz/photoserver/full/2291647438.jpg"},
  {id:'large-suv',name:'Большой внедорожник',inspiration:'Вдохновение: Land Cruiser 300',speed:20,handling:5,handlingLabel:'+5% к управлению',rarity:'РЕДКАЯ',chance:11,duplicate:2200,shape:3,image:"https://portal.toyota-body.co.jp/dakar/en/news/2024/img/14/001.jpg"},
  {id:'rally-truck',name:'Ралли-грузовик',inspiration:'Вдохновение: КАМАЗ-мастер Dakar',speed:-10,handling:25,handlingLabel:'+25% к устойчивости и контролю',rarity:'ОСОБАЯ',chance:7,duplicate:3000,shape:4,image:"https://img.championat.com/s/1280x850/news/big/j/k/kamaz-master-otpravilsja-na-ralli-marafon-dakar_15773548651543643465.jpg"},
- {id:'sport-coupe',name:'Спортивное купе',inspiration:'Вдохновение: Toyota Supra',speed:30,handling:15,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5,image:"https://media.safarilounge.jp/online/thegear/content/theme/img/org/article/18204/main.jpg"},
- {id:'business-sedan',name:'Спортивный бизнес-седан',inspiration:'Вдохновение: BMW M5 F90 Competition',speed:35,handling:18,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6,image:"https://spots.ag/2025/10/13/bmw-m5-f90-competition-2021-bb185-c714613102025130610_1.jpg"},
+ {id:'sport-coupe',name:'Спортивное купе',inspiration:'Вдохновение: Toyota Supra',speed:30,handling:15,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5,image:"https://images.pexels.com/photos/31853161/pexels-photo-31853161/free-photo-of-silver-toyota-supra-in-industrial-setting.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://scene7.toyota.eu/is/image/toyotaeurope/Toyota-exterieur-GR-Supra-schuin-voor-zilver%3AMedium-Landscape?op_usm=1.75%2C0.3%2C2%2C0&resMode=sharp2&ts=0"},
+ {id:'business-sedan',name:'Спортивный бизнес-седан',inspiration:'Вдохновение: BMW M5 F90 Competition',speed:35,handling:18,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6,image:"https://mediapool.bmwgroup.com/cache/P9/201807/P90316034/P90316034-the-new-bmw-m5-competition-in-ascari-07-2018-2247px.jpg",fallbackImage:"https://paultan.org/image/2018/08/2018-BMW-M5-Competition-Official-Photos_Exterior-40.jpg"},
  {id:'supercar',name:'Суперкар',inspiration:'Вдохновение: Ferrari',speed:50,handling:22,handlingLabel:'+22% к управлению',rarity:'ЛЕГЕНДАРНАЯ',chance:1,duplicate:12000,shape:7,image:"https://www.europeanprestige.co.uk/blobs/stock/245/images/45248c99-edb3-4a94-9d32-f8b371e59431/1j6a1011-edit.jpg?height=2376&width=3168"}
 ];
 const CAR_CASE_COST = 3000;
 const carCaseRarityColors = ['#aeb9c0','#75bf8e','#75b8e7','#9c8be9','#e9b36b','#eb806e','#d18bea','#ffd17f'];
 function carCaseArtwork(index){
  const v=carCaseVehicles[index]; if(!v)return '';
- return '<img src="'+v.image+'" alt="'+v.name+'" loading="lazy" decoding="async">';
+ return '<img class="car-case-photo" src="'+v.image+'"'+(v.fallbackImage?' data-fallback="'+v.fallbackImage+'"':'')+' alt="'+v.name+'" loading="eager" decoding="async" referrerpolicy="no-referrer">';
 }
 function renderCarCaseShop(){
  const grid=$('carCaseCars'); if(!grid)return;
  grid.innerHTML=carCaseVehicles.map((v,i)=>{
   const owned=save.carCaseOwned.includes(v.id);
   const speed=(v.speed>0?'+':'')+v.speed+' км/ч';
+  const handling=(v.handling>0?'+':'')+v.handling+'%';
   return '<article class="car-case-card" style="--case-rarity:'+carCaseRarityColors[i]+'">'+
    '<div class="case-car-visual"><span class="case-car-level">'+(i+1)+'/8</span><span class="case-car-chance">'+v.chance+'%</span>'+carCaseArtwork(i)+'<span class="case-car-owned" '+(owned?'':'hidden')+'>В КОЛЛЕКЦИИ</span></div>'+
-   '<div class="case-car-meta"><div><small>'+v.rarity+' · '+(i+1)+'/8</small><strong>'+v.name+'</strong><em>'+(v.speed>0?'+':'')+v.speed+' км/ч</em></div>'+
+   '<div class="case-car-meta"><div><small>'+v.rarity+' · '+(i+1)+'/8</small><strong>'+v.name+'</strong><em>'+speed+'</em><span class="case-car-handling">УПРАВЛЕНИЕ '+handling+'</span></div>'+
    '<button type="button" class="car-case-info-btn" data-car-info="'+i+'" aria-label="Характеристики: '+v.name+'" title="Характеристики">i</button></div></article>';
  }).join('');
 }
@@ -3181,9 +3187,22 @@ function openCarCase(){
   '<h2 class="car-case-result-title" id="car-case-result-title">'+(duplicate?'МАШИНА УЖЕ ЕСТЬ':'НОВАЯ НАГРАДА!')+'</h2>'+
   '<p class="car-case-result-name">'+v.name+'</p>'+
   '<p class="car-case-result-text">'+(duplicate?'Этот автомобиль уже есть в твоей коллекции. За повторное выпадение начислена компенсация.':'Поздравляем! Автомобиль теперь отмечен в твоей коллекции CAR CASE.')+'</p>'+
+  '<div class="car-case-result-stats"><span>СКОРОСТЬ <b>'+(v.speed>0?'+':'')+v.speed+' км/ч</b></span><span>УПРАВЛЕНИЕ <b>'+(v.handling>0?'+':'')+v.handling+'%</b></span></div>'+
   (duplicate?'<div class="car-case-result-payout">+'+payout.toLocaleString('ru-RU')+' <small>TOK</small></div>':'<div class="car-case-result-payout">ДОБАВЛЕН В КОЛЛЕКЦИЮ</div>');
  $('car-case-result-modal').classList.remove('hidden');
 }
+// Retry a second photo source automatically if a remote image is unavailable.
+document.addEventListener('error',event=>{
+ const img=event.target;
+ if(!img||!img.classList||!img.classList.contains('car-case-photo'))return;
+ if(img.dataset.fallback&&!img.dataset.fallbackTried){
+  img.dataset.fallbackTried='1';
+  img.src=img.dataset.fallback;
+  return;
+ }
+ img.classList.add('car-case-photo-failed');
+ img.alt='Фото временно недоступно';
+},true);
 renderCarCaseShop();
 updateCarCaseUI();
 $('carCaseOpen').addEventListener('click',openCarCase);
