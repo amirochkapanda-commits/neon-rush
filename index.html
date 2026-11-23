@@ -2380,7 +2380,7 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  if(isPlayer){
   const shape=modelProfile.scale;
   body.scale.set(shape[0],shape[1],shape[2]);
-  body.position.y=(1-shape[1])*.48;
+  body.position.y=.005*(1-shape[1]);
   if(vehicleId==='city-sedan'){
    for(const side of [-1,1]){
     tube([[side*.98,.78,.78],[side*1.02,.76,.15],[side*1.02,.76,-.62],[side*.98,.80,-1.42]],.018,metal,34,6);
@@ -3379,9 +3379,10 @@ function renderCarCaseShop(){
   const owned=save.carCaseOwned.includes(v.id);
   const speed=(v.speed>0?'+':'')+v.speed+' км/ч';
   const handling=(v.handling>0?'+':'')+v.handling+'%';
+  const acceleration=(v.acceleration>0?'+':'')+v.acceleration+'%';
   return '<article class="car-case-card" style="--case-rarity:'+carCaseRarityColors[i]+'">'+
    '<div class="case-car-visual"><span class="case-car-level">'+(i+1)+'/8</span><span class="case-car-chance">'+v.chance+'%</span>'+carCaseArtwork(i)+'<span class="case-car-owned" '+(owned?'':'hidden')+'>В КОЛЛЕКЦИИ</span></div>'+
-   '<div class="case-car-meta"><div><small>'+v.rarity+' · '+(i+1)+'/8</small><strong>'+v.name+'</strong><em>'+speed+'</em><span class="case-car-handling">УПРАВЛЕНИЕ '+handling+'</span></div>'+
+   '<div class="case-car-meta"><div><small>'+v.rarity+' · '+(i+1)+'/8</small><strong>'+v.name+'</strong><em>'+speed+'</em><span class="case-car-handling">РАЗГОН '+acceleration+' · УПРАВЛЕНИЕ '+handling+'</span></div>'+
    '<button type="button" class="car-case-info-btn" data-car-info="'+i+'" aria-label="Характеристики: '+v.name+'" title="Характеристики">i</button></div></article>';
  }).join('');
 }
