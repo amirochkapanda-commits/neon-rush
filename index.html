@@ -1689,6 +1689,78 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
  #panel-garage .garage-car-thumb{width:48px;height:42px}
  #panel-garage .garage-car-picker-foot{margin-top:2px;font-size:5px}
 }
+
+/* SHOP SUBTABS + PROMO CODE REDEMPTION */
+#panel-shop .shop-subtabs{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:min(430px,100%);margin:0 auto 11px;padding:4px;border:1px solid #ffffff20;border-radius:11px;background:#071019ad}
+#panel-shop .shop-subtab{min-width:0;padding:10px 12px;border:1px solid transparent;border-radius:8px;background:transparent;color:#aebdc7;font-size:9px;font-weight:950;letter-spacing:.13em;box-shadow:none}
+#panel-shop .shop-subtab[aria-pressed=true]{color:#17120d;background:linear-gradient(110deg,#efb86d,#f8d99d);border-color:#ffe0a5;box-shadow:0 3px 14px #d69b4b33}
+#panel-shop .shop-section{display:none;min-width:0}
+#panel-shop .shop-section.active{display:block}
+#panel-shop .promo-shop{width:min(780px,100%);margin:0 auto;display:flex;flex-direction:column;gap:11px}
+#panel-shop .promo-hero{display:grid;grid-template-columns:84px minmax(0,1fr);align-items:center;gap:14px;padding:15px;border:1px solid #d9b77b55;border-radius:13px;background:radial-gradient(ellipse at 12% 45%,#d9944630,transparent 43%),linear-gradient(115deg,#202f38,#101a22 75%);box-shadow:inset 0 1px #ffffff0c}
+#panel-shop .promo-emblem{height:76px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #e8bc7a66;border-radius:10px;background:linear-gradient(145deg,#704a2b66,#111b23);color:#f6cc8d}
+#panel-shop .promo-emblem span{font-size:17px;font-weight:1000;letter-spacing:-.08em}
+#panel-shop .promo-emblem b{font-size:9px;letter-spacing:.24em}
+#panel-shop .promo-kicker{font-size:7px;font-weight:950;letter-spacing:.2em;color:#e9bd81}
+#panel-shop .promo-hero h2{margin:4px 0;font-size:clamp(22px,3.5vw,30px);line-height:1;letter-spacing:-.045em}
+#panel-shop .promo-hero p{margin:0;color:#bdcbd1;font-size:10px;line-height:1.45}
+#panel-shop .promo-entry-card{padding:17px;border:1px solid #ffffff25;border-radius:13px;background:linear-gradient(145deg,#1b2a34,#0b141d);box-shadow:0 8px 25px #0003}
+#panel-shop .promo-entry-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:15px}
+#panel-shop .promo-entry-head small{color:#9eafb8;font-size:7px;font-weight:950;letter-spacing:.18em}
+#panel-shop .promo-entry-head h3{margin:4px 0 0;font-size:13px;letter-spacing:.08em}
+#panel-shop .promo-status-mark{width:35px;height:35px;display:grid;place-items:center;border:1px solid #e6b97675;border-radius:9px;color:#ffd18e;font-size:10px;font-weight:1000}
+#panel-shop .promo-input-label{display:block;margin-bottom:7px;color:#c6d1d6;font-size:8px;font-weight:950;letter-spacing:.13em}
+#panel-shop .promo-entry-row{display:grid;grid-template-columns:minmax(0,1fr) 174px;gap:9px;align-items:stretch}
+#panel-shop .promo-input{width:100%;min-width:0;min-height:45px;padding:0 13px;border:1px solid #ffffff35;border-radius:9px;background:#07121b;color:#fff;font-size:12px;font-weight:900;letter-spacing:.07em;text-transform:uppercase;outline:none;user-select:text;-webkit-user-select:text}
+#panel-shop .promo-input::placeholder{color:#70818b;font-size:9px;letter-spacing:.02em}
+#panel-shop .promo-input:focus{border-color:#f2c57d;box-shadow:0 0 0 2px #f2c57d25}
+#panel-shop .promo-redeem{width:100%;min-height:45px;margin:0;padding:8px 10px;border-radius:9px;font-size:9px;letter-spacing:.06em}
+#panel-shop .promo-message{min-height:30px;margin:10px 0 0;color:#aebdc5;font-size:9px;line-height:1.45}
+#panel-shop .promo-message.is-success{color:#9ce3b9}
+#panel-shop .promo-message.is-error{color:#ffaaa0}
+#panel-shop .promo-balance{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:7px;padding-top:11px;border-top:1px solid #ffffff18}
+#panel-shop .promo-balance span{color:#91a2ab;font-size:8px;font-weight:900;letter-spacing:.15em}
+#panel-shop .promo-balance strong{color:#ffd18e;font-size:15px;font-variant-numeric:tabular-nums}
+#panel-shop .promo-footnote{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid #ffffff18;border-radius:10px;background:#ffffff06}
+#panel-shop .promo-footnote>span{color:#e9bd81;font-size:9px;font-weight:1000}
+#panel-shop .promo-footnote p{margin:0;color:#9eafb8;font-size:8px;line-height:1.5}
+@media(max-width:520px){
+ #panel-shop .shop-subtabs{margin-bottom:8px}
+ #panel-shop .shop-subtab{padding:9px 6px;font-size:8px}
+ #panel-shop .promo-shop{gap:8px}
+ #panel-shop .promo-hero{grid-template-columns:62px minmax(0,1fr);gap:9px;padding:10px}
+ #panel-shop .promo-emblem{height:62px}
+ #panel-shop .promo-emblem span{font-size:14px}
+ #panel-shop .promo-kicker{font-size:6px;letter-spacing:.13em}
+ #panel-shop .promo-hero h2{font-size:21px}
+ #panel-shop .promo-hero p{font-size:8px}
+ #panel-shop .promo-entry-card{padding:12px}
+ #panel-shop .promo-entry-row{grid-template-columns:minmax(0,1fr) 112px;gap:6px}
+ #panel-shop .promo-input{min-height:40px;padding:0 8px;font-size:10px}
+ #panel-shop .promo-input::placeholder{font-size:7px}
+ #panel-shop .promo-redeem{min-height:40px;padding:7px 4px;font-size:7px}
+ #panel-shop .promo-entry-head{margin-bottom:11px}
+ #panel-shop .promo-entry-head h3{font-size:11px}
+ #panel-shop .promo-balance strong{font-size:13px}
+}
+@media(max-width:360px){
+ #panel-shop .promo-entry-row{grid-template-columns:1fr}
+ #panel-shop .promo-redeem{min-height:39px}
+}
+@media(orientation:landscape) and (max-height:560px){
+ #panel-shop .shop-subtabs{margin-bottom:6px;padding:3px}
+ #panel-shop .shop-subtab{padding:6px 9px}
+ #panel-shop .promo-shop{gap:7px}
+ #panel-shop .promo-hero{grid-template-columns:60px minmax(0,1fr);padding:8px;gap:9px}
+ #panel-shop .promo-emblem{height:50px}
+ #panel-shop .promo-entry-card{padding:10px}
+ #panel-shop .promo-entry-head{margin-bottom:8px}
+ #panel-shop .promo-entry-row{grid-template-columns:minmax(0,1fr) 150px}
+ #panel-shop .promo-input,#panel-shop .promo-redeem{min-height:36px}
+ #panel-shop .promo-message{min-height:20px;margin-top:6px}
+ #panel-shop .promo-footnote{padding:6px 9px}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -1782,6 +1854,11 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
 </section>
 
 <section class="panel" id="panel-shop" aria-label="Магазин">
+ <div class="shop-subtabs" role="tablist" aria-label="Разделы магазина">
+  <button type="button" class="shop-subtab" data-shop-section="cases" aria-pressed="true">CAR CASE</button>
+  <button type="button" class="shop-subtab" data-shop-section="promos" aria-pressed="false">ПРОМОКОДЫ</button>
+ </div>
+ <div class="shop-section active" id="shop-section-cases">
  <div class="car-case-shop">
   <div class="car-case-hero">
    <div class="car-case-crate" aria-hidden="true">
@@ -1806,6 +1883,33 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
    <small>8 МАШИН · 100%</small>
   </div>
   <div class="car-case-grid" id="carCaseCars"></div>
+ </div>
+ </div>
+ <div class="shop-section" id="shop-section-promos">
+  <div class="promo-shop">
+   <div class="promo-hero">
+    <div class="promo-emblem" aria-hidden="true"><span>AS</span><b>TOK</b></div>
+    <div class="promo-hero-copy">
+     <div class="promo-kicker">AUTOSPORT REWARDS PROGRAM</div>
+     <h2>ПРОМОКОДЫ</h2>
+     <p>Активируй промокод и получи TOK прямо на игровой баланс.</p>
+    </div>
+   </div>
+   <div class="promo-entry-card">
+    <div class="promo-entry-head">
+     <div><small>REWARDS CENTER · 01</small><h3>АКТИВАЦИЯ КОДА</h3></div>
+     <span class="promo-status-mark">TOK</span>
+    </div>
+    <label class="promo-input-label" for="promoCodeInput">ВВЕДИ ПРОМОКОД</label>
+    <div class="promo-entry-row">
+     <input id="promoCodeInput" class="promo-input" type="text" maxlength="40" placeholder="НАПРИМЕР, FIRSTPROMO..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Промокод">
+     <button type="button" class="primary promo-redeem" id="promoRedeemBtn">АКТИВИРОВАТЬ</button>
+    </div>
+    <p class="promo-message" id="promoMessage" role="status" aria-live="polite">Каждый промокод можно активировать один раз в текущем сохранении.</p>
+    <div class="promo-balance"><span>ТВОЙ БАЛАНС</span><strong id="promoBalance">0 TOK</strong></div>
+   </div>
+   <div class="promo-footnote"><span>01</span><p>После успешной активации награда сразу добавляется к балансу. Повторно использовать тот же код в этом сохранении нельзя.</p></div>
+  </div>
  </div>
 </section>
 </div></div>
@@ -1901,7 +2005,7 @@ window.addEventListener('error',event=>{if(event.error)showGameError(event.error
 window.addEventListener('unhandledrejection',event=>showGameError(event.reason,'ASYNC'));
 setLoadProgress(5,'ЗАГРУЗКА AUTOSPORT','ПОДКЛЮЧЕНИЕ РЕСУРСОВ');
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),mix=(a,b,t)=>a+(b-a)*t;
-const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.carCaseOwned=Array.isArray(save.carCaseOwned)?[...new Set(save.carCaseOwned.filter(x=>typeof x==="string"))]:[];save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);if(!save.championshipRulesV2){save.leaguePoints=0;save.races=0;save.points=0;save.championshipRulesV2=true;localStorage.setItem('autosport-career',JSON.stringify(save));} // One-time reset for the new championship rules; future reloads keep current progress.
+const defaults={wins:0,rep:0,credits:0,points:0,races:0,seasons:0,best:0,league:0,leaguePoints:0};let save={...defaults};try{save={...save,...JSON.parse(localStorage.getItem('autosport-career')||'{}')}}catch{}save.carCaseOwned=Array.isArray(save.carCaseOwned)?[...new Set(save.carCaseOwned.filter(x=>typeof x==="string"))]:[];save.redeemedPromoCodes=Array.isArray(save.redeemedPromoCodes)?[...new Set(save.redeemedPromoCodes.filter(x=>typeof x==="string").map(x=>x.trim().toUpperCase()))]:[];save.league=clamp(Number(save.league||0),0,4);save.leaguePoints=Number(save.leaguePoints||0);if(!save.championshipRulesV2){save.leaguePoints=0;save.races=0;save.points=0;save.championshipRulesV2=true;localStorage.setItem('autosport-career',JSON.stringify(save));} // One-time reset for the new championship rules; future reloads keep current progress.
 const championshipTracks=['coast','forest','desert'];const trackNames=['COAST RUN','ROCKY PASS','DESERT RING'];
 let prefs={paint:'#dba14e',track:'coast'};try{prefs={...prefs,...JSON.parse(localStorage.getItem('autosport-garage')||'{}')}}catch{}
 const currentStage=Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||championshipTracks.indexOf(prefs.track)>currentStage)prefs.track=championshipTracks[currentStage];let replayMode=championshipTracks.indexOf(prefs.track)<save.races,activeRaceReplay=false,selectedReplayLeague=null;
@@ -3209,7 +3313,7 @@ function finish(){
 function renderLeagueOptions(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const list=$('league-list');if(!list)return;list.innerHTML='';names.forEach((name,index)=>{const unlocked=index<=save.league,current=selectedReplayLeague===null?index===save.league:index===selectedReplayLeague,button=document.createElement('button');button.type='button';button.className='league-option'+(current?' current':'');button.disabled=!unlocked;const status=!unlocked?'ЗАКРЫТА':current?'ВЫБРАНА':index<save.league?'ПОВТОР ДОСТУПЕН':'ТЕКУЩАЯ ЛИГА';button.innerHTML='<span><span class="league-option-name">ЛИГА '+(index+1)+' · '+name+'</span><span class="league-option-sub">'+(index<save.league?'Пройдена · можно перепройти':index===save.league?'Твой текущий чемпионат':'Откроется после предыдущей лиги')+'</span></span><span class="league-option-status">'+status+'</span>';button.addEventListener('click',()=>{if(!unlocked)return;selectedReplayLeague=index<save.league?index:null;prefs.track='coast';replayMode=selectedReplayLeague!==null;localStorage.setItem('autosport-garage',JSON.stringify(prefs));$('league-modal').classList.add('hidden');updateMenuStats()});list.appendChild(button)})}
 function openLeaguePicker(){$('league-modal').classList.remove('hidden');renderLeagueOptions()}
 $('leagueName').addEventListener('click',openLeaguePicker);$('league-close').addEventListener('click',()=>$('league-modal').classList.add('hidden'));$('league-modal').addEventListener('click',e=>{if(e.target===$('league-modal'))$('league-modal').classList.add('hidden')});document.addEventListener('keydown',e=>{if(e.key==='Escape')$('league-modal').classList.add('hidden')});
-function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const pastLeague=selectedReplayLeague!==null,leagueIndex=pastLeague?selectedReplayLeague:save.league,stage=pastLeague?0:Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||(!pastLeague&&championshipTracks.indexOf(prefs.track)>stage))prefs.track=championshipTracks[stage];replayMode=pastLeague||championshipTracks.indexOf(prefs.track)<save.races;$('season').textContent=(stage+1)+'/3';$('points').textContent=pastLeague?'—':save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;updateCarCaseUI();renderGarageCarPicker();$('leagueName').textContent='ЛИГА '+(leagueIndex+1)+' · '+names[leagueIndex]+' ▾';$('mission').textContent=pastLeague?'ПОВТОР ЛИГИ: '+names[leagueIndex]+'. Все три трассы доступны. Награды и основной прогресс не начисляются.':replayMode?'Повторный заезд: '+trackNames[championshipTracks.indexOf(prefs.track)]+'. Награды и прогресс не начисляются.':'Текущий этап '+(stage+1)+'/3: '+trackNames[stage]+'. Пройденные этапы можно повторять без наград.';document.querySelectorAll('.track-card').forEach(b=>{const index=championshipTracks.indexOf(b.dataset.track),active=b.dataset.track===prefs.track,available=pastLeague||index<=stage;b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-disabled',String(!available));b.dataset.replay=String(available&&(pastLeague||index<save.races))});$('start').textContent=replayMode?'ПОВТОРИТЬ ЗАЕЗД · БЕЗ НАГРАД ↻':'НАЧАТЬ ГОНКУ →';updateUpgradeLabels();renderLeagueOptions()}
+function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const pastLeague=selectedReplayLeague!==null,leagueIndex=pastLeague?selectedReplayLeague:save.league,stage=pastLeague?0:Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||(!pastLeague&&championshipTracks.indexOf(prefs.track)>stage))prefs.track=championshipTracks[stage];replayMode=pastLeague||championshipTracks.indexOf(prefs.track)<save.races;$('season').textContent=(stage+1)+'/3';$('points').textContent=pastLeague?'—':save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;updateCarCaseUI();if($('promoBalance'))$('promoBalance').textContent=Number(save.credits||0).toLocaleString('ru-RU')+' TOK';renderGarageCarPicker();$('leagueName').textContent='ЛИГА '+(leagueIndex+1)+' · '+names[leagueIndex]+' ▾';$('mission').textContent=pastLeague?'ПОВТОР ЛИГИ: '+names[leagueIndex]+'. Все три трассы доступны. Награды и основной прогресс не начисляются.':replayMode?'Повторный заезд: '+trackNames[championshipTracks.indexOf(prefs.track)]+'. Награды и прогресс не начисляются.':'Текущий этап '+(stage+1)+'/3: '+trackNames[stage]+'. Пройденные этапы можно повторять без наград.';document.querySelectorAll('.track-card').forEach(b=>{const index=championshipTracks.indexOf(b.dataset.track),active=b.dataset.track===prefs.track,available=pastLeague||index<=stage;b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-disabled',String(!available));b.dataset.replay=String(available&&(pastLeague||index<save.races))});$('start').textContent=replayMode?'ПОВТОРИТЬ ЗАЕЗД · БЕЗ НАГРАД ↻':'НАЧАТЬ ГОНКУ →';updateUpgradeLabels();renderLeagueOptions()}
 function start(){activeRaceReplay=replayMode;mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;lateralSpeed=0;driftAmount=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{const slot=BOT_STARTS[i];a.d=slot.d;a.side=slot.side;a.laneTarget=slot.side;a.planTimer=.3+i*.2;a.paceTimer=1+i*.17;a.paceMood=.98;a.attackTimer=0;a.currentSpeed=0;a.hit=0;place(a.car,a.d,a.side)});const menu=$('menu'),hud=$('hud');menu.classList.add('hidden');menu.style.setProperty('display','none','important');$('result').classList.add('hidden');hud.style.setProperty('display','block','important');$('pause').textContent='Ⅱ';let s=pointAt(0);if(mapCtx)drawRaceMap(.1);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));updateRaceShadowAnchor();cameraUpdate(.1);console.info('[AUTOSPORT] race screen activated', {mode,menuDisplay:getComputedStyle(menu).display,hudDisplay:getComputedStyle(hud).display,canvas:!!renderer?.domElement?.isConnected})}
 // Reliable multi-touch input: pointer capture keeps a press alive when a
 // finger drifts outside its button. Keyboard and touch states are independent.
@@ -3454,6 +3558,45 @@ $('garageCarGrid').addEventListener('error',e=>{if(e.target&&e.target.tagName===
 $('car-case-info-modal').addEventListener('click',e=>{if(e.target===$('car-case-info-modal'))closeCarCaseModal('car-case-info-modal')});
 $('car-case-result-modal').addEventListener('click',e=>{if(e.target===$('car-case-result-modal'))closeCarCaseModal('car-case-result-modal')});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCarCaseModal('car-case-info-modal');closeCarCaseModal('car-case-result-modal')}});
+
+// Promo codes are unlimited in distribution; each code is claimed once per local save.
+const promoCodeRegistry=Object.freeze({
+ FIRSTPROMOFORNEWGAME:Object.freeze({tokens:10000,maxClaimsPerSave:1,totalUseLimit:null})
+});
+document.querySelectorAll('#panel-shop [data-shop-section]').forEach(button=>button.addEventListener('click',()=>{
+ const section=button.dataset.shopSection;
+ document.querySelectorAll('#panel-shop [data-shop-section]').forEach(item=>item.setAttribute('aria-pressed',String(item===button)));
+ document.querySelectorAll('#panel-shop .shop-section').forEach(item=>item.classList.toggle('active',item.id==='shop-section-'+section));
+ $('panel-shop').scrollTop=0;
+}));
+function setPromoMessage(message,state=''){
+ const node=$('promoMessage');if(!node)return;
+ node.textContent=message;
+ node.classList.toggle('is-success',state==='success');
+ node.classList.toggle('is-error',state==='error');
+}
+function redeemPromoCode(){
+ const input=$('promoCodeInput');
+ const code=String(input?.value||'').trim().toUpperCase();
+ if(!code){setPromoMessage('Сначала введи промокод.','error');input?.focus();return}
+ const promo=promoCodeRegistry[code];
+ if(!promo){setPromoMessage('Такого промокода нет. Проверь написание и попробуй ещё раз.','error');return}
+ if(save.redeemedPromoCodes.includes(code)){setPromoMessage('Этот промокод уже активирован в текущем сохранении.','error');return}
+ const reward=Math.floor(Number(promo.tokens));
+ const balance=Math.max(0,Math.floor(Number(save.credits)||0));
+ if(!Number.isSafeInteger(reward)||reward<1||balance>Number.MAX_SAFE_INTEGER-reward){
+  setPromoMessage('Не удалось начислить награду. Баланс TOK не изменён.','error');return;
+ }
+ save.credits=balance+reward;
+ save.redeemedPromoCodes.push(code);
+ localStorage.setItem('autosport-career',JSON.stringify(save));
+ input.value='';
+ updateMenuStats();
+ setPromoMessage('УСПЕШНО! Начислено +'+reward.toLocaleString('ru-RU')+' TOK. Промокод использован.','success');
+}
+$('promoRedeemBtn')?.addEventListener('click',redeemPromoCode);
+$('promoCodeInput')?.addEventListener('keydown',event=>{if(event.key==='Enter'){event.preventDefault();redeemPromoCode()}});
+$('promoCodeInput')?.addEventListener('input',()=>{if($('promoMessage')?.classList.contains('is-error'))setPromoMessage('Каждый промокод можно активировать один раз в текущем сохранении.')});
 
 syncAppViewport();
 document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
