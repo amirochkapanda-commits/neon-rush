@@ -2109,8 +2109,9 @@ function carContact(a,b){
  const axes=[{x:Math.cos(a.rotation.y),z:-Math.sin(a.rotation.y)},{x:Math.sin(a.rotation.y),z:Math.cos(a.rotation.y)},{x:Math.cos(b.rotation.y),z:-Math.sin(b.rotation.y)},{x:Math.sin(b.rotation.y),z:Math.cos(b.rotation.y)}];
  let min=Infinity,nx=0,nz=0;
  for(const axis of axes){
-  const ra=1.18*Math.abs(axis.x*Math.cos(a.rotation.y)-axis.z*Math.sin(a.rotation.y))+2.34*Math.abs(axis.x*Math.sin(a.rotation.y)+axis.z*Math.cos(a.rotation.y));
-  const rb=1.18*Math.abs(axis.x*Math.cos(b.rotation.y)-axis.z*Math.sin(b.rotation.y))+2.34*Math.abs(axis.x*Math.sin(b.rotation.y)+axis.z*Math.cos(b.rotation.y));
+  const aw=a.userData.halfWidth||1.18,al=a.userData.halfLength||2.34,bw=b.userData.halfWidth||1.18,bl=b.userData.halfLength||2.34;
+  const ra=aw*Math.abs(axis.x*Math.cos(a.rotation.y)-axis.z*Math.sin(a.rotation.y))+al*Math.abs(axis.x*Math.sin(a.rotation.y)+axis.z*Math.cos(a.rotation.y));
+  const rb=bw*Math.abs(axis.x*Math.cos(b.rotation.y)-axis.z*Math.sin(b.rotation.y))+bl*Math.abs(axis.x*Math.sin(b.rotation.y)+axis.z*Math.cos(b.rotation.y));
   const along=dx*axis.x+dz*axis.z,overlap=ra+rb-Math.abs(along);
   if(overlap<=0)return null;
   if(overlap<min){min=overlap;const sign=along>=0?1:-1;nx=axis.x*sign;nz=axis.z*sign}
@@ -2153,6 +2154,19 @@ function planBotLane(a){
 function currentRacePlace(){return 1+ai.filter(a=>a.d>progress+.05).length}
 function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  const vehicleId=isPlayer?requestedVehicleId:'starter-subaru';
+ const modelProfiles={
+  'starter-subaru':{scale:[1,1,1],wheel:1,halfWidth:1.18,halfLength:2.34},
+  'city-sedan':{scale:[1.01,.96,1.045],wheel:1.02,halfWidth:1.20,halfLength:2.45},
+  'sport-suv':{scale:[1.10,1.16,1.04],wheel:1.07,halfWidth:1.30,halfLength:2.44},
+  'japanese-sedan':{scale:[1.055,.94,1.12],wheel:1.04,halfWidth:1.25,halfLength:2.62},
+  'large-suv':{scale:[1.18,1.23,1.08],wheel:1.12,halfWidth:1.40,halfLength:2.53},
+  'rally-truck':{scale:[1.23,1.30,1.12],wheel:1.17,halfWidth:1.47,halfLength:2.64},
+  'sport-coupe':{scale:[1.10,.84,1.14],wheel:1.20,halfWidth:1.34,halfLength:2.67},
+  'business-sedan':{scale:[1.08,.97,1.12],wheel:1.08,halfWidth:1.29,halfLength:2.62},
+  'supercar':{scale:[1.16,.76,1.11],wheel:1.30,halfWidth:1.38,halfLength:2.60}
+ };
+ const modelProfile=modelProfiles[vehicleId]||modelProfiles['starter-subaru'];
+ const wheelRadius=.425*modelProfile.wheel,wheelCenterY=wheelRadius+.005;
  const root=new THREE.Group(),body=new THREE.Group();root.name=isPlayer?'player-'+vehicleId:'bot-subaru-impreza';root.add(body);
  const pm=new THREE.MeshPhysicalMaterial({color,roughness:.27,metalness:.38,clearcoat:1,clearcoatRoughness:.12,reflectivity:.72,envMapIntensity:1.35});
  if(isPlayer)paintMat=pm;
@@ -2254,14 +2268,29 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  for(const side of [-1,1]){
   const wiper=box(.022,.016,.64,darkMetal,side*.25,1.055,.86);wiper.rotation.y=side*.15;
  }
- // Distinct Subaru GD front fascia: inset hexagonal grille, split lower intake and round projector units.
- poly([[-.46,.13],[-.37,.19],[.37,.19],[.46,.13],[.39,-.13],[-.39,-.13]],.075,deep,0,.785,2.245);
- for(let i=0;i<7;i++)box(.018,.19,.018,darkMetal,-.27+i*.09,.79,2.293);
- poly([[-.53,.075],[-.47,.13],[.47,.13],[.53,.075],[.46,-.085],[-.46,-.085]],.055,deep,0,.595,2.235);
+ // Each class gets a different grille layout, lamp proportion and front intake.
+ const fascia={
+  'starter-subaru':{w:.92,top:.19,bottom:-.13,bars:7,style:'vertical',lamp:[.50,.25]},
+  'city-sedan':{w:1.12,top:.14,bottom:-.10,bars:5,style:'horizontal',lamp:[.56,.20]},
+  'sport-suv':{w:1.12,top:.18,bottom:-.15,bars:6,style:'vertical',lamp:[.43,.31]},
+  'japanese-sedan':{w:1.02,top:.13,bottom:-.11,bars:7,style:'horizontal',lamp:[.61,.16]},
+  'large-suv':{w:1.20,top:.21,bottom:-.17,bars:5,style:'vertical',lamp:[.41,.34]},
+  'rally-truck':{w:1.14,top:.20,bottom:-.16,bars:8,style:'vertical',lamp:[.46,.28]},
+  'sport-coupe':{w:1.20,top:.12,bottom:-.10,bars:1,style:'horizontal',lamp:[.65,.15]},
+  'business-sedan':{w:1.16,top:.16,bottom:-.12,bars:8,style:'horizontal',lamp:[.58,.18]},
+  'supercar':{w:1.25,top:.10,bottom:-.10,bars:1,style:'horizontal',lamp:[.70,.13]}
+ }[vehicleId]||{w:.92,top:.19,bottom:-.13,bars:7,style:'vertical',lamp:[.50,.25]};
+ poly([[-fascia.w*.5,fascia.bottom],[-fascia.w*.42,fascia.top],[fascia.w*.42,fascia.top],[fascia.w*.5,fascia.bottom],[fascia.w*.42,fascia.bottom-.075],[-fascia.w*.42,fascia.bottom-.075]],.075,deep,0,.785,2.245);
+ if(fascia.style==='vertical'){
+  for(let i=0;i<fascia.bars;i++)box(.022,fascia.top-fascia.bottom,.022,vehicleId==='rally-truck'?metal:darkMetal,-fascia.w*.36+i*(fascia.w*.72/Math.max(1,fascia.bars-1)),.785,2.292);
+ }else{
+  for(let i=0;i<fascia.bars;i++)softBox(fascia.w*.82,.018,.022,metal,0,fascia.bottom+.045+i*((fascia.top-fascia.bottom-.09)/Math.max(1,fascia.bars-1)),2.292,.006);
+ }
+ softBox(fascia.w*1.08,.135,.055,deep,0,.585,2.225,.035);
  for(const side of [-1,1]){
-  const hx=side*.72;
-  softBox(.50,.25,.095,black,hx,.94,2.145,.075).rotation.y=side*.10;
-  softBox(.435,.185,.035,lampGlass,hx,.95,2.205,.06).rotation.y=side*.10;
+  const hx=side*.72,lampW=fascia.lamp[0],lampH=fascia.lamp[1];
+  softBox(lampW,lampH,.095,black,hx,.94,2.145,.075).rotation.y=side*.10;
+  softBox(lampW*.87,lampH*.74,.035,lampGlass,hx,.95,2.205,.06).rotation.y=side*.10;
   const projector=add(new THREE.CylinderGeometry(.073,.073,.025,28),reflector,hx-side*.035,.95,2.228);projector.rotation.x=Math.PI/2;
   const inner=add(new THREE.CylinderGeometry(.046,.046,.028,24),deep,hx-side*.035,.95,2.245);inner.rotation.x=Math.PI/2;
   softBox(.13,.10,.035,amberLens,side*1.0,.83,2.19,.035);
@@ -2270,6 +2299,13 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  }
  softBox(1.54,.075,.13,black,0,.49,2.22,.035);
  softBox(2.05,.055,.25,black,0,.535,2.12,.05);
+ if(vehicleId==='rally-truck'){
+  for(const side of [-1,1])tube([[side*.88,.60,2.13],[side*.94,.92,2.16],[side*.82,1.12,2.14]],.035,metal,18,7);
+  softBox(2.12,.09,.16,metal,0,.55,2.27,.025);
+ }
+ if(vehicleId==='supercar'||vehicleId==='sport-coupe'){
+  for(const side of [-1,1])softBox(.28,.10,.26,deep,side*.79,.64,2.18,.025);
+ }
  // Side profile: four door shut lines, handles, mirrors, skirts, side repeaters and restrained fender flares.
  for(const side of [-1,1]){
   tube([[side*1.012,.84,.92],[side*1.035,.79,.52],[side*1.04,.76,-.32],[side*1.035,.78,-1.05],[side*.99,.83,-1.48]],.012,darkMetal,46,5);
@@ -2282,24 +2318,24 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
   softBox(.12,.045,1.86,pm,side*1.08,.55,-.02,.025);
   // Wheel-arch lips follow the upper half of each wheel opening.
   for(const z of [-1.42,1.42]){
-   const arch=add(new THREE.TorusGeometry(.515,.068,12,64,Math.PI),pm,side*1.035,.43,z);arch.rotation.y=Math.PI/2;
-   const innerArch=add(new THREE.TorusGeometry(.455,.018,8,48,Math.PI),black,side*1.045,.43,z);innerArch.rotation.y=Math.PI/2;
+   const arch=add(new THREE.TorusGeometry(wheelRadius+.09,.068,12,64,Math.PI),pm,side*1.035,wheelCenterY,z);arch.rotation.y=Math.PI/2;
+   const innerArch=add(new THREE.TorusGeometry(wheelRadius+.035,.018,8,48,Math.PI),black,side*1.045,wheelCenterY,z);innerArch.rotation.y=Math.PI/2;
   }
  }
  // Four detailed wheel assemblies preserve the original centres used by the handling and collision code.
- const tireGeo=new THREE.CylinderGeometry(.425,.425,.32,56,1);
+ const tireGeo=new THREE.CylinderGeometry(wheelRadius,wheelRadius,.32*modelProfile.wheel,56,1);
  for(const z of [-1.42,1.42])for(const side of [-1,1]){
-  const tire=add(tireGeo,rubber,side*1.08,.43,z);tire.rotation.z=-side*Math.PI/2;
-  const rimFace=add(new THREE.CylinderGeometry(.305,.305,.045,48),rim,side*1.255,.43,z);rimFace.rotation.z=-side*Math.PI/2;
-  const hub=add(new THREE.CylinderGeometry(.092,.092,.052,24),metal,side*1.285,.43,z);hub.rotation.z=-side*Math.PI/2;
-  const lip=add(new THREE.TorusGeometry(.292,.012,8,48),metal,side*1.282,.43,z);lip.rotation.y=Math.PI/2;
+  const tire=add(tireGeo,rubber,side*1.08,wheelCenterY,z);tire.rotation.z=-side*Math.PI/2;
+  const rimFace=add(new THREE.CylinderGeometry(wheelRadius*.72,wheelRadius*.72,.045*modelProfile.wheel,48),rim,side*1.255,wheelCenterY,z);rimFace.rotation.z=-side*Math.PI/2;
+  const hub=add(new THREE.CylinderGeometry(wheelRadius*.22,wheelRadius*.22,.052*modelProfile.wheel,24),metal,side*1.285,wheelCenterY,z);hub.rotation.z=-side*Math.PI/2;
+  const lip=add(new THREE.TorusGeometry(wheelRadius*.69,.012*modelProfile.wheel,8,48),metal,side*1.282,wheelCenterY,z);lip.rotation.y=Math.PI/2;
   for(let k=0;k<10;k++){
-   const a=k*Math.PI/5,spoke=box(.038,.035,.255,metal,side*1.286,.43+Math.sin(a)*.145,z+Math.cos(a)*.145);spoke.rotation.x=a;
+   const a=k*Math.PI/5,spoke=box(.038*modelProfile.wheel,.035*modelProfile.wheel,wheelRadius*.60,metal,side*1.286,wheelCenterY+Math.sin(a)*wheelRadius*.34,z+Math.cos(a)*wheelRadius*.34);spoke.rotation.x=a;
   }
-  const rotor=add(new THREE.CylinderGeometry(.285,.285,.025,32),reflector,side*1.17,.43,z);rotor.rotation.z=-side*Math.PI/2;
-  softBox(.07,.20,.13,mat('#6e302b',.48,.34),side*1.19,.48,z+.16,.025);
+  const rotor=add(new THREE.CylinderGeometry(wheelRadius*.67,wheelRadius*.67,.025*modelProfile.wheel,32),reflector,side*1.17,wheelCenterY,z);rotor.rotation.z=-side*Math.PI/2;
+  softBox(.07,.20*modelProfile.wheel,.13,mat('#6e302b',.48,.34),side*1.19,wheelCenterY+.05,z+.16,.025);
   for(let k=0;k<5;k++){
-   const a=k*Math.PI*2/5,nut=add(new THREE.CylinderGeometry(.012,.012,.012,8),deep,side*1.292,.43+Math.sin(a)*.065,z+Math.cos(a)*.065);nut.rotation.z=-side*Math.PI/2;
+   const a=k*Math.PI*2/5,nut=add(new THREE.CylinderGeometry(.012,.012,.012,8),deep,side*1.292,wheelCenterY+Math.sin(a)*wheelRadius*.15,z+Math.cos(a)*wheelRadius*.15);nut.rotation.z=-side*Math.PI/2;
   }
  }
  // Rear lighting, trunk shut lines, bumper diffuser and twin exhaust outlets.
@@ -2315,13 +2351,21 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  softBox(1.88,.11,.20,black,0,.51,-2.18,.04);
  softBox(1.50,.055,.18,metal,0,.47,-2.27,.025);
  for(let i=0;i<5;i++)box(.035,.12,.22,darkMetal,-.48+i*.24,.45,-2.28);
- // Production-style STI rear wing: two sculpted pedestals and a broad, shallow blade.
- for(const side of [-1,1]){
-  softBox(.12,.33,.16,pm,side*.63,1.28,-1.96,.035);
-  softBox(.09,.27,.13,black,side*.63,1.34,-1.97,.025);
+ // Rear aerodynamic parts match the car class instead of giving every vehicle a rally wing.
+ if(vehicleId==='starter-subaru'||vehicleId==='sport-coupe'||vehicleId==='supercar'){
+  const wingWidth=vehicleId==='supercar'?2.02:1.88,wingY=vehicleId==='supercar'?1.28:1.49,wingZ=-1.98;
+  for(const side of [-1,1]){
+   softBox(.12,.30,.16,pm,side*.63,wingY-.20,wingZ,.035);
+   softBox(.09,.25,.13,black,side*.63,wingY-.14,wingZ-.01,.025);
+  }
+  softBox(wingWidth,.095,.42,pm,0,wingY,wingZ,.065);
+  softBox(wingWidth*.94,.035,.13,deep,0,wingY-.055,wingZ+.02,.025);
+ }else if(vehicleId==='sport-suv'||vehicleId==='large-suv'){
+  softBox(1.62,.10,.30,deep,0,1.53,-1.92,.04);
+  for(const side of [-1,1])softBox(.10,.20,.26,pm,side*.62,1.44,-1.91,.025);
+ }else{
+  softBox(1.40,.045,.16,pm,0,1.02,-2.20,.025);
  }
- softBox(1.88,.095,.42,pm,0,1.49,-1.98,.065);
- softBox(1.78,.035,.13,deep,0,1.435,-1.96,.025);
  // Front cabin furnishings are visible through the glazing but do not affect vehicle physics.
  const interior=mat('#11191d',.88,.04),seatMat=mat('#202a30',.82,.02);
  softBox(1.38,.10,1.18,interior,0,1.045,-.16,.035);
@@ -2332,45 +2376,89 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  }
  softBox(.88,.07,.17,interior,0,1.16,.62,.025);
  const steering=add(new THREE.TorusGeometry(.18,.022,8,28),metal,-.43,1.27,.46);steering.rotation.x=.16;
- if(isPlayer&&vehicleId!=='starter-subaru'){
-  const profiles={
-   'city-sedan':[1.00,.94,1.03],
-   'sport-suv':[1.08,1.13,1.02],
-   'japanese-sedan':[1.035,.92,1.12],
-   'large-suv':[1.14,1.18,1.04],
-   'rally-truck':[1.17,1.16,1.08],
-   'sport-coupe':[1.035,.86,1.08],
-   'business-sedan':[1.04,.96,1.04],
-   'supercar':[1.06,.82,1.10]
-  };
-  const shape=profiles[vehicleId]||[1,1,1];
+ // Player-only body equipment: each car now has class-specific proportions and details.
+ if(isPlayer){
+  const shape=modelProfile.scale;
   body.scale.set(shape[0],shape[1],shape[2]);
   body.position.y=(1-shape[1])*.48;
-  // SUV roof rails and rally-specific cargo body make the selected class visible in 3D.
-  if(vehicleId==='sport-suv'||vehicleId==='large-suv'){
+  if(vehicleId==='city-sedan'){
    for(const side of [-1,1]){
-    tube([[side*.55,1.59,.30],[side*.61,1.62,-.55],[side*.57,1.58,-.76]],.035,deep,24,7);
+    tube([[side*.98,.78,.78],[side*1.02,.76,.15],[side*1.02,.76,-.62],[side*.98,.80,-1.42]],.018,metal,34,6);
+    softBox(.13,.16,.06,metal,side*1.08,.78,-.52,.025);
    }
-   if(vehicleId==='large-suv'){
-    softBox(2.02,.12,.34,deep,0,.62,2.24,.035);
-    for(const side of [-1,1])softBox(.10,.19,.30,metal,side*.98,.70,2.12,.025);
+   softBox(1.68,.055,.07,metal,0,.82,-2.20,.025);
+  }
+  if(vehicleId==='sport-suv'){
+   softBox(1.48,.10,1.02,pm,0,1.57,-.18,.08);
+   for(const side of [-1,1]){
+    tube([[side*.58,1.61,.33],[side*.62,1.65,-.55],[side*.57,1.61,-.78]],.045,deep,28,8);
+    softBox(.17,.12,2.34,deep,side*1.08,.48,-.02,.035);
+    tube([[side*1.05,.56,1.0],[side*1.08,.54,-1.0]],.045,metal,24,7);
    }
+   softBox(1.98,.16,.28,deep,0,.57,2.17,.045);
+  }
+  if(vehicleId==='japanese-sedan'){
+   softBox(1.16,.035,.12,metal,0,.98,1.38,.025);
+   for(const side of [-1,1]){
+    tube([[side*1.03,.84,.85],[side*1.07,.82,.05],[side*1.07,.82,-.85],[side*1.02,.84,-1.55]],.014,metal,36,5);
+    softBox(.30,.10,.08,deep,side*.78,.74,2.20,.025);
+   }
+   softBox(1.90,.05,.12,metal,0,.72,-2.22,.025);
+  }
+  if(vehicleId==='large-suv'){
+   softBox(1.62,.13,1.18,pm,0,1.59,-.15,.035);
+   for(const side of [-1,1]){
+    tube([[side*.62,1.65,.48],[side*.62,1.67,-.72]],.055,deep,28,8);
+    softBox(.19,.14,2.42,deep,side*1.13,.49,-.04,.035);
+    softBox(.12,.20,.38,metal,side*1.16,.70,2.12,.025);
+   }
+   for(const z of [.25,-.48])tube([[-.72,1.69,z],[.72,1.69,z]],.035,metal,24,7);
+   add(new THREE.TorusGeometry(.40,.12,12,40),rubber,0,.96,-2.34);
+   const spareHub=add(new THREE.CylinderGeometry(.22,.22,.10,32),metal,0,.96,-2.36);spareHub.rotation.x=Math.PI/2;
   }
   if(vehicleId==='rally-truck'){
-   softBox(1.68,.56,1.02,pm,0,1.18,-1.34,.07);
-   softBox(1.74,.07,1.08,deep,0,.91,-1.34,.025);
+   softBox(1.82,.42,1.22,pm,0,.92,-1.30,.055);
+   softBox(1.92,.075,1.28,deep,0,.69,-1.30,.025);
    for(const side of [-1,1]){
-    tube([[side*.70,.92,-.86],[side*.78,1.48,-.86],[side*.78,1.48,-1.82],[side*.70,.92,-1.82]],.045,black,20,7);
+    softBox(.10,.48,1.28,pm,side*.91,.96,-1.30,.025);
+    tube([[side*.89,.72,-1.94],[side*.89,1.20,-1.94],[side*.89,1.20,-.67],[side*.89,.72,-.67]],.035,metal,28,7);
+    tube([[side*.74,1.52,.28],[side*.74,1.57,-.55],[side*.74,1.42,-.78]],.035,deep,24,7);
    }
-   softBox(1.92,.08,.34,deep,0,.48,2.25,.02);
+   for(let i=0;i<4;i++)softBox(.27,.12,.06,metal,-.48+i*.32,1.60,.84,.025);
+   const spareA=add(new THREE.TorusGeometry(.34,.10,10,32),rubber,-.40,.94,-1.28);spareA.rotation.x=Math.PI/2;
+   const spareB=add(new THREE.TorusGeometry(.34,.10,10,32),rubber,.40,.94,-1.28);spareB.rotation.x=Math.PI/2;
+   softBox(2.02,.10,.28,deep,0,.49,2.24,.025);
   }
-  if(vehicleId==='sport-coupe'||vehicleId==='supercar'){
-   softBox(2.10,.065,.34,deep,0,.47,2.26,.025);
-   softBox(1.72,.07,.30,deep,0,.48,-2.25,.025);
+  if(vehicleId==='sport-coupe'){
+   for(const side of [-1,1]){
+    softBox(.28,.12,.44,deep,side*1.00,.77,-.62,.03);
+    softBox(.16,.20,.08,metal,side*1.08,.72,-.60,.025);
+    tube([[side*.88,.63,1.45],[side*1.08,.57,.95],[side*1.08,.57,-1.25]],.035,deep,28,7);
+   }
+   softBox(2.16,.07,.30,deep,0,.47,2.23,.025);
+   softBox(1.86,.07,.24,deep,0,.47,-2.25,.025);
   }
   if(vehicleId==='business-sedan'){
-   softBox(.31,.22,.075,deep,-.22,.79,2.30,.018);
-   softBox(.31,.22,.075,deep,.22,.79,2.30,.018);
+   softBox(.28,.25,.08,deep,-.22,.79,2.30,.018);
+   softBox(.28,.25,.08,deep,.22,.79,2.30,.018);
+   for(const side of [-1,1]){
+    tube([[side*1.04,.84,.82],[side*1.08,.82,.05],[side*1.08,.82,-.92],[side*1.02,.85,-1.55]],.018,metal,36,6);
+    softBox(.16,.12,.10,metal,side*1.09,.80,-.52,.02);
+    const exhaust=add(new THREE.CylinderGeometry(.075,.075,.18,20),metal,side*.73,.56,-2.27);exhaust.rotation.x=Math.PI/2;
+   }
+  }
+  if(vehicleId==='supercar'){
+   for(const side of [-1,1]){
+    softBox(.34,.16,.58,deep,side*1.03,.74,-.18,.045);
+    for(let i=0;i<3;i++)tube([[side*.91,.82,-.48-i*.12],[side*1.05,.81,-.48-i*.12]],.018,metal,10,5);
+    softBox(.12,.13,.55,deep,side*1.13,.48,-.06,.025);
+   }
+   for(let i=0;i<7;i++)softBox(.055,.018,.55,deep,-.45+i*.15,.91,-1.24,.008);
+   softBox(2.18,.08,.34,deep,0,.46,2.24,.025);
+   softBox(1.86,.08,.42,deep,0,.45,-2.28,.025);
+   for(const side of [-1,1]){
+    const exhaust=add(new THREE.CylinderGeometry(.095,.095,.20,24),metal,side*.72,.56,-2.30);exhaust.rotation.x=Math.PI/2;
+   }
   }
  }
  root.userData.vehicleId=vehicleId;
@@ -2922,7 +3010,7 @@ function update(dt){
   // Gas and reverse are separate commands. Reverse first brakes to zero,
   // then engages a controlled reverse gear.
   const selectedVehicle=getSelectedVehicleData();
-  const accel=9.5+prefs.engine*1.15,maxV=42+(30/3.6)+prefs.engine*3.8+(selectedVehicle.speed/3.6),reverseMax=13;
+  const accel=(9.5+prefs.engine*1.15)*(1+(selectedVehicle.acceleration||0)/100),maxV=42+(30/3.6)+prefs.engine*3.8+(selectedVehicle.speed/3.6),reverseMax=13;
   if(held.gas){
     if(speed<0)speed=Math.min(0,speed+22*dt);
     else speed=Math.min(maxV,speed+accel*dt);
@@ -3223,16 +3311,16 @@ function buyUpgrade(key){const level=Number(prefs[key]||0),cost=(key==='engine'?
 function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=Number(prefs[key]||0),cost=(key==='engine'?260:220)+level*150,bar=$(key+'Bar'),preview=$(key+'Preview'),value=$(key+'Value'),btn=$(key+'Upgrade');value.textContent=level+'/8 ур.';const pct=level/8*100,next=Math.min(100,(level+1)/8*100);bar.style.width=pct+'%';preview.style.left=pct+'%';preview.style.width=(next-pct)+'%';btn.textContent=level>=8?'МАКСИМУМ':('УЛУЧШИТЬ · '+cost+' TOK');btn.disabled=level>=8;}}
 
 const carCaseVehicles = [
- {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0,image:"https://images.pexels.com/photos/33987626/pexels-photo-33987626/free-photo-of-silver-luxury-sedan-in-parking-lot.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://ymimg1.b8cdn.com/resized/car_model/6916/pictures/6212626/webp_listing_main_trumpchi_ga4_9.webp"},
- {id:'sport-suv',name:'Kairo Sportage X',inspiration:'Оригинальный дизайн городского спорт-внедорожника',speed:15,handling:5,handlingLabel:'+5% к управлению',rarity:'ОБЫЧНАЯ+',chance:23,duplicate:1000,shape:1,image:"https://www.mycarcheck.com/assets/images/720/vehicles/tier-aj/553aa4ae729c24d591504cc73c7d85cc.jpg?v=cadd0a80a2b6e96358279061ee8ffce5"},
- {id:'japanese-sedan',name:'Toyama Mark II',inspiration:'Оригинальный дизайн японского бизнес-седана',speed:20,handling:10,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2,image:"https://trademe.tmcdn.co.nz/photoserver/full/2291647438.jpg"},
- {id:'large-suv',name:'Lander Cruiser 300',inspiration:'Оригинальный дизайн крупного внедорожника',speed:20,handling:5,handlingLabel:'+5% к управлению',rarity:'РЕДКАЯ',chance:11,duplicate:2200,shape:3,image:"https://portal.toyota-body.co.jp/dakar/en/news/2024/img/14/001.jpg"},
- {id:'rally-truck',name:'KAMOR Dakar Rally',inspiration:'Оригинальный дизайн раллийного грузовика',speed:-10,handling:25,handlingLabel:'+25% к устойчивости и контролю',rarity:'ОСОБАЯ',chance:7,duplicate:3000,shape:4,image:"https://img.championat.com/s/1280x850/news/big/j/k/kamaz-master-otpravilsja-na-ralli-marafon-dakar_15773548651543643465.jpg"},
- {id:'sport-coupe',name:'Toyama Suvra GT',inspiration:'Оригинальный дизайн японского спортивного купе',speed:30,handling:15,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5,image:"https://images.pexels.com/photos/31853161/pexels-photo-31853161/free-photo-of-silver-toyota-supra-in-industrial-setting.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://scene7.toyota.eu/is/image/toyotaeurope/Toyota-exterieur-GR-Supra-schuin-voor-zilver%3AMedium-Landscape?op_usm=1.75%2C0.3%2C2%2C0&resMode=sharp2&ts=0"},
- {id:'business-sedan',name:'Bavaro M5 F90',inspiration:'Оригинальный дизайн спортивного бизнес-седана',speed:35,handling:18,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6,image:"https://mediapool.bmwgroup.com/cache/P9/201807/P90316034/P90316034-the-new-bmw-m5-competition-in-ascari-07-2018-2247px.jpg",fallbackImage:"https://paultan.org/image/2018/08/2018-BMW-M5-Competition-Official-Photos_Exterior-40.jpg"},
- {id:'supercar',name:'Feraro V12',inspiration:'Оригинальный дизайн итальянского суперкара',speed:50,handling:22,handlingLabel:'+22% к управлению',rarity:'ЛЕГЕНДАРНАЯ',chance:1,duplicate:12000,shape:7,image:"https://www.europeanprestige.co.uk/blobs/stock/245/images/45248c99-edb3-4a94-9d32-f8b371e59431/1j6a1011-edit.jpg?height=2376&width=3168"}
+ {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,acceleration:-2,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0,image:"https://images.pexels.com/photos/33987626/pexels-photo-33987626/free-photo-of-silver-luxury-sedan-in-parking-lot.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://ymimg1.b8cdn.com/resized/car_model/6916/pictures/6212626/webp_listing_main_trumpchi_ga4_9.webp"},
+ {id:'sport-suv',name:'Kairo Sportage X',inspiration:'Оригинальный дизайн городского спорт-внедорожника',speed:15,handling:5,acceleration:0,handlingLabel:'+5% к управлению',rarity:'ОБЫЧНАЯ+',chance:23,duplicate:1000,shape:1,image:"https://www.mycarcheck.com/assets/images/720/vehicles/tier-aj/553aa4ae729c24d591504cc73c7d85cc.jpg?v=cadd0a80a2b6e96358279061ee8ffce5"},
+ {id:'japanese-sedan',name:'Toyama Mark II',inspiration:'Оригинальный дизайн японского бизнес-седана',speed:20,handling:10,acceleration:3,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2,image:"https://trademe.tmcdn.co.nz/photoserver/full/2291647438.jpg"},
+ {id:'large-suv',name:'Lander Cruiser 300',inspiration:'Оригинальный дизайн крупного внедорожника',speed:20,handling:5,acceleration:-4,handlingLabel:'+5% к управлению',rarity:'РЕДКАЯ',chance:11,duplicate:2200,shape:3,image:"https://portal.toyota-body.co.jp/dakar/en/news/2024/img/14/001.jpg"},
+ {id:'rally-truck',name:'KAMOR Dakar Rally',inspiration:'Оригинальный дизайн раллийного грузовика',speed:-10,handling:25,acceleration:-8,handlingLabel:'+25% к устойчивости и контролю',rarity:'ОСОБАЯ',chance:7,duplicate:3000,shape:4,image:"https://img.championat.com/s/1280x850/news/big/j/k/kamaz-master-otpravilsja-na-ralli-marafon-dakar_15773548651543643465.jpg"},
+ {id:'sport-coupe',name:'Toyama Suvra GT',inspiration:'Оригинальный дизайн японского спортивного купе',speed:30,handling:15,acceleration:8,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5,image:"https://images.pexels.com/photos/31853161/pexels-photo-31853161/free-photo-of-silver-toyota-supra-in-industrial-setting.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://scene7.toyota.eu/is/image/toyotaeurope/Toyota-exterieur-GR-Supra-schuin-voor-zilver%3AMedium-Landscape?op_usm=1.75%2C0.3%2C2%2C0&resMode=sharp2&ts=0"},
+ {id:'business-sedan',name:'Bavaro M5 F90',inspiration:'Оригинальный дизайн спортивного бизнес-седана',speed:35,handling:18,acceleration:7,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6,image:"https://mediapool.bmwgroup.com/cache/P9/201807/P90316034/P90316034-the-new-bmw-m5-competition-in-ascari-07-2018-2247px.jpg",fallbackImage:"https://paultan.org/image/2018/08/2018-BMW-M5-Competition-Official-Photos_Exterior-40.jpg"},
+ {id:'supercar',name:'Feraro V12',inspiration:'Оригинальный дизайн итальянского суперкара',speed:50,handling:22,acceleration:15,handlingLabel:'+22% к управлению',rarity:'ЛЕГЕНДАРНАЯ',chance:1,duplicate:12000,shape:7,image:"https://www.europeanprestige.co.uk/blobs/stock/245/images/45248c99-edb3-4a94-9d32-f8b371e59431/1j6a1011-edit.jpg?height=2376&width=3168"}
 ];
-const STARTER_VEHICLE={id:'starter-subaru',name:'Aurora Impreza',inspiration:'Стартовый автомобиль AUTOSPORT',speed:0,handling:0,handlingLabel:'Базовое управление',rarity:'СТАРТОВАЯ',image:null};
+const STARTER_VEHICLE={id:'starter-subaru',name:'Aurora Impreza',inspiration:'Стартовый автомобиль AUTOSPORT',speed:0,handling:0,acceleration:0,handlingLabel:'Базовое управление',rarity:'СТАРТОВАЯ',image:null};
 if(!prefs.carId||(!save.carCaseOwned.includes(prefs.carId)&&prefs.carId!=='starter-subaru'))prefs.carId='starter-subaru';
 function getSelectedVehicleData(){
  if(prefs.carId==='starter-subaru')return STARTER_VEHICLE;
@@ -3249,10 +3337,11 @@ function renderGarageCarPicker(){
   const active=v.id===selected.id;
   const speed=(v.speed>0?'+':'')+v.speed+' КМ/Ч';
   const control=(v.handling>0?'+':'')+v.handling+'% УПРАВЛЕНИЕ';
+  const accel=(v.acceleration>0?'+':'')+v.acceleration+'% РАЗГОН';
   const thumb=v.image?'<img src="'+v.image+'" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">':'';
   return '<button type="button" class="garage-car-option" data-garage-car="'+v.id+'" aria-pressed="'+active+'">'+
    '<span class="garage-car-thumb"><i>AS</i>'+thumb+'</span>'+
-   '<span class="garage-car-option-info"><small>'+v.rarity+'</small><strong>'+v.name+'</strong><em>'+speed+'</em><b>'+control+'</b></span>'+
+   '<span class="garage-car-option-info"><small>'+v.rarity+'</small><strong>'+v.name+'</strong><em>'+speed+'</em><b>'+accel+'</b><b>'+control+'</b></span>'+
    '<span class="garage-car-selected">ВЫБРАНА</span></button>';
  }).join('');
 }
