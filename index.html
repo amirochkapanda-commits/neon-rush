@@ -2462,6 +2462,8 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
   }
  }
  root.userData.vehicleId=vehicleId;
+ root.userData.halfWidth=modelProfile.halfWidth*(isPlayer?modelProfile.scale[0]:1);
+ root.userData.halfLength=modelProfile.halfLength*(isPlayer?modelProfile.scale[2]:1);
  root.userData.body=body;return root;
 }
 function applyGarage(){
