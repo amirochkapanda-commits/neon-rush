@@ -2273,7 +2273,9 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  const modelProfile=modelProfiles[vehicleId]||modelProfiles['starter-subaru'];
  const wheelRadius=.425*modelProfile.wheel,wheelCenterY=wheelRadius+.005;
  const root=new THREE.Group(),body=new THREE.Group(),cabinGroup=new THREE.Group();root.name=(isPlayer?'player-':'opponent-')+vehicleId;root.add(body);body.add(cabinGroup);let activeGroup=body;
- cabinGroup.scale.set(...(modelProfile.cabinScale||[1,1,1]));cabinGroup.position.set(...(modelProfile.cabinPosition||[0,0,0]));
+ const cabinScale=modelProfile.cabinScale||[1,1,1],bodyScale=modelProfile.scale;
+ cabinGroup.scale.set(cabinScale[0]/bodyScale[0],cabinScale[1]/bodyScale[1],cabinScale[2]/bodyScale[2]);
+ const cabinPosition=modelProfile.cabinPosition||[0,0,0];cabinGroup.position.set(cabinPosition[0]/bodyScale[0],cabinPosition[1]/bodyScale[1],cabinPosition[2]/bodyScale[2]);
  const wheelZs=[-(modelProfile.wheelBase||1.42),(modelProfile.wheelBase||1.42)];
  const pm=new THREE.MeshPhysicalMaterial({color,roughness:.27,metalness:.38,clearcoat:1,clearcoatRoughness:.12,reflectivity:.72,envMapIntensity:1.35});
  if(isPlayer)paintMat=pm;
