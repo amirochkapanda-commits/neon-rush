@@ -2013,6 +2013,7 @@ const currentStage=Math.min(2,save.races);if(!championshipTracks.includes(prefs.
 let scene,camera,cameraAim,renderer,garageRenderer,composer,ssaoPass,bloomPass,pmremTarget,clock,curve,length=0,player,paintMat,rimMat,garageScene,garageCamera,garageCar,garagePaintMat,garageRimMat,garageDragging=false,garageDragPoint=null,garagePointerId=null,garageOrbitAzimuth=.82,garageOrbitElevation=1.05,ai=[],raf=0,mode='menu',paused=false,elapsed=0,progress=0,offset=0,steer=0,speed=0,heading=0,lateralSpeed=0,driftAmount=0,collisionFlash=0,boundaryHit=0,basePixelRatio=1,adaptiveScale=1,mobileQuality=false,mapCanvas=null,mapCtx=null,mapClock=0;let atmosphereLights=null,weatherCanvas=null,weatherCtx=null,weatherParticles=[];const held={left:false,right:false,gas:false,reverse:false};const ROAD=22.5;
 const BOT_STARTS=[{d:11,side:-6.3},{d:11,side:0},{d:11,side:6.3},{d:20,side:-6.3},{d:20,side:0},{d:20,side:6.3},{d:29,side:0}];
 const BOT_COLORS=['#d34e43','#e6e9e8','#4388b9','#e0a34f','#71a9a0','#b5a7dc','#d978a0'];
+const BOT_VEHICLE_IDS=['city-sedan','sport-suv','japanese-sedan','large-suv','rally-truck','sport-coupe','business-sedan'];
 const BOT_LANES=[-7.5,-2.5,2.5,7.5];
 const BOT_LEAGUE_SPEED_KMH=[162,186,212,240,270];
 const BOT_SPEED_SPREAD=.075;
@@ -2257,21 +2258,23 @@ function planBotLane(a){
 }
 function currentRacePlace(){return 1+ai.filter(a=>a.d>progress+.05).length}
 function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
- const vehicleId=isPlayer?requestedVehicleId:'starter-subaru';
+ const vehicleId=requestedVehicleId||'starter-subaru';
  const modelProfiles={
-  'starter-subaru':{scale:[1,1,1],wheel:1,halfWidth:1.18,halfLength:2.34},
-  'city-sedan':{scale:[1.01,.96,1.045],wheel:1.02,halfWidth:1.20,halfLength:2.45},
-  'sport-suv':{scale:[1.10,1.16,1.04],wheel:1.07,halfWidth:1.30,halfLength:2.44},
-  'japanese-sedan':{scale:[1.055,.94,1.12],wheel:1.04,halfWidth:1.25,halfLength:2.62},
-  'large-suv':{scale:[1.18,1.23,1.08],wheel:1.12,halfWidth:1.40,halfLength:2.53},
-  'rally-truck':{scale:[1.23,1.30,1.12],wheel:1.17,halfWidth:1.47,halfLength:2.64},
-  'sport-coupe':{scale:[1.10,.84,1.14],wheel:1.20,halfWidth:1.34,halfLength:2.67},
-  'business-sedan':{scale:[1.08,.97,1.12],wheel:1.08,halfWidth:1.29,halfLength:2.62},
-  'supercar':{scale:[1.16,.76,1.11],wheel:1.30,halfWidth:1.38,halfLength:2.60}
+  'starter-subaru':{scale:[1.00,1.00,1.00],cabinScale:[1.00,1.00,1.00],cabinPosition:[0,0,0],wheel:1.00,wheelBase:1.42,halfWidth:1.18,halfLength:2.34},
+  'city-sedan':{scale:[1.00,.98,1.08],cabinScale:[1.035,.98,1.06],cabinPosition:[0,.005,-.04],wheel:1.02,wheelBase:1.46,halfWidth:1.20,halfLength:2.45},
+  'sport-suv':{scale:[1.14,1.17,1.07],cabinScale:[1.12,1.16,1.13],cabinPosition:[0,.14,-.08],wheel:1.10,wheelBase:1.48,halfWidth:1.30,halfLength:2.44},
+  'japanese-sedan':{scale:[1.08,.94,1.16],cabinScale:[1.08,.94,1.15],cabinPosition:[0,-.015,-.08],wheel:1.05,wheelBase:1.53,halfWidth:1.25,halfLength:2.62},
+  'large-suv':{scale:[1.23,1.28,1.14],cabinScale:[1.17,1.17,1.19],cabinPosition:[0,.18,-.10],wheel:1.18,wheelBase:1.51,halfWidth:1.40,halfLength:2.53},
+  'rally-truck':{scale:[1.30,1.23,1.20],cabinScale:[1.18,1.12,.90],cabinPosition:[0,.14,.24],wheel:1.22,wheelBase:1.61,halfWidth:1.47,halfLength:2.64},
+  'sport-coupe':{scale:[1.12,.83,1.22],cabinScale:[.98,.80,.88],cabinPosition:[0,-.10,.13],wheel:1.22,wheelBase:1.55,halfWidth:1.34,halfLength:2.67},
+  'business-sedan':{scale:[1.15,.97,1.20],cabinScale:[1.10,.97,1.13],cabinPosition:[0,.005,-.08],wheel:1.10,wheelBase:1.55,halfWidth:1.29,halfLength:2.62},
+  'supercar':{scale:[1.25,.72,1.17],cabinScale:[1.12,.72,.79],cabinPosition:[0,-.16,.18],wheel:1.32,wheelBase:1.56,halfWidth:1.38,halfLength:2.60}
  };
  const modelProfile=modelProfiles[vehicleId]||modelProfiles['starter-subaru'];
  const wheelRadius=.425*modelProfile.wheel,wheelCenterY=wheelRadius+.005;
- const root=new THREE.Group(),body=new THREE.Group();root.name=isPlayer?'player-'+vehicleId:'bot-subaru-impreza';root.add(body);
+ const root=new THREE.Group(),body=new THREE.Group(),cabinGroup=new THREE.Group();root.name=(isPlayer?'player-':'opponent-')+vehicleId;root.add(body);body.add(cabinGroup);let activeGroup=body;
+ cabinGroup.scale.set(...(modelProfile.cabinScale||[1,1,1]));cabinGroup.position.set(...(modelProfile.cabinPosition||[0,0,0]));
+ const wheelZs=[-(modelProfile.wheelBase||1.42),(modelProfile.wheelBase||1.42)];
  const pm=new THREE.MeshPhysicalMaterial({color,roughness:.27,metalness:.38,clearcoat:1,clearcoatRoughness:.12,reflectivity:.72,envMapIntensity:1.35});
  if(isPlayer)paintMat=pm;
  const black=mat('#101519',.55,.18),deep=mat('#080c0f',.72,.12),rubber=mat('#090b0d',.94,.02),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.84),metal=mat('#aeb9bd',.24,.82),darkMetal=mat('#252e33',.38,.72);
@@ -2281,7 +2284,7 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  const reflector=new THREE.MeshStandardMaterial({color:'#d2dadd',metalness:.82,roughness:.2});
  const redLens=new THREE.MeshPhysicalMaterial({color:'#8f2528',metalness:.18,roughness:.13,clearcoat:1,emissive:'#350607',emissiveIntensity:.18});
  const amberLens=new THREE.MeshPhysicalMaterial({color:'#c47a31',metalness:.12,roughness:.18,clearcoat:1});
- function add(geo,material,x=0,y=0,z=0,parent=body){const o=new THREE.Mesh(geo,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
+ function add(geo,material,x=0,y=0,z=0,parent=activeGroup){const o=new THREE.Mesh(geo,material);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;parent.add(o);return o}
  function box(w,h,d,material,x,y,z){return add(new THREE.BoxGeometry(w,h,d),material,x,y,z)}
  function softBox(w,h,d,material,x,y,z,r=.04){
   const rr=Math.max(.008,Math.min(r,w*.22,h*.22,d*.22)),s=new THREE.Shape();
@@ -2349,6 +2352,7 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  softBox(.42,.028,.28,deep,0,1.114,1.47,.045);
  for(let i=0;i<5;i++)box(.018,.018,.22,metal,-.16+i*.08,1.132,1.47);
  // Cabin glass is split into proper front, rear and side panes instead of one solid glass block.
+ activeGroup=cabinGroup;
  quad([[-.68,1.045,.86],[.68,1.045,.86],[.64,1.505,.22],[-.64,1.505,.22]],glass,.012);
  quad([[-.66,1.045,-1.15],[.66,1.045,-1.15],[.64,1.49,-.66],[-.64,1.49,-.66]],glass,.01);
  quad([[-.64,1.51,.22],[.64,1.51,.22],[.64,1.51,-.66],[-.64,1.51,-.66]],pm,.025);
@@ -2372,6 +2376,8 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  for(const side of [-1,1]){
   const wiper=box(.022,.016,.64,darkMetal,side*.25,1.055,.86);wiper.rotation.y=side*.15;
  }
+ // Return to the main shell for the front fascia and exterior body details.
+ activeGroup=body;
  // Each class gets a different grille layout, lamp proportion and front intake.
  const fascia={
   'starter-subaru':{w:.92,top:.19,bottom:-.13,bars:7,style:'vertical',lamp:[.50,.25]},
@@ -2421,14 +2427,14 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
   softBox(.14,.11,2.1,deep,side*1.035,.57,-.02,.035);
   softBox(.12,.045,1.86,pm,side*1.08,.55,-.02,.025);
   // Wheel-arch lips follow the upper half of each wheel opening.
-  for(const z of [-1.42,1.42]){
+  for(const z of wheelZs){
    const arch=add(new THREE.TorusGeometry(wheelRadius+.09,.068,12,64,Math.PI),pm,side*1.035,wheelCenterY,z);arch.rotation.y=Math.PI/2;
    const innerArch=add(new THREE.TorusGeometry(wheelRadius+.035,.018,8,48,Math.PI),black,side*1.045,wheelCenterY,z);innerArch.rotation.y=Math.PI/2;
   }
  }
  // Four detailed wheel assemblies preserve the original centres used by the handling and collision code.
  const tireGeo=new THREE.CylinderGeometry(wheelRadius,wheelRadius,.32*modelProfile.wheel,56,1);
- for(const z of [-1.42,1.42])for(const side of [-1,1]){
+ for(const z of wheelZs)for(const side of [-1,1]){
   const tire=add(tireGeo,rubber,side*1.08,wheelCenterY,z);tire.rotation.z=-side*Math.PI/2;
   const rimFace=add(new THREE.CylinderGeometry(wheelRadius*.72,wheelRadius*.72,.045*modelProfile.wheel,48),rim,side*1.255,wheelCenterY,z);rimFace.rotation.z=-side*Math.PI/2;
   const hub=add(new THREE.CylinderGeometry(wheelRadius*.22,wheelRadius*.22,.052*modelProfile.wheel,24),metal,side*1.285,wheelCenterY,z);hub.rotation.z=-side*Math.PI/2;
@@ -2481,7 +2487,7 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
  softBox(.88,.07,.17,interior,0,1.16,.62,.025);
  const steering=add(new THREE.TorusGeometry(.18,.022,8,28),metal,-.43,1.27,.46);steering.rotation.x=.16;
  // Player-only body equipment: each car now has class-specific proportions and details.
- if(isPlayer){
+ {
   const shape=modelProfile.scale;
   body.scale.set(shape[0],shape[1],shape[2]);
   body.position.y=.005*(1-shape[1]);
@@ -2564,10 +2570,89 @@ function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
     const exhaust=add(new THREE.CylinderGeometry(.095,.095,.20,24),metal,side*.72,.56,-2.30);exhaust.rotation.x=Math.PI/2;
    }
   }
+  // Extra profile-specific surfacing makes every vehicle read differently at a glance.
+  if(vehicleId==='starter-subaru'){
+   softBox(.92,.045,.38,deep,0,1.015,1.03,.035);
+   for(const side of [-1,1]){
+    softBox(.23,.10,.22,deep,side*.78,.62,2.12,.025);
+    softBox(.08,.06,.52,metal,side*1.02,.70,-1.46,.02);
+   }
+   softBox(2.02,.07,.30,deep,0,.47,2.27,.025);
+  }
+  if(vehicleId==='city-sedan'){
+   softBox(1.70,.045,.08,metal,0,.91,-2.18,.02);
+   for(const side of [-1,1]){
+    tube([[side*.82,1.49,.14],[side*.84,1.49,-.58]],.012,metal,18,5);
+    softBox(.24,.035,.045,metal,side*1.03,.95,-.76,.012);
+   }
+   softBox(1.74,.045,.10,metal,0,.60,2.20,.025);
+  }
+  if(vehicleId==='sport-suv'){
+   for(const side of [-1,1]){
+    tube([[side*.59,1.73,.38],[side*.60,1.76,-.76]],.052,metal,28,7);
+    softBox(.18,.10,2.20,black,side*1.20,.48,-.04,.035);
+    softBox(.11,.10,.46,amberLens,side*1.18,.72,1.95,.025);
+   }
+   softBox(1.85,.08,.23,deep,0,.45,2.25,.03);
+  }
+  if(vehicleId==='japanese-sedan'){
+   for(const side of [-1,1]){
+    softBox(.52,.045,.30,deep,side*.61,1.01,1.34,.035);
+    tube([[side*.80,1.43,.30],[side*.82,1.43,-.72]],.012,metal,24,5);
+    softBox(.16,.08,.20,metal,side*1.06,.78,-1.82,.02);
+   }
+   softBox(1.92,.055,.12,metal,0,.57,-2.22,.02);
+  }
+  if(vehicleId==='large-suv'){
+   for(const side of [-1,1]){
+    softBox(.18,.38,.13,deep,side*1.18,1.02,-1.47,.025);
+    softBox(.14,.24,.28,metal,side*1.19,.73,2.12,.025);
+    tube([[side*.62,1.82,.42],[side*.62,1.82,-.70]],.045,metal,28,7);
+   }
+   softBox(2.18,.13,.24,deep,0,.47,2.22,.035);
+   softBox(1.30,.045,.13,metal,0,.59,-2.23,.025);
+  }
+  if(vehicleId==='rally-truck'){
+   for(const side of [-1,1]){
+    tube([[side*.86,1.72,.30],[side*.86,1.78,-.52],[side*.86,1.72,-1.70]],.045,metal,28,8);
+    softBox(.14,.48,1.12,deep,side*1.11,.92,-1.20,.025);
+    softBox(.20,.16,.22,amberLens,side*1.16,.85,2.02,.025);
+   }
+   for(let i=0;i<5;i++)softBox(.075,.025,.60,metal,-.32+i*.16,1.72,.64,.012);
+   softBox(2.24,.10,.38,deep,0,.44,2.22,.025);
+  }
+  if(vehicleId==='sport-coupe'){
+   for(const side of [-1,1]){
+    softBox(.42,.12,.70,deep,side*.92,.72,1.22,.045);
+    tube([[side*.84,1.08,.18],[side*.90,.94,-.56],[side*.90,.83,-1.26]],.025,metal,24,6);
+    softBox(.28,.10,.12,amberLens,side*.96,.62,2.16,.025);
+   }
+   softBox(2.12,.08,.36,deep,0,.46,2.25,.025);
+  }
+  if(vehicleId==='business-sedan'){
+   for(const side of [-1,1]){
+    tube([[side*.83,1.47,.18],[side*.84,1.47,-.66]],.015,metal,24,5);
+    softBox(.22,.06,.055,metal,side*1.06,.96,-.78,.018);
+    softBox(.08,.10,.38,metal,side*1.17,.61,-.06,.025);
+   }
+   softBox(1.88,.045,.09,metal,0,.59,2.20,.02);
+   softBox(1.74,.045,.10,metal,0,.60,-2.22,.02);
+  }
+  if(vehicleId==='supercar'){
+   for(const side of [-1,1]){
+    softBox(.45,.20,.68,deep,side*.92,.69,-.30,.07);
+    softBox(.30,.08,.28,black,side*.78,.61,2.08,.035);
+    tube([[side*.82,.78,.70],[side*1.10,.62,.25],[side*1.12,.58,-.78]],.035,deep,26,7);
+   }
+   for(let i=0;i<9;i++)softBox(.045,.018,.66,deep,-.42+i*.105,.45,-2.22,.008);
+   softBox(2.22,.11,.45,deep,0,.42,2.25,.035);
+  }
  }
  root.userData.vehicleId=vehicleId;
- root.userData.halfWidth=modelProfile.halfWidth*(isPlayer?modelProfile.scale[0]:1);
- root.userData.halfLength=modelProfile.halfLength*(isPlayer?modelProfile.scale[2]:1);
+ root.userData.modelClass=vehicleId;
+ root.userData.cabin=cabinGroup;
+ root.userData.halfWidth=modelProfile.halfWidth*modelProfile.scale[0];
+ root.userData.halfLength=modelProfile.halfLength*modelProfile.scale[2];
  root.userData.body=body;return root;
 }
 function applyGarage(){
@@ -3014,7 +3099,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
  const markerCount=44,markerPost=new THREE.InstancedMesh(new THREE.CylinderGeometry(.055,.075,1.12,9),mat('#d8d9d4',.55,.18),markerCount*2),markerReflector=new THREE.InstancedMesh(new THREE.BoxGeometry(.19,.17,.045),mat('#d94a3f',.38,.22),markerCount*2),markerDummy=new THREE.Object3D();
  for(let i=0;i<markerCount;i++)for(const side of [-1,1]){const s=pointAt((i+.35)/markerCount*length),dist=ROAD/2+2.45,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,baseY=terrainHeightAt(x,z),index=i*2+(side>0?1:0),yaw=Math.atan2(s.tan.x,s.tan.z);markerDummy.position.set(x,baseY+.56,z);markerDummy.rotation.set(0,yaw,0);markerDummy.scale.set(1,1,1);markerDummy.updateMatrix();markerPost.setMatrixAt(index,markerDummy.matrix);markerDummy.position.set(x,baseY+.83,z);markerDummy.updateMatrix();markerReflector.setMatrixAt(index,markerDummy.matrix);if(markerReflector.setColorAt)markerReflector.setColorAt(index,new THREE.Color((i+Math.round(side))%3===0?'#f1c36f':'#e9e9df'))}
  markerPost.instanceMatrix.needsUpdate=true;markerReflector.instanceMatrix.needsUpdate=true;if(markerReflector.instanceColor)markerReflector.instanceColor.needsUpdate=true;markerPost.castShadow=true;scene.add(markerPost,markerReflector);
- player=car($('paint').value,true,prefs.carId||'starter-subaru');scene.add(player);buildGaragePreview();ai=[];const botLeague=Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague));const botBaseSpeed=BOT_LEAGUE_SPEED_KMH[botLeague]/3.6;for(let i=0;i<BOT_STARTS.length;i++){const slot=BOT_STARTS[i],c=car(BOT_COLORS[i]),seed=(0x51f15e+i*0x9e3779b9)>>>0;const bot={car:c,d:slot.d,side:slot.side,startSide:slot.side,v:botBaseSpeed*(1-BOT_SPEED_SPREAD/2+((seed>>>8)%1000)/1000*BOT_SPEED_SPREAD),currentSpeed:0,hit:0,seed,skill:.72+((seed>>>19)%1000)/1000*.26,aggression:.62+((seed>>>5)%1000)/1000*.38,preferredLane:BOT_LANES[i%BOT_LANES.length],laneTarget:slot.side,planTimer:.25+i*.19,paceTimer:1+i*.23,paceMood:.98+((seed>>>12)%100)/1000,attackTimer:0};bot.acceleration=11.4+bot.skill*2.7;bot.braking=17+bot.skill*7;scene.add(c);ai.push(bot)}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
+ player=car($('paint').value,true,prefs.carId||'starter-subaru');scene.add(player);buildGaragePreview();ai=[];const botLeague=Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague));const botBaseSpeed=BOT_LEAGUE_SPEED_KMH[botLeague]/3.6;for(let i=0;i<BOT_STARTS.length;i++){const slot=BOT_STARTS[i],c=car(BOT_COLORS[i],false,BOT_VEHICLE_IDS[i%BOT_VEHICLE_IDS.length]),seed=(0x51f15e+i*0x9e3779b9)>>>0;const bot={car:c,d:slot.d,side:slot.side,startSide:slot.side,v:botBaseSpeed*(1-BOT_SPEED_SPREAD/2+((seed>>>8)%1000)/1000*BOT_SPEED_SPREAD),currentSpeed:0,hit:0,seed,skill:.72+((seed>>>19)%1000)/1000*.26,aggression:.62+((seed>>>5)%1000)/1000*.38,preferredLane:BOT_LANES[i%BOT_LANES.length],laneTarget:slot.side,planTimer:.25+i*.19,paceTimer:1+i*.23,paceMood:.98+((seed>>>12)%100)/1000,attackTimer:0};bot.acceleration=11.4+bot.skill*2.7;bot.braking=17+bot.skill*7;scene.add(c);ai.push(bot)}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function updateRaceShadowAnchor(){
  if(!player||!atmosphereLights?.sun)return;
  const light=atmosphereLights.sun,x=player.position.x,y=player.position.y,z=player.position.z;
