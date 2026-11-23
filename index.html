@@ -1652,6 +1652,43 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
  #panel-shop .car-case-card{min-height:58px}
  #panel-shop .case-car-visual{height:48px}
 }
+
+/* GARAGE VEHICLE PICKER — collection-first, swipeable and responsive. */
+#panel-garage .garage-showroom{grid-template-rows:minmax(0,1fr) auto!important;row-gap:10px!important}
+#panel-garage .garage-car-picker{min-width:0;padding:10px 12px;border:1px solid #d5b17a44;border-radius:13px;background:linear-gradient(120deg,#101d28ed,#0a131ced);box-shadow:inset 0 1px #ffffff0d}
+#panel-garage .garage-car-picker-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
+#panel-garage .garage-car-picker-head>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+#panel-garage .garage-car-picker-head small{font-size:7px;letter-spacing:.19em;color:#aabac3;font-weight:900}
+#panel-garage .garage-car-picker-head strong{font-size:12px;letter-spacing:.06em;color:#f4c77e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#panel-garage .garage-car-picker-head>span{flex:0 0 auto;padding:5px 8px;border:1px solid #ffffff20;border-radius:7px;background:#ffffff08;color:#c4d0d5;font-size:7px;font-weight:900;letter-spacing:.1em}
+#panel-garage .garage-car-grid{display:flex;gap:7px;min-width:0;overflow-x:auto;overflow-y:hidden;padding:1px 1px 5px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;scrollbar-width:thin;scrollbar-color:#a77a46 #ffffff12}
+#panel-garage .garage-car-option{position:relative;display:grid;grid-template-columns:62px minmax(0,1fr);align-items:center;gap:8px;flex:0 0 clamp(155px,19vw,190px);min-width:0;min-height:69px;padding:6px 7px;border:1px solid #ffffff24;border-radius:9px;background:linear-gradient(145deg,#1c2b36,#101922);text-align:left;scroll-snap-align:start;overflow:hidden}
+#panel-garage .garage-car-option[aria-pressed=true]{border-color:#f4c77e;background:linear-gradient(135deg,#42331f,#192630);box-shadow:0 0 0 1px #f4c77e35,inset 0 1px #ffffff20}
+#panel-garage .garage-car-thumb{position:relative;display:grid;place-items:center;width:62px;height:52px;overflow:hidden;border-radius:6px;background:linear-gradient(135deg,#344957,#101923);color:#f4c77e;font-size:13px;font-weight:1000;letter-spacing:.08em}
+#panel-garage .garage-car-thumb i{position:absolute;font-style:normal;z-index:0}
+#panel-garage .garage-car-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+#panel-garage .garage-car-option-info{display:flex;flex-direction:column;gap:2px;min-width:0;padding-bottom:2px}
+#panel-garage .garage-car-option-info small{font-size:6px;font-weight:950;letter-spacing:.1em;color:#d8b77f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#panel-garage .garage-car-option-info strong{font-size:8px;line-height:1.15;color:#f2f5f6;white-space:normal}
+#panel-garage .garage-car-option-info em{font-size:7px;font-style:normal;color:#f0c17b;font-weight:900}
+#panel-garage .garage-car-option-info b{font-size:6px;color:#aebfc7;font-weight:850;white-space:nowrap}
+#panel-garage .garage-car-selected{display:none;position:absolute;top:4px;right:4px;padding:2px 4px;border-radius:4px;background:#dca85d;color:#17120d;font-size:5px;font-weight:1000;letter-spacing:.05em}
+#panel-garage .garage-car-option[aria-pressed=true] .garage-car-selected{display:block}
+#panel-garage .garage-car-picker-foot{margin-top:5px;color:#81939e;font-size:7px;letter-spacing:.04em}
+@media (orientation:portrait),(max-width:699px){
+ #panel-garage .garage-showroom{display:flex!important;flex-direction:column!important;gap:8px!important}
+ #panel-garage .garage-car-picker{padding:9px 10px}
+ #panel-garage .garage-car-option{flex-basis:clamp(148px,43vw,172px);min-height:65px;grid-template-columns:56px minmax(0,1fr);gap:7px}
+ #panel-garage .garage-car-thumb{width:56px;height:49px}
+ #panel-garage .garage-car-picker-foot{font-size:6px}
+}
+@media (orientation:landscape) and (max-height:520px){
+ #panel-garage .garage-car-picker{padding:5px 7px}
+ #panel-garage .garage-car-picker-head{margin-bottom:4px}
+ #panel-garage .garage-car-option{flex-basis:145px;min-height:54px;grid-template-columns:48px minmax(0,1fr);gap:6px;padding:4px}
+ #panel-garage .garage-car-thumb{width:48px;height:42px}
+ #panel-garage .garage-car-picker-foot{margin-top:2px;font-size:5px}
+}
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -1663,9 +1700,17 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
 <button id="start" class="primary">▶ СТАРТ</button><p id="status" class="tiny">Загрузка…</p></section>
 <section class="panel" id="panel-garage">
 <div class="garage-showroom">
- <div id="garage-view" class="garage-view" aria-label="3D-модель твоего автомобиля">
-  <div class="garage-view-title">ТВОЙ АВТОМОБИЛЬ</div>
+ <div id="garage-view" class="garage-view" aria-label="3D-модель выбранного автомобиля">
+  <div class="garage-view-title" id="garageViewTitle">ТВОЙ АВТОМОБИЛЬ</div>
   <div class="garage-view-hint">ВРАЩАЙ ПАЛЬЦЕМ В ЛЮБУЮ СТОРОНУ</div>
+ </div>
+ <div class="garage-car-picker">
+  <div class="garage-car-picker-head">
+   <div><small>ГАРАЖ / МОЯ КОЛЛЕКЦИЯ</small><strong id="garageCarCurrent">SUBARU IMPREZA</strong></div>
+   <span id="garageCarCount">1 / 9 МАШИН</span>
+  </div>
+  <div class="garage-car-grid" id="garageCarGrid" aria-label="Выбор автомобиля"></div>
+  <div class="garage-car-picker-foot">Выбирай только открытые машины · Листай список по горизонтали</div>
  </div>
  <div class="garage-toolbar">
   <div class="garage-customize">
@@ -2106,11 +2151,13 @@ function planBotLane(a){
  if(changed)a.attackTimer=1.1+a.aggression*.55;
 }
 function currentRacePlace(){return 1+ai.filter(a=>a.d>progress+.05).length}
-function car(color,isPlayer=false){
- const root=new THREE.Group(),body=new THREE.Group();root.name=isPlayer?'player-subaru-impreza':'bot-subaru-impreza';root.add(body);
+function car(color,isPlayer=false,requestedVehicleId='starter-subaru'){
+ const vehicleId=isPlayer?requestedVehicleId:'starter-subaru';
+ const root=new THREE.Group(),body=new THREE.Group();root.name=isPlayer?'player-'+vehicleId:'bot-subaru-impreza';root.add(body);
  const pm=new THREE.MeshPhysicalMaterial({color,roughness:.27,metalness:.38,clearcoat:1,clearcoatRoughness:.12,reflectivity:.72,envMapIntensity:1.35});
  if(isPlayer)paintMat=pm;
  const black=mat('#101519',.55,.18),deep=mat('#080c0f',.72,.12),rubber=mat('#090b0d',.94,.02),rim=mat(isPlayer?(prefs.rim||'#9da6aa'):'#9da6aa',.24,.84),metal=mat('#aeb9bd',.24,.82),darkMetal=mat('#252e33',.38,.72);
+ if(isPlayer)rimMat=rim;
  const glass=new THREE.MeshPhysicalMaterial({color:'#9ebbc8',metalness:.12,roughness:.075,transparent:true,opacity:.72,clearcoat:1,clearcoatRoughness:.04,side:THREE.DoubleSide,depthWrite:false,envMapIntensity:1.2});
  const lampGlass=new THREE.MeshPhysicalMaterial({color:'#dce9ee',metalness:.12,roughness:.09,transparent:true,opacity:.94,clearcoat:1,side:THREE.DoubleSide});
  const reflector=new THREE.MeshStandardMaterial({color:'#d2dadd',metalness:.82,roughness:.2});
@@ -2285,6 +2332,48 @@ function car(color,isPlayer=false){
  }
  softBox(.88,.07,.17,interior,0,1.16,.62,.025);
  const steering=add(new THREE.TorusGeometry(.18,.022,8,28),metal,-.43,1.27,.46);steering.rotation.x=.16;
+ if(isPlayer&&vehicleId!=='starter-subaru'){
+  const profiles={
+   'city-sedan':[1.00,.94,1.03],
+   'sport-suv':[1.08,1.13,1.02],
+   'japanese-sedan':[1.035,.92,1.12],
+   'large-suv':[1.14,1.18,1.04],
+   'rally-truck':[1.17,1.16,1.08],
+   'sport-coupe':[1.035,.86,1.08],
+   'business-sedan':[1.04,.96,1.04],
+   'supercar':[1.06,.82,1.10]
+  };
+  const shape=profiles[vehicleId]||[1,1,1];
+  body.scale.set(shape[0],shape[1],shape[2]);
+  body.position.y=(1-shape[1])*.48;
+  // SUV roof rails and rally-specific cargo body make the selected class visible in 3D.
+  if(vehicleId==='sport-suv'||vehicleId==='large-suv'){
+   for(const side of [-1,1]){
+    tube([[side*.55,1.59,.30],[side*.61,1.62,-.55],[side*.57,1.58,-.76]],.035,deep,24,7);
+   }
+   if(vehicleId==='large-suv'){
+    softBox(2.02,.12,.34,deep,0,.62,2.24,.035);
+    for(const side of [-1,1])softBox(.10,.19,.30,metal,side*.98,.70,2.12,.025);
+   }
+  }
+  if(vehicleId==='rally-truck'){
+   softBox(1.68,.56,1.02,pm,0,1.18,-1.34,.07);
+   softBox(1.74,.07,1.08,deep,0,.91,-1.34,.025);
+   for(const side of [-1,1]){
+    tube([[side*.70,.92,-.86],[side*.78,1.48,-.86],[side*.78,1.48,-1.82],[side*.70,.92,-1.82]],.045,black,20,7);
+   }
+   softBox(1.92,.08,.34,deep,0,.48,2.25,.02);
+  }
+  if(vehicleId==='sport-coupe'||vehicleId==='supercar'){
+   softBox(2.10,.065,.34,deep,0,.47,2.26,.025);
+   softBox(1.72,.07,.30,deep,0,.48,-2.25,.025);
+  }
+  if(vehicleId==='business-sedan'){
+   softBox(.31,.22,.075,deep,-.22,.79,2.30,.018);
+   softBox(.31,.22,.075,deep,.22,.79,2.30,.018);
+  }
+ }
+ root.userData.vehicleId=vehicleId;
  root.userData.body=body;return root;
 }
 function applyGarage(){
@@ -2298,6 +2387,28 @@ function updateGarageCamera(){
  const portrait=isPortraitViewport();const radius=portrait?8.4:7.15,polar=clamp(garageOrbitElevation,.12,1.62),horizontal=radius*Math.sin(polar);
  garageCamera.position.set(Math.sin(garageOrbitAzimuth)*horizontal,radius*Math.cos(polar)+.68,Math.cos(garageOrbitAzimuth)*horizontal);
  garageCamera.lookAt(0,.68,0);
+}
+function refreshGarageCarPreview(){
+ if(!garageScene||!player)return;
+ if(garageCar){
+  garageScene.remove(garageCar);
+  garageCar.traverse(o=>{
+   if(!o.isMesh)return;
+   const materials=Array.isArray(o.material)?o.material:[o.material];
+   materials.forEach(m=>m&&m.dispose&&m.dispose());
+  });
+ }
+ garageCar=player.clone(true);const materialCopies=new Map();garagePaintMat=null;garageRimMat=null;
+ garageCar.traverse(o=>{
+  if(!o.isMesh)return;
+  const copyMaterial=m=>{
+   if(!materialCopies.has(m)){const cloned=m.clone();materialCopies.set(m,cloned);if(m===paintMat)garagePaintMat=cloned;if(m===rimMat)garageRimMat=cloned}
+   return materialCopies.get(m);
+  };
+  o.material=Array.isArray(o.material)?o.material.map(copyMaterial):copyMaterial(o.material);
+ });
+ garageCar.position.set(0,.10,0);garageCar.rotation.set(0,-.55,0);garageCar.scale.setScalar(1.16);
+ garageScene.add(garageCar);applyGarage();
 }
 function buildGaragePreview(){
  garageScene=new THREE.Scene();garageScene.background=new THREE.Color('#263b48');garageScene.environment=scene.environment;garageScene.environmentIntensity=1.35;
@@ -2317,17 +2428,7 @@ function buildGaragePreview(){
  const fill=new THREE.DirectionalLight('#b5dfff',2.6);fill.position.set(6,4,-4);garageScene.add(fill);
  const front=new THREE.DirectionalLight('#ffffff',1.25);front.position.set(1.5,3.5,7);garageScene.add(front);
  const back=new THREE.PointLight('#e4ad62',52,20);back.position.set(0,4,-5);garageScene.add(back);
- garageCar=player.clone(true);const materialCopies=new Map();garagePaintMat=null;garageRimMat=null;
- garageCar.traverse(o=>{
-  if(!o.isMesh)return;
-  const copyMaterial=m=>{
-   if(!materialCopies.has(m)){const cloned=m.clone();materialCopies.set(m,cloned);if(m===paintMat)garagePaintMat=cloned;if(m===rimMat)garageRimMat=cloned}
-   return materialCopies.get(m);
-  };
-  o.material=Array.isArray(o.material)?o.material.map(copyMaterial):copyMaterial(o.material);
- });
- garageCar.position.set(0,.10,0);garageCar.rotation.set(0,-.55,0);garageCar.scale.setScalar(1.16);
- garageScene.add(garageCar);applyGarage();updateGarageCamera();
+ refreshGarageCarPreview();updateGarageCamera();
 }
 function renderGaragePreview(){
  if(!garageScene||!garageCamera)return false;
@@ -2719,7 +2820,7 @@ for(let i=0;i<7;i++){let s=pointAt(i/7*length+.08*length),side=i%2?1:-1,dist=ROA
  const markerCount=44,markerPost=new THREE.InstancedMesh(new THREE.CylinderGeometry(.055,.075,1.12,9),mat('#d8d9d4',.55,.18),markerCount*2),markerReflector=new THREE.InstancedMesh(new THREE.BoxGeometry(.19,.17,.045),mat('#d94a3f',.38,.22),markerCount*2),markerDummy=new THREE.Object3D();
  for(let i=0;i<markerCount;i++)for(const side of [-1,1]){const s=pointAt((i+.35)/markerCount*length),dist=ROAD/2+2.45,x=s.p.x+s.side.x*dist*side,z=s.p.z+s.side.z*dist*side,baseY=terrainHeightAt(x,z),index=i*2+(side>0?1:0),yaw=Math.atan2(s.tan.x,s.tan.z);markerDummy.position.set(x,baseY+.56,z);markerDummy.rotation.set(0,yaw,0);markerDummy.scale.set(1,1,1);markerDummy.updateMatrix();markerPost.setMatrixAt(index,markerDummy.matrix);markerDummy.position.set(x,baseY+.83,z);markerDummy.updateMatrix();markerReflector.setMatrixAt(index,markerDummy.matrix);if(markerReflector.setColorAt)markerReflector.setColorAt(index,new THREE.Color((i+Math.round(side))%3===0?'#f1c36f':'#e9e9df'))}
  markerPost.instanceMatrix.needsUpdate=true;markerReflector.instanceMatrix.needsUpdate=true;if(markerReflector.instanceColor)markerReflector.instanceColor.needsUpdate=true;markerPost.castShadow=true;scene.add(markerPost,markerReflector);
- player=car($('paint').value,true);scene.add(player);buildGaragePreview();ai=[];const botLeague=Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague));const botBaseSpeed=BOT_LEAGUE_SPEED_KMH[botLeague]/3.6;for(let i=0;i<BOT_STARTS.length;i++){const slot=BOT_STARTS[i],c=car(BOT_COLORS[i]),seed=(0x51f15e+i*0x9e3779b9)>>>0;const bot={car:c,d:slot.d,side:slot.side,startSide:slot.side,v:botBaseSpeed*(1-BOT_SPEED_SPREAD/2+((seed>>>8)%1000)/1000*BOT_SPEED_SPREAD),currentSpeed:0,hit:0,seed,skill:.72+((seed>>>19)%1000)/1000*.26,aggression:.62+((seed>>>5)%1000)/1000*.38,preferredLane:BOT_LANES[i%BOT_LANES.length],laneTarget:slot.side,planTimer:.25+i*.19,paceTimer:1+i*.23,paceMood:.98+((seed>>>12)%100)/1000,attackTimer:0};bot.acceleration=11.4+bot.skill*2.7;bot.braking=17+bot.skill*7;scene.add(c);ai.push(bot)}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
+ player=car($('paint').value,true,prefs.carId||'starter-subaru');scene.add(player);buildGaragePreview();ai=[];const botLeague=Math.max(0,Math.min(4,selectedReplayLeague===null?(save.league||0):selectedReplayLeague));const botBaseSpeed=BOT_LEAGUE_SPEED_KMH[botLeague]/3.6;for(let i=0;i<BOT_STARTS.length;i++){const slot=BOT_STARTS[i],c=car(BOT_COLORS[i]),seed=(0x51f15e+i*0x9e3779b9)>>>0;const bot={car:c,d:slot.d,side:slot.side,startSide:slot.side,v:botBaseSpeed*(1-BOT_SPEED_SPREAD/2+((seed>>>8)%1000)/1000*BOT_SPEED_SPREAD),currentSpeed:0,hit:0,seed,skill:.72+((seed>>>19)%1000)/1000*.26,aggression:.62+((seed>>>5)%1000)/1000*.38,preferredLane:BOT_LANES[i%BOT_LANES.length],laneTarget:slot.side,planTimer:.25+i*.19,paceTimer:1+i*.23,paceMood:.98+((seed>>>12)%100)/1000,attackTimer:0};bot.acceleration=11.4+bot.skill*2.7;bot.braking=17+bot.skill*7;scene.add(c);ai.push(bot)}applyGarage();clock=new THREE.Clock();$('status').textContent='Трасса загружена · '+r.points.length+' контрольных точек';animate()}
 function updateRaceShadowAnchor(){
  if(!player||!atmosphereLights?.sun)return;
  const light=atmosphereLights.sun,x=player.position.x,y=player.position.y,z=player.position.z;
@@ -2820,7 +2921,8 @@ function update(dt){
   steer=steerInput;
   // Gas and reverse are separate commands. Reverse first brakes to zero,
   // then engages a controlled reverse gear.
-  const accel=9.5+prefs.engine*1.15,maxV=42+(30/3.6)+prefs.engine*3.8,reverseMax=13;
+  const selectedVehicle=getSelectedVehicleData();
+  const accel=9.5+prefs.engine*1.15,maxV=42+(30/3.6)+prefs.engine*3.8+(selectedVehicle.speed/3.6),reverseMax=13;
   if(held.gas){
     if(speed<0)speed=Math.min(0,speed+22*dt);
     else speed=Math.min(maxV,speed+accel*dt);
@@ -2840,7 +2942,8 @@ function update(dt){
   // while each sports-tyre level makes the front end respond more eagerly.
   const stockTurnRate=.58+Math.min(absSpeed,48)*.014;
   const tyreSteeringBonus=1+gripLevel*.035;
-  const turnRate=stockTurnRate*tyreSteeringBonus;
+  const vehicleControlBonus=1+selectedVehicle.handling/100;
+  const turnRate=stockTurnRate*tyreSteeringBonus*vehicleControlBonus;
   const driftStart=24+gripLevel*1.35;
   const driftFull=34+gripLevel*1.15;
   const speedFactor=clamp((absSpeed-driftStart)/(driftFull-driftStart),0,1);
@@ -2851,16 +2954,16 @@ function update(dt){
   // Build rear slip progressively while the driver holds the turn. Counter-
   // steering catches the slide; releasing the wheel lets grip return smoothly.
   if(steerInput!==0&&driftFactor>.04&&!counterSteering){
-    driftAmount=clamp(driftAmount+dt*(1.45+driftFactor*.65)*(1-gripLevel*.045),0,1);
+    driftAmount=clamp(driftAmount+dt*(1.45+driftFactor*.65)*(1-gripLevel*.045)/vehicleControlBonus,0,1);
   }else{
     driftAmount=Math.max(0,driftAmount-dt*(counterSteering?2.8:2.0));
   }
-  const maxSlipAngle=.34-gripLevel*.027;
+  const maxSlipAngle=(.34-gripLevel*.027)/(1+(selectedVehicle.handling/100)*.65);
   const targetSlipAngle=driftAmount*driftFactor*maxSlipAngle*brakingInTurn;
   // Rear momentum moves opposite the steering input, so the rear steps outside
   // the corner while the nose remains aimed into it.
   const targetLateral= -Math.sign(speed||1)*steerInput*absSpeed*Math.tan(targetSlipAngle);
-  const lateralResponse=steerInput===0?5.2:3.5+gripLevel*.16;
+  const lateralResponse=(steerInput===0?5.2:3.5+gripLevel*.16)*(1+selectedVehicle.handling/100*.5);
   lateralSpeed+=(targetLateral-lateralSpeed)*Math.min(1,lateralResponse*dt);
   const lateralLimit=absSpeed*Math.tan(maxSlipAngle);
   lateralSpeed=clamp(lateralSpeed,-lateralLimit,lateralLimit);
@@ -3016,7 +3119,7 @@ function finish(){
 function renderLeagueOptions(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const list=$('league-list');if(!list)return;list.innerHTML='';names.forEach((name,index)=>{const unlocked=index<=save.league,current=selectedReplayLeague===null?index===save.league:index===selectedReplayLeague,button=document.createElement('button');button.type='button';button.className='league-option'+(current?' current':'');button.disabled=!unlocked;const status=!unlocked?'ЗАКРЫТА':current?'ВЫБРАНА':index<save.league?'ПОВТОР ДОСТУПЕН':'ТЕКУЩАЯ ЛИГА';button.innerHTML='<span><span class="league-option-name">ЛИГА '+(index+1)+' · '+name+'</span><span class="league-option-sub">'+(index<save.league?'Пройдена · можно перепройти':index===save.league?'Твой текущий чемпионат':'Откроется после предыдущей лиги')+'</span></span><span class="league-option-status">'+status+'</span>';button.addEventListener('click',()=>{if(!unlocked)return;selectedReplayLeague=index<save.league?index:null;prefs.track='coast';replayMode=selectedReplayLeague!==null;localStorage.setItem('autosport-garage',JSON.stringify(prefs));$('league-modal').classList.add('hidden');updateMenuStats()});list.appendChild(button)})}
 function openLeaguePicker(){$('league-modal').classList.remove('hidden');renderLeagueOptions()}
 $('leagueName').addEventListener('click',openLeaguePicker);$('league-close').addEventListener('click',()=>$('league-modal').classList.add('hidden'));$('league-modal').addEventListener('click',e=>{if(e.target===$('league-modal'))$('league-modal').classList.add('hidden')});document.addEventListener('keydown',e=>{if(e.key==='Escape')$('league-modal').classList.add('hidden')});
-function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const pastLeague=selectedReplayLeague!==null,leagueIndex=pastLeague?selectedReplayLeague:save.league,stage=pastLeague?0:Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||(!pastLeague&&championshipTracks.indexOf(prefs.track)>stage))prefs.track=championshipTracks[stage];replayMode=pastLeague||championshipTracks.indexOf(prefs.track)<save.races;$('season').textContent=(stage+1)+'/3';$('points').textContent=pastLeague?'—':save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;updateCarCaseUI();$('leagueName').textContent='ЛИГА '+(leagueIndex+1)+' · '+names[leagueIndex]+' ▾';$('mission').textContent=pastLeague?'ПОВТОР ЛИГИ: '+names[leagueIndex]+'. Все три трассы доступны. Награды и основной прогресс не начисляются.':replayMode?'Повторный заезд: '+trackNames[championshipTracks.indexOf(prefs.track)]+'. Награды и прогресс не начисляются.':'Текущий этап '+(stage+1)+'/3: '+trackNames[stage]+'. Пройденные этапы можно повторять без наград.';document.querySelectorAll('.track-card').forEach(b=>{const index=championshipTracks.indexOf(b.dataset.track),active=b.dataset.track===prefs.track,available=pastLeague||index<=stage;b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-disabled',String(!available));b.dataset.replay=String(available&&(pastLeague||index<save.races))});$('start').textContent=replayMode?'ПОВТОРИТЬ ЗАЕЗД · БЕЗ НАГРАД ↻':'НАЧАТЬ ГОНКУ →';updateUpgradeLabels();renderLeagueOptions()}
+function updateMenuStats(){const names=['НОВИЧОК','КЛУБНЫЙ','ПРОФИ','ЭЛИТА','ЛЕГЕНДА'];const pastLeague=selectedReplayLeague!==null,leagueIndex=pastLeague?selectedReplayLeague:save.league,stage=pastLeague?0:Math.min(2,save.races);if(!championshipTracks.includes(prefs.track)||(!pastLeague&&championshipTracks.indexOf(prefs.track)>stage))prefs.track=championshipTracks[stage];replayMode=pastLeague||championshipTracks.indexOf(prefs.track)<save.races;$('season').textContent=(stage+1)+'/3';$('points').textContent=pastLeague?'—':save.leaguePoints;$('wins').textContent=save.wins;$('credits').textContent=save.credits;updateCarCaseUI();renderGarageCarPicker();$('leagueName').textContent='ЛИГА '+(leagueIndex+1)+' · '+names[leagueIndex]+' ▾';$('mission').textContent=pastLeague?'ПОВТОР ЛИГИ: '+names[leagueIndex]+'. Все три трассы доступны. Награды и основной прогресс не начисляются.':replayMode?'Повторный заезд: '+trackNames[championshipTracks.indexOf(prefs.track)]+'. Награды и прогресс не начисляются.':'Текущий этап '+(stage+1)+'/3: '+trackNames[stage]+'. Пройденные этапы можно повторять без наград.';document.querySelectorAll('.track-card').forEach(b=>{const index=championshipTracks.indexOf(b.dataset.track),active=b.dataset.track===prefs.track,available=pastLeague||index<=stage;b.setAttribute('aria-pressed',String(active));b.setAttribute('aria-disabled',String(!available));b.dataset.replay=String(available&&(pastLeague||index<save.races))});$('start').textContent=replayMode?'ПОВТОРИТЬ ЗАЕЗД · БЕЗ НАГРАД ↻':'НАЧАТЬ ГОНКУ →';updateUpgradeLabels();renderLeagueOptions()}
 function start(){activeRaceReplay=replayMode;mode='race';paused=false;elapsed=0;progress=0;offset=0;speed=0;lateralSpeed=0;driftAmount=0;boundaryHit=0;clearControls();ai.forEach((a,i)=>{const slot=BOT_STARTS[i];a.d=slot.d;a.side=slot.side;a.laneTarget=slot.side;a.planTimer=.3+i*.2;a.paceTimer=1+i*.17;a.paceMood=.98;a.attackTimer=0;a.currentSpeed=0;a.hit=0;place(a.car,a.d,a.side)});const menu=$('menu'),hud=$('hud');menu.classList.add('hidden');menu.style.setProperty('display','none','important');$('result').classList.add('hidden');hud.style.setProperty('display','block','important');$('pause').textContent='Ⅱ';let s=pointAt(0);if(mapCtx)drawRaceMap(.1);player.position.set(s.p.x,s.p.y+.05,s.p.z);heading=Math.atan2(s.tan.x,s.tan.z);player.rotation.y=heading;player.rotation.x=-Math.atan2(s.tan.y,Math.hypot(s.tan.x,s.tan.z));updateRaceShadowAnchor();cameraUpdate(.1);console.info('[AUTOSPORT] race screen activated', {mode,menuDisplay:getComputedStyle(menu).display,hudDisplay:getComputedStyle(hud).display,canvas:!!renderer?.domElement?.isConnected})}
 // Reliable multi-touch input: pointer capture keeps a press alive when a
 // finger drifts outside its button. Keyboard and touch states are independent.
@@ -3129,6 +3232,50 @@ const carCaseVehicles = [
  {id:'business-sedan',name:'Спортивный бизнес-седан',inspiration:'Вдохновение: BMW M5 F90 Competition',speed:35,handling:18,handlingLabel:'+18% к управлению',rarity:'ЭПИЧЕСКАЯ',chance:3,duplicate:7500,shape:6,image:"https://mediapool.bmwgroup.com/cache/P9/201807/P90316034/P90316034-the-new-bmw-m5-competition-in-ascari-07-2018-2247px.jpg",fallbackImage:"https://paultan.org/image/2018/08/2018-BMW-M5-Competition-Official-Photos_Exterior-40.jpg"},
  {id:'supercar',name:'Суперкар',inspiration:'Вдохновение: Ferrari',speed:50,handling:22,handlingLabel:'+22% к управлению',rarity:'ЛЕГЕНДАРНАЯ',chance:1,duplicate:12000,shape:7,image:"https://www.europeanprestige.co.uk/blobs/stock/245/images/45248c99-edb3-4a94-9d32-f8b371e59431/1j6a1011-edit.jpg?height=2376&width=3168"}
 ];
+const STARTER_VEHICLE={id:'starter-subaru',name:'Subaru Impreza',inspiration:'Стартовый автомобиль AUTOSPORT',speed:0,handling:0,handlingLabel:'Базовое управление',rarity:'СТАРТОВАЯ',image:null};
+if(!prefs.carId||(!save.carCaseOwned.includes(prefs.carId)&&prefs.carId!=='starter-subaru'))prefs.carId='starter-subaru';
+function getSelectedVehicleData(){
+ if(prefs.carId==='starter-subaru')return STARTER_VEHICLE;
+ return carCaseVehicles.find(v=>v.id===prefs.carId&&save.carCaseOwned.includes(v.id))||STARTER_VEHICLE;
+}
+function renderGarageCarPicker(){
+ const grid=$('garageCarGrid');if(!grid)return;
+ const owned=[STARTER_VEHICLE,...carCaseVehicles.filter(v=>save.carCaseOwned.includes(v.id))];
+ const selected=getSelectedVehicleData();
+ $('garageCarCurrent').textContent=selected.name.toUpperCase();
+ $('garageCarCount').textContent=owned.length+' / 9 МАШИН';
+ $('garageViewTitle').textContent='ВЫБРАНА · '+selected.name.toUpperCase();
+ grid.innerHTML=owned.map(v=>{
+  const active=v.id===selected.id;
+  const speed=(v.speed>0?'+':'')+v.speed+' КМ/Ч';
+  const control=(v.handling>0?'+':'')+v.handling+'% УПРАВЛЕНИЕ';
+  const thumb=v.image?'<img src="'+v.image+'" alt="" loading="lazy" decoding="async" referrerpolicy="no-referrer">':'';
+  return '<button type="button" class="garage-car-option" data-garage-car="'+v.id+'" aria-pressed="'+active+'">'+
+   '<span class="garage-car-thumb"><i>AS</i>'+thumb+'</span>'+
+   '<span class="garage-car-option-info"><small>'+v.rarity+'</small><strong>'+v.name+'</strong><em>'+speed+'</em><b>'+control+'</b></span>'+
+   '<span class="garage-car-selected">ВЫБРАНА</span></button>';
+ }).join('');
+}
+function selectGarageCar(id){
+ const available=id==='starter-subaru'||save.carCaseOwned.includes(id);
+ if(!available)return;
+ if(prefs.carId===id){renderGarageCarPicker();return}
+ prefs.carId=id;
+ localStorage.setItem('autosport-garage',JSON.stringify(prefs));
+ if(scene&&player&&mode!=='race'){
+  const old=player,next=car(prefs.paint||'#dba14e',true,prefs.carId);
+  next.position.copy(old.position);next.rotation.copy(old.rotation);next.scale.copy(old.scale);
+  scene.remove(old);player=next;scene.add(player);
+  refreshGarageCarPreview();applyGarage();
+  old.traverse(o=>{
+   if(!o.isMesh)return;
+   if(o.geometry&&o.geometry.dispose)o.geometry.dispose();
+   const materials=Array.isArray(o.material)?o.material:[o.material];
+   materials.forEach(m=>m&&m.dispose&&m.dispose());
+  });
+ }
+ renderGarageCarPicker();
+}
 const CAR_CASE_COST = 3000;
 const carCaseRarityColors = ['#aeb9c0','#75bf8e','#75b8e7','#9c8be9','#e9b36b','#eb806e','#d18bea','#ffd17f'];
 function carCaseArtwork(index){
@@ -3210,6 +3357,8 @@ $('carCaseCars').addEventListener('click',e=>{const button=e.target.closest('[da
 $('carCaseInfoClose').addEventListener('click',()=>closeCarCaseModal('car-case-info-modal'));
 $('carCaseResultClose').addEventListener('click',()=>closeCarCaseModal('car-case-result-modal'));
 $('carCaseResultOk').addEventListener('click',()=>closeCarCaseModal('car-case-result-modal'));
+$('garageCarGrid').addEventListener('click',e=>{const button=e.target.closest('[data-garage-car]');if(button)selectGarageCar(button.dataset.garageCar)});
+$('garageCarGrid').addEventListener('error',e=>{if(e.target&&e.target.tagName==='IMG')e.target.hidden=true},true);
 $('car-case-info-modal').addEventListener('click',e=>{if(e.target===$('car-case-info-modal'))closeCarCaseModal('car-case-info-modal')});
 $('car-case-result-modal').addEventListener('click',e=>{if(e.target===$('car-case-result-modal'))closeCarCaseModal('car-case-result-modal')});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCarCaseModal('car-case-info-modal');closeCarCaseModal('car-case-result-modal')}});
