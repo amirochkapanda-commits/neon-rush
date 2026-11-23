@@ -1761,6 +1761,41 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
  #panel-shop .promo-footnote{padding:6px 9px}
 }
 
+
+/* Promo input: keep the application viewport stable while the on-screen keyboard is visible. */
+#panel-shop .promo-shop{width:min(650px,100%);gap:10px;padding:2px 2px max(18px,env(safe-area-inset-bottom))}
+#panel-shop .promo-hero{grid-template-columns:58px minmax(0,1fr);gap:10px;padding:11px}
+#panel-shop .promo-emblem{height:54px}
+#panel-shop .promo-entry-card{padding:14px}
+#panel-shop .promo-entry-row{grid-template-columns:minmax(0,1fr) minmax(120px,155px);gap:8px}
+#panel-shop .promo-input{font-size:16px!important;letter-spacing:.045em;touch-action:manipulation;-webkit-touch-callout:default;user-select:text!important;-webkit-user-select:text!important}
+#panel-shop .promo-message{overflow-wrap:anywhere}
+@media(max-width:520px){
+ #panel-shop .promo-shop{gap:8px;padding:0 1px max(20px,env(safe-area-inset-bottom))}
+ #panel-shop .promo-hero{grid-template-columns:48px minmax(0,1fr);gap:8px;padding:9px}
+ #panel-shop .promo-emblem{height:48px}
+ #panel-shop .promo-hero h2{font-size:19px}
+ #panel-shop .promo-hero p{font-size:9px}
+ #panel-shop .promo-entry-card{padding:11px}
+ #panel-shop .promo-entry-row{grid-template-columns:minmax(0,1fr);gap:8px}
+ #panel-shop .promo-input{min-height:44px;padding:0 11px}
+ #panel-shop .promo-redeem{min-height:42px;font-size:9px}
+ #panel-shop .promo-footnote{padding:8px 10px}
+}
+@media(orientation:landscape) and (max-height:560px){
+ #panel-shop .promo-shop{max-width:760px;gap:6px;padding-bottom:8px}
+ #panel-shop .promo-hero{grid-template-columns:44px minmax(0,1fr);gap:7px;padding:6px 9px}
+ #panel-shop .promo-emblem{height:40px}
+ #panel-shop .promo-hero h2{font-size:17px}
+ #panel-shop .promo-hero p{font-size:8px}
+ #panel-shop .promo-entry-card{padding:8px 10px}
+ #panel-shop .promo-entry-head{margin-bottom:6px}
+ #panel-shop .promo-entry-head h3{font-size:10px}
+ #panel-shop .promo-input,#panel-shop .promo-redeem{min-height:36px}
+ #panel-shop .promo-message{min-height:16px;margin-top:4px}
+ #panel-shop .promo-footnote{padding:5px 8px}
+}
+
 </style></head><body><div id="stage"></div>
 <div id="menu" class="screen"><div class="card">
 <div class="brand">AUTO<span>SPORT</span></div><div class="tag">RACING CHAMPIONSHIP</div>
@@ -1902,7 +1937,7 @@ html,body{width:100%!important;height:var(--app-height)!important;min-height:var
     </div>
     <label class="promo-input-label" for="promoCodeInput">ВВЕДИ ПРОМОКОД</label>
     <div class="promo-entry-row">
-     <input id="promoCodeInput" class="promo-input" type="text" maxlength="40" placeholder="НАПРИМЕР, FIRSTPROMO..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" aria-label="Промокод">
+     <input id="promoCodeInput" class="promo-input" type="text" maxlength="40" autocomplete="off" autocorrect="off" autocapitalize="characters" inputmode="text" spellcheck="false" aria-label="Промокод">
      <button type="button" class="primary promo-redeem" id="promoRedeemBtn">АКТИВИРОВАТЬ</button>
     </div>
     <p class="promo-message" id="promoMessage" role="status" aria-live="polite">Каждый промокод можно активировать один раз в текущем сохранении.</p>
@@ -3113,7 +3148,14 @@ function updateRaceShadowAnchor(){
 function cameraUpdate(dt){const portrait=isPortraitViewport();const followDistance=portrait?14.2:11,cameraHeight=portrait?6.4:5.3,lookAhead=portrait?10:8;let fx=Math.sin(heading),fz=Math.cos(heading),target=new THREE.Vector3(player.position.x-fx*followDistance,player.position.y+cameraHeight,player.position.z-fz*followDistance),lookTarget=new THREE.Vector3(player.position.x+fx*lookAhead,player.position.y+1.1,player.position.z+fz*lookAhead);const blend=1-Math.pow(.001,dt);camera.position.lerp(target,blend);cameraAim.position.copy(camera.position);cameraAim.lookAt(lookTarget);camera.quaternion.slerp(cameraAim.quaternion,blend)}
 function fmt(t){return Math.floor(t/60)+':'+('0'+Math.floor(t%60)).slice(-2)}
 let fpsWindowTime=0,fpsWindowFrames=0;function adaptRenderQuality(dt){fpsWindowTime+=dt;fpsWindowFrames++;if(fpsWindowTime<1.5)return;const avg=fpsWindowTime/fpsWindowFrames,target=1/(mobileQuality?60:90),minScale=mobileQuality?.96:.90;if(avg>target*1.12&&adaptiveScale>minScale)adaptiveScale=Math.max(minScale,adaptiveScale-.06);else if(avg<target*.88&&adaptiveScale<1)adaptiveScale=Math.min(1,adaptiveScale+.035);if(composer&&Math.abs(adaptiveScale-(composer.__adaptiveScale||1))>.001){const ratio=basePixelRatio*adaptiveScale,view=getAppViewport();renderer.setPixelRatio(ratio);renderer.setSize(view.width,view.height);composer.setPixelRatio(ratio);composer.setSize(view.width,view.height);composer.__adaptiveScale=adaptiveScale}fpsWindowTime=0;fpsWindowFrames=0}function animate(){raf=requestAnimationFrame(animate);try{let dt=Math.min(clock.getDelta(),.04);adaptRenderQuality(dt);if(mode==='race'&&!paused)update(dt);updateAtmosphereVisuals(dt);const showingGarage=mode==='menu'&&!$('menu').classList.contains('hidden')&&$('panel-garage').classList.contains('active');if(showingGarage){if(!garageDragging&&garageCar)garageCar.rotation.y+=dt*.10;if(!renderGaragePreview()&&composer)composer.render()}else if(composer)composer.render();else renderer.render(scene,camera)}catch(error){cancelAnimationFrame(raf);raf=0;showGameError(error,'ЦИКЛ РЕНДЕРА')}}
+let textInputViewport=null;
+function isTextEntryTarget(target){
+ if(!target)return false;
+ const tag=String(target.tagName||'').toUpperCase();
+ return target.isContentEditable===true||['INPUT','TEXTAREA','SELECT'].includes(tag)||!!target.closest?.('[contenteditable="true"],[role="textbox"]');
+}
 function initRaceMap(){mapCanvas=$('race-map-canvas');mapCtx=mapCanvas?mapCanvas.getContext('2d'):null}function getAppViewport(){
+ if(textInputViewport)return {...textInputViewport};
  const vv=window.visualViewport,root=document.documentElement;
  const width=Math.max(1,Math.round(vv&&vv.width>0?vv.width:(root.clientWidth||window.innerWidth||1)));
  const height=Math.max(1,Math.round(vv&&vv.height>0?vv.height:(root.clientHeight||window.innerHeight||1)));
@@ -3161,6 +3203,23 @@ if(window.visualViewport){
  window.visualViewport.addEventListener('resize',scheduleAppViewportSync,{passive:true});
  window.visualViewport.addEventListener('scroll',scheduleAppViewportSync,{passive:true});
 }
+document.addEventListener('focusin',event=>{
+ if(!isTextEntryTarget(event.target))return;
+ const root=getComputedStyle(document.documentElement);
+ const width=parseFloat(root.getPropertyValue('--app-width'))||getAppViewport().width;
+ const height=parseFloat(root.getPropertyValue('--app-height'))||getAppViewport().height;
+ textInputViewport={width,height};
+ document.body.classList.add('text-entry-active');
+},true);
+document.addEventListener('focusout',event=>{
+ if(!isTextEntryTarget(event.target))return;
+ requestAnimationFrame(()=>{
+  if(isTextEntryTarget(document.activeElement))return;
+  textInputViewport=null;
+  document.body.classList.remove('text-entry-active');
+  scheduleAppViewportSync();
+ });
+},true);
 syncAppViewport();
 requestAnimationFrame(syncAppViewport);
 scheduleAppViewportSync();
@@ -3451,6 +3510,7 @@ addEventListener('pointercancel',releaseControlPointer,true);
 document.addEventListener('touchend',e=>{if(e.touches.length===0)releaseTouchPointers()},{passive:true});
 document.addEventListener('touchcancel',releaseTouchPointers,{passive:true});
 addEventListener('keydown',e=>{
+ if(isTextEntryTarget(e.target))return;
  const key=keyMap[e.code];
  if(key){e.preventDefault();keyboardHeld.add(key);refreshHeld()}
  if(e.code==='Escape'&&mode==='race'){if(paused)closePause();else openPause()}
@@ -3506,7 +3566,7 @@ function updateUpgradeLabels(){for(const key of ['engine','grip']){const level=N
 const carCaseVehicles = [
  {id:'city-sedan',name:'Обычный седан',inspiration:'Оригинальный городской седан',speed:10,handling:0,acceleration:-2,handlingLabel:'Базовое управление',rarity:'ОБЫЧНАЯ',chance:35,duplicate:700,shape:0,image:"https://images.pexels.com/photos/33987626/pexels-photo-33987626/free-photo-of-silver-luxury-sedan-in-parking-lot.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://ymimg1.b8cdn.com/resized/car_model/6916/pictures/6212626/webp_listing_main_trumpchi_ga4_9.webp"},
  {id:'sport-suv',name:'Kairo Sportage X',inspiration:'Оригинальный дизайн городского спорт-внедорожника',speed:15,handling:5,acceleration:0,handlingLabel:'+5% к управлению',rarity:'ОБЫЧНАЯ+',chance:23,duplicate:1000,shape:1,image:"https://www.mycarcheck.com/assets/images/720/vehicles/tier-aj/553aa4ae729c24d591504cc73c7d85cc.jpg?v=cadd0a80a2b6e96358279061ee8ffce5"},
- {id:'japanese-sedan',name:'Toyama Mark II',inspiration:'Оригинальный дизайн японского бизнес-седана',speed:20,handling:10,acceleration:3,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2,image:"https://trademe.tmcdn.co.nz/photoserver/full/2291647438.jpg"},
+ {id:'japanese-sedan',name:'Toyama Mark II',inspiration:'Оригинальный дизайн японского бизнес-седана',speed:20,handling:10,acceleration:3,handlingLabel:'+10% к управлению',rarity:'НЕОБЫЧНАЯ',chance:16,duplicate:1500,shape:2,image:"https://upload.wikimedia.org/wikipedia/commons/3/3d/JZX100_Toyota_Mark_II.jpg",fallbackImage:"https://upload.wikimedia.org/wikipedia/commons/thumb/3/3d/JZX100_Toyota_Mark_II.jpg/960px-JZX100_Toyota_Mark_II.jpg"},
  {id:'large-suv',name:'Lander Cruiser 300',inspiration:'Оригинальный дизайн крупного внедорожника',speed:20,handling:5,acceleration:-4,handlingLabel:'+5% к управлению',rarity:'РЕДКАЯ',chance:11,duplicate:2200,shape:3,image:"https://portal.toyota-body.co.jp/dakar/en/news/2024/img/14/001.jpg"},
  {id:'rally-truck',name:'KAMOR Dakar Rally',inspiration:'Оригинальный дизайн раллийного грузовика',speed:-10,handling:25,acceleration:-8,handlingLabel:'+25% к устойчивости и контролю',rarity:'ОСОБАЯ',chance:7,duplicate:3000,shape:4,image:"https://img.championat.com/s/1280x850/news/big/j/k/kamaz-master-otpravilsja-na-ralli-marafon-dakar_15773548651543643465.jpg"},
  {id:'sport-coupe',name:'Toyama Suvra GT',inspiration:'Оригинальный дизайн японского спортивного купе',speed:30,handling:15,acceleration:8,handlingLabel:'+15% к управлению',rarity:'ОЧЕНЬ РЕДКАЯ',chance:4,duplicate:4000,shape:5,image:"https://images.pexels.com/photos/31853161/pexels-photo-31853161/free-photo-of-silver-toyota-supra-in-industrial-setting.jpeg?auto=compress&cs=tinysrgb&w=1000",fallbackImage:"https://scene7.toyota.eu/is/image/toyotaeurope/Toyota-exterieur-GR-Supra-schuin-voor-zilver%3AMedium-Landscape?op_usm=1.75%2C0.3%2C2%2C0&resMode=sharp2&ts=0"},
@@ -3562,7 +3622,7 @@ const CAR_CASE_COST = 3000;
 const carCaseRarityColors = ['#aeb9c0','#75bf8e','#75b8e7','#9c8be9','#e9b36b','#eb806e','#d18bea','#ffd17f'];
 function carCaseArtwork(index){
  const v=carCaseVehicles[index]; if(!v)return '';
- return '<img class="car-case-photo" src="'+v.image+'"'+(v.fallbackImage?' data-fallback="'+v.fallbackImage+'"':'')+' alt="'+v.name+'" loading="eager" decoding="async" referrerpolicy="no-referrer">';
+ return '<img class="car-case-photo" src="'+v.image+'"'+(v.fallbackImage?' data-fallback="'+v.fallbackImage+'"':'')+' data-placeholder-label="'+v.name+'" alt="'+v.name+'" loading="eager" decoding="async" referrerpolicy="no-referrer">';
 }
 function renderCarCaseShop(){
  const grid=$('carCaseCars'); if(!grid)return;
@@ -3621,7 +3681,12 @@ function openCarCase(){
   (duplicate?'<div class="car-case-result-payout">+'+payout.toLocaleString('ru-RU')+' <small>TOK</small></div>':'<div class="car-case-result-payout">ДОБАВЛЕН В КОЛЛЕКЦИЮ</div>');
  $('car-case-result-modal').classList.remove('hidden');
 }
-// Retry a second photo source automatically if a remote image is unavailable.
+// Retry a backup photo and then show a lightweight built-in car illustration.
+function carPhotoPlaceholder(label='AUTOSPORT'){
+ const safeLabel=String(label).replace(/[<>&"']/g,'').slice(0,22);
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360"><defs><linearGradient id="g" x2="0" y2="1"><stop stop-color="#263a46"/><stop offset="1" stop-color="#0b151e"/></linearGradient></defs><rect width="640" height="360" fill="url(#g)"/><path d="M86 222l35-62q8-14 27-18l63-10 54-52q12-12 31-12h125q24 0 40 17l53 58 42 12q23 7 31 29l8 38v31H86z" fill="#d9a45f" stroke="#f9d8a6" stroke-width="7"/><path d="M242 143l42-43q7-7 17-7h110q13 0 21 10l39 48z" fill="#142531" stroke="#f0c889" stroke-width="5"/><path d="M108 216h424" stroke="#704b2d" stroke-width="8"/><circle cx="190" cy="247" r="39" fill="#091018" stroke="#b8c3ca" stroke-width="10"/><circle cx="190" cy="247" r="13" fill="#d7dfe3"/><circle cx="462" cy="247" r="39" fill="#091018" stroke="#b8c3ca" stroke-width="10"/><circle cx="462" cy="247" r="13" fill="#d7dfe3"/><text x="320" y="324" text-anchor="middle" fill="#dbe4e8" font-family="Arial,sans-serif" font-size="23" font-weight="700" letter-spacing="5">'+safeLabel+'</text></svg>';
+ return 'data:image/svg+xml;charset=UTF-8,'+encodeURIComponent(svg);
+}
 document.addEventListener('error',event=>{
  const img=event.target;
  if(!img||!img.classList||!img.classList.contains('car-case-photo'))return;
@@ -3630,8 +3695,13 @@ document.addEventListener('error',event=>{
   img.src=img.dataset.fallback;
   return;
  }
+ if(!img.dataset.placeholderTried){
+  img.dataset.placeholderTried='1';
+  img.src=carPhotoPlaceholder(img.dataset.placeholderLabel||'AUTOSPORT');
+  img.alt=img.dataset.placeholderLabel||'AUTOSPORT';
+  return;
+ }
  img.classList.add('car-case-photo-failed');
- img.alt='Фото временно недоступно';
 },true);
 renderCarCaseShop();
 updateCarCaseUI();
@@ -3686,6 +3756,6 @@ $('promoCodeInput')?.addEventListener('keydown',event=>{if(event.key==='Enter'){
 $('promoCodeInput')?.addEventListener('input',()=>{if($('promoMessage')?.classList.contains('is-error'))setPromoMessage('Каждый промокод можно активировать один раз в текущем сохранении.')});
 
 syncAppViewport();
-document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>e.preventDefault());document.addEventListener('selectstart',e=>e.preventDefault());document.addEventListener('dragstart',e=>e.preventDefault());
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.setAttribute('aria-selected',String(x===btn)));document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id==='panel-'+btn.dataset.tab))}));document.addEventListener('contextmenu',e=>{if(!isTextEntryTarget(e.target))e.preventDefault()});document.addEventListener('selectstart',e=>{if(!isTextEntryTarget(e.target))e.preventDefault()});document.addEventListener('dragstart',e=>e.preventDefault());
 updateMenuStats();updateUpgradeLabels();buildWorld().then(ok=>{if(ok)hideGameLoader();else $('status').textContent='Не удалось загрузить игру. Обнови страницу.'})
 </script></body></html>
